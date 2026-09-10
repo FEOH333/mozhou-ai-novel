@@ -23,6 +23,16 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # transformers 的主版本升级会换掉 onnxruntime-node 的传递依赖，
+      # 实测 4.2.0 引入 onnxruntime-node@1.24.3 → adm-zip@0.5.18，
+      # 带来 3 条 high（adm-zip / onnxruntime-node / transformers 自身），
+      # 而 3.8.1 是 0 漏洞。且 adm-zip 的修复版 0.6.0 超出
+      # onnxruntime-node 的 ^0.5.16 范围，Dependabot 无法自动收敛。
+      # 因此主版本更新一律不做自动 PR，等上游解决传递依赖后再人工评估。
+      - dependency-name: '@huggingface/transformers'
+        update-types:
+          - version-update:semver-major
 
   # 保持 GitHub Actions 自身为最新，避免用废弃的 action 版本
   - package-ecosystem: github-actions
