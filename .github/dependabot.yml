@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  # 依赖面刻意保持最小（只有一个直接依赖），因此更新策略也保持克制：
+  # 安全更新已由仓库设置中的 Dependabot security updates 自动处理，
+  # 这里只做常规的版本更新检查，且合并成单个 PR 以减少噪音。
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: 'chore(deps)'
+    labels:
+      - dependencies
+    groups:
+      # 所有非主版本更新合并为一个 PR
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+
+  # 保持 GitHub Actions 自身为最新，避免用废弃的 action 版本
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Shanghai
+    commit-message:
+      prefix: 'chore(ci)'
+    labels:
+      - dependencies
