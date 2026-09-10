@@ -1,0 +1,25 @@
+node_modules/
+/data/
+/data-debug-*/
+*.log
+.DS_Store
+
+# 本地参考库与临时产物
+/reference/
+tmp-*/
+/backups/
+
+# 本地配置与密钥（绝不提交）
+.env
+.env.*
+config.local.json
+data/config.json
+
+# 编辑器 / 智能体工作目录
+.mimosa/
+.workbuddy/
+.trae/
+.zcode/
+.dsh-subagents/
+.idea/
+.vscode/

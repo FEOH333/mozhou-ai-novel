@@ -1,0 +1,48 @@
+{
+  "_comment": "墨舟配置模板。首次运行请在 Web 设置页填写，或复制本文件为 data/config.json 后编辑。",
+  "_warning": "data/config.json 含明文 API Key，已在 .gitignore 中排除，请勿提交。",
+
+  "provider": "deepseek_official",
+  "apiKey": "<YOUR_API_KEY>",
+  "baseUrl": "https://api.deepseek.com/v1",
+  "protocol": "chat",
+  "writingModel": "pro",
+
+  "backup": {
+    "enabled": true,
+    "provider": "",
+    "apiKey": "",
+    "baseUrl": "",
+    "modelMap": { "flash": "", "pro": "" },
+    "stickyMs": 300000,
+    "probeIntervalMs": 60000,
+    "failureThreshold": 3
+  },
+
+  "contextBudgetTokens": 128000,
+  "worldbookBudgetTokens": 6000,
+  "autoConfirmOutline": true,
+  "maxReviseRounds": 3,
+  "autoHealLength": true,
+
+  "resilience": {
+    "connectTimeoutMs": 60000,
+    "idleTimeoutMs": 60000,
+    "totalTimeoutMs": 420000,
+    "maxRetries": 3,
+    "rateLimitMaxRetries": 20,
+    "networkMaxRetries": 10,
+    "networkBackoffMs": 20000,
+    "circuitBreaker": { "threshold": 3, "openMs": 60000, "maxOpenMs": 600000 }
+  },
+
+  "archiveStrategy": "auto",
+  "archiveRatio": 0.85,
+  "keepRecentChapters": 15,
+  "consecutiveFailures": 2,
+  "highIssueThreshold": 3,
+  "maxRecoveryRounds": 3,
+
+  "retrieval": { "topK": 10, "chunkWords": 512, "overlapWords": 64 },
+  "embedding": { "enabled": true, "model": "Xenova/bge-small-zh-v1.5" }
+}

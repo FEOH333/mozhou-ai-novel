@@ -1,0 +1,33 @@
+{
+  "name": "mozhou-ai-novel",
+  "version": "0.109.0",
+  "private": false,
+  "type": "module",
+  "description": "墨舟：本地运行、AI 本位的长篇中文网文自动创作系统（有界创作上下文、反模板化戏剧契约、正文证据结算、原子叙事版本重建与经验证的自进化，V0.109.0）",
+  "engines": {
+    "node": ">=23.4.0"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test \"tests/*.test.js\"",
+    "doctor": "node server/maintenance/doctor.js --pretty",
+    "audit:recovery": "node server/maintenance/audit-recovery-runs.js --pretty"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.7.0"
+  },
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/<YOUR_ACCOUNT>/mozhou-ai-novel.git"
+  },
+  "keywords": [
+    "novel",
+    "ai-writing",
+    "chinese",
+    "longform",
+    "webnovel",
+    "llm",
+    "local-first"
+  ]
+}
