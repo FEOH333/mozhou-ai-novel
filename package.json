@@ -14,7 +14,7 @@
     "audit:recovery": "node server/maintenance/audit-recovery-runs.js --pretty"
   },
   "dependencies": {
-    "@huggingface/transformers": "^3.7.0"
+    "@huggingface/transformers": "^4.2.0"
   },
   "overrides": {
     "sharp": "^0.35.4"
