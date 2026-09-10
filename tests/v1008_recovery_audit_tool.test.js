@@ -24,8 +24,16 @@ function sha256File(file) {
   return createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
-function sqliteTripletHashes(file) {
-  return Object.fromEntries([file, `${file}-wal`, `${file}-shm`]
+/**
+ * 源库「未被改动」的判据：只比对持久化内容，即主文件与 WAL。
+ *
+ * 刻意排除 `-shm`：它是 SQLite 的共享内存索引，不是数据库内容的一部分，
+ * 任何连接（包括只读打开）都可能让内核重写它的字节。把 SHM 纳入逐字哈希，
+ * 会在不同平台/时序下随机报「源库被改动」的假阳性——
+ * 实测 GitHub Actions 的 Linux runner 上必然触发。
+ */
+function sqlitePersistentHashes(file) {
+  return Object.fromEntries([file, `${file}-wal`]
     .filter(target => fs.existsSync(target))
     .map(target => [path.basename(target), sha256File(target)]));
 }
@@ -77,7 +85,7 @@ test('V0.100.9 返工审计必须包含 WAL 中的最新提交，不能拿过期
     result: { diagnosis_fingerprint: 'c'.repeat(64) },
   });
   assert.ok(fs.statSync(`${sourceDb}-wal`).size > 0, '夹具必须把目标运行留在 WAL');
-  const before = sqliteTripletHashes(sourceDb);
+  const before = sqlitePersistentHashes(sourceDb);
 
   const child = spawnSync(process.execPath, [
     path.resolve('server/maintenance/audit-recovery-runs.js'), '--db', sourceDb,
@@ -91,8 +99,8 @@ test('V0.100.9 返工审计必须包含 WAL 中的最新提交，不能拿过期
     '副本应包含 WAL 里的 rewriting 运行，并只在副本中把它自愈为 planned');
   assert.equal(store.recommendationRecoveryRuns.get(run.id).status, 'rewriting',
     '审计不得把源库运行一并自愈');
-  assert.deepEqual(sqliteTripletHashes(sourceDb), before,
-    '主文件、WAL、SHM 三件套都必须逐字不变');
+  assert.deepEqual(sqlitePersistentHashes(sourceDb), before,
+    '主文件与 WAL 必须逐字不变（SHM 是内存索引，不属内容，不参与比对）');
 });
 
 test('V0.100.9 返工审计作为模块调用时也必须隔离 store 缓存，不能自愈源库', async () => {
@@ -103,7 +111,7 @@ test('V0.100.9 返工审计作为模块调用时也必须隔离 store 缓存，�
     workOrders: [{ chapter: 6, action: 'rebuild', objective: '转折', evidence: ['哨点'], reason: '停滞' }],
     result: { diagnosis_fingerprint: 'd'.repeat(64) },
   });
-  const before = sqliteTripletHashes(sourceDb);
+  const before = sqlitePersistentHashes(sourceDb);
 
   const report = await auditRecoveryRuns(sourceDb);
   const runReport = report.books
@@ -113,8 +121,8 @@ test('V0.100.9 返工审计作为模块调用时也必须隔离 store 缓存，�
   assert.equal(runReport?.status, 'planned', '只允许副本自愈后显示 planned');
   assert.equal(store.recommendationRecoveryRuns.get(run.id).status, 'rewriting',
     'store.js 已在宿主进程加载时，审计也不得误用缓存连接去修改源库');
-  assert.deepEqual(sqliteTripletHashes(sourceDb), before,
-    '模块调用前后源库三件套必须逐字不变');
+  assert.deepEqual(sqlitePersistentHashes(sourceDb), before,
+    '模块调用前后主文件与 WAL 必须逐字不变');
 });
 
 test('V0.100.9 返工审计只清理自己创建的唯一临时目录，不得递归删除调用方目录', async () => {
