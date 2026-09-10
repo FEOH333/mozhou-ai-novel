@@ -4,7 +4,7 @@
 > It writes from a one-line idea all the way to a finished book — not "AI writes you a paragraph," but a **resumable, auditable, settleable** long-form production line.
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D23.4-brightgreen.svg)](https://nodejs.org/)
+[![Node](https://img.shields.io/badge/node-%3E%3D23.8-brightgreen.svg)](https://nodejs.org/)
 [![CI](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml/badge.svg)](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-1556%20passed-brightgreen.svg)](#testing)
 [![Dependencies](https://img.shields.io/badge/dependencies-1-brightgreen.svg)](./package.json)
@@ -44,7 +44,7 @@ Every artifact is **persisted, traceable, and rollback-able**. It targets the re
 
 ### Requirements
 
-- **Node.js ≥ 23.4** (relies on built-in `node:sqlite`; plain JS, no build step, ESM)
+- **Node.js ≥ 23.8** (relies on built-in `node:sqlite`; its `backup()` export requires 23.8.0+; plain JS, no build step, ESM)
 - First run downloads a local embedding model (~100 MB); fully offline afterwards
 
 ### Install and Run
@@ -201,7 +201,7 @@ Read [`CONTRIBUTING.md`](./CONTRIBUTING.md) before contributing. The most import
 npm test
 ```
 
-Uses Node's built-in test runner (`node:test`). **Node ≥ 23.4 is required** — older versions fail on `node:sqlite` behavior, not on project logic.
+Uses Node's built-in test runner (`node:test`). **Node ≥ 23.8 is required** — the `backup()` export of `node:sqlite` only exists from v23.8.0; 23.4–23.7 fail outright with `does not provide an export named 'backup'`.
 
 ---
 

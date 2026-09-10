@@ -40,6 +40,22 @@ function rows(db, sql, ...params) {
   return db.prepare(sql).all(...params).map(row => ({ ...row }));
 }
 
+/**
+ * 剥离 Node 运行时打在 stderr 上的噪声行，只留子进程真正输出的内容。
+ *
+ * Node 23.8～24 的 node:sqlite 仍是实验特性，会在任何 import 了它的进程里
+ * 往 stderr 打 ExperimentalWarning（可能还有 --trace-warnings 提示行）。
+ * 若不剥离，下面「stderr 应为纯 JSON」的断言会在低版本 Node 上误报失败。
+ */
+function stripNodeRuntimeNoise(text) {
+  return String(text || '')
+    .split('\n')
+    .filter(line => !/^\(node:\d+\)/.test(line.trim()))
+    .filter(line => !/^\(Use `node --trace-warnings/.test(line.trim()))
+    .join('\n')
+    .trim();
+}
+
 function domainState(db) {
   return JSON.stringify({
     volumes: rows(db, 'SELECT * FROM volumes ORDER BY id'),
@@ -404,7 +420,7 @@ test('CLI 参数解析：默认 dry-run 且 apply 强制显式 db', async () => 
     cwd: ROOT, encoding: 'utf8', windowsHide: true,
   });
   assert.notEqual(child.status, 0);
-  assert.equal(child.stdout, '');
-  const errorJson = JSON.parse(child.stderr.trim());
+  assert.equal(stripNodeRuntimeNoise(child.stdout), '');
+  const errorJson = JSON.parse(stripNodeRuntimeNoise(child.stderr));
   assert.equal(errorJson.error.code, 'APPLY_REQUIRES_DB');
 });

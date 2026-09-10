@@ -13,7 +13,7 @@ npm install
 npm test              # 应当全绿；这是提交前的底线
 ```
 
-- Node.js **≥ 23.4**（依赖内置 `node:sqlite`）
+- Node.js **≥ 23.8**（依赖内置 `node:sqlite` 的 `backup()`，该导出自 v23.8.0 起提供）
 - 项目**无构建步骤**：纯 ESM JavaScript，改完直接跑
 
 ---
@@ -111,7 +111,7 @@ if (book.settings?.someFeature === true) { ... }
 ## 4. 代码风格
 
 - **纯 ESM**，`'use strict'` 不写（模块默认严格模式）
-- 无构建、无转译：只写 Node 23.4+ 能直接跑的原生 JS
+- 无构建、无转译：只写 Node 23.8+ 能直接跑的原生 JS
 - 注释用中文，**注释解释"为什么"，不复述"做了什么"**
 - 版本号只在 `package.json` 与架构文档里维护，**不要在提示词里硬编码版本号**
 

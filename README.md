@@ -4,7 +4,7 @@
 > 从灵感一路自动写到完本——不是"AI 帮你写一段"，而是一条**可恢复、可审校、可结算**的长篇生产线。
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D23.4-brightgreen.svg)](https://nodejs.org/)
+[![Node](https://img.shields.io/badge/node-%3E%3D23.8-brightgreen.svg)](https://nodejs.org/)
 [![CI](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml/badge.svg)](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-1556%20passed-brightgreen.svg)](#测试)
 [![Dependencies](https://img.shields.io/badge/dependencies-1-brightgreen.svg)](./package.json)
@@ -44,7 +44,7 @@
 
 ### 环境要求
 
-- **Node.js ≥ 23.4**（依赖内置 `node:sqlite`，纯 JS、无构建步骤、ESM）
+- **Node.js ≥ 23.8**（依赖内置 `node:sqlite`，其中 `backup()` 需 23.8.0+；纯 JS、无构建步骤、ESM）
 - 首次运行会下载本地 embedding 模型（约 100MB），之后离线可用
 
 ### 安装与启动
@@ -203,7 +203,7 @@ tests/             1500+ 用例（node:test）
 npm test
 ```
 
-基于 Node 内置测试运行器（`node:test`）。**必须使用 Node ≥ 23.4**——更低版本会因 `node:sqlite` 行为差异失败，那不是项目逻辑的问题。
+基于 Node 内置测试运行器（`node:test`）。**必须使用 Node ≥ 23.8**——`node:sqlite` 的 `backup()` 导出自 v23.8.0 才提供，23.4～23.7 会直接报 `does not provide an export named 'backup'`。
 
 ---
 

@@ -5,7 +5,7 @@
   "type": "module",
   "description": "墨舟：本地运行、AI 本位的长篇中文网文自动创作系统（有界创作上下文、反模板化戏剧契约、正文证据结算、原子叙事版本重建与经验证的自进化，V0.109.0）",
   "engines": {
-    "node": ">=23.4.0"
+    "node": ">=23.8.0"
   },
   "scripts": {
     "start": "node server/index.js",
