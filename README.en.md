@@ -5,8 +5,10 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D23.4-brightgreen.svg)](https://nodejs.org/)
+[![CI](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml/badge.svg)](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-1556%20passed-brightgreen.svg)](#testing)
 [![Dependencies](https://img.shields.io/badge/dependencies-1-brightgreen.svg)](./package.json)
+[![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-brightgreen.svg)](https://github.com/FEOH333/mozhou-ai-novel/security/dependabot)
 [![Local First](https://img.shields.io/badge/local--first-your%20data%20never%20leaves%20your%20machine-blueviolet.svg)](#local-first)
 
 [简体中文](./README.md) | **English**
