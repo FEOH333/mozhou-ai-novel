@@ -3,9 +3,10 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
 
 process.env.NOVEL_MOCK_LLM = '1';
-process.env.NOVEL_DATA_DIR = fs.mkdtempSync(`${os.tmpdir()}\\v117-factbook-`);
+process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v117-factbook-'));
 
 const store = await import('../server/db/store.js');
 const factbook = await import('../server/engine/factbook.js');
