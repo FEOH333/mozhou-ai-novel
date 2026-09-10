@@ -21,16 +21,21 @@ import { fileURLToPath } from 'node:url';
 
 const { embeddingSelfHeal } = await import('../server/memory/embedding.js');
 
-/** 在真实缓存目录下开一个临时子目录，用完即删——护栏要求路径确实在缓存内。 */
+/**
+ * 在临时目录里造一个「看起来像 transformers 缓存根」的沙箱，用完即删。
+ *
+ * 刻意不用真实缓存目录：那样会让测试依赖运行环境（CI 上 .cache 可能根本不存在），
+ * 且多个测试文件并发时会互相干扰——实测这会让本文件在并发跑时随机失败。
+ * 这里把「缓存根」通过第二个参数显式传给被测函数，语义完全等价但完全隔离。
+ */
 function withCacheFixture(name, fn) {
-  const root = embeddingSelfHeal.cacheDir();
-  assert.ok(root, '应能定位到 transformers 缓存目录');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), `v1092-${name}-`));
   const dir = path.join(root, 'Xenova', name);
   fs.mkdirSync(path.join(dir, 'onnx'), { recursive: true });
   try {
     return fn({ root, dir, model: path.join(dir, 'onnx', 'model.onnx') });
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(root, { recursive: true, force: true });
   }
 }
 
@@ -121,12 +126,31 @@ test('错误信息里没有路径时不做任何事', () => {
   assert.equal(embeddingSelfHeal.tryRemoveCorruptCacheFile(null, os.tmpdir()), null);
 });
 
-test('缓存目录不存在时静默返回 null，不抛异常', () => {
+test('缓存根目录不存在时不抛异常（目录刚被清掉也不能崩）', () => {
   const missing = path.join(os.tmpdir(), 'v1092-definitely-missing-' + Date.now());
   const err = new Error(`Load model from ${path.join(missing, 'model.onnx')} failed:Protobuf parsing failed.`);
   assert.doesNotThrow(() => {
+    // 文件本就不存在 ⇒ 没有可删的东西 ⇒ 返回 null，交由调用方去试下一个模型源
     assert.equal(embeddingSelfHeal.tryRemoveCorruptCacheFile(err.message, missing), null);
   });
+});
+
+test('缓存根目录不存在、但坏文件确实存在时仍能自愈', () => {
+  // 这是修复过的真实缺陷：早先版本要求 root 目录必须存在，导致
+  // 「缓存根被清掉但坏文件残留」这类场景静默失去自愈机会，与自愈初衷相反。
+  // 能报出 "Load model from <root 内路径>" 就说明 transformers 已认定该 root。
+  const root = path.join(os.tmpdir(), `v1092-noroot-${Date.now()}`);
+  const deep = path.join(root, 'Xenova', 'bge-small-zh-v1.5', 'onnx');
+  fs.mkdirSync(deep, { recursive: true });
+  const model = path.join(deep, 'model.onnx');
+  fs.writeFileSync(model, 'corrupt');
+  try {
+    const err = new Error(`Load model from ${model} failed:Protobuf parsing failed.`);
+    assert.equal(embeddingSelfHeal.tryRemoveCorruptCacheFile(err.message, root), path.resolve(model));
+    assert.equal(fs.existsSync(model), false, '坏文件必须被删除');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('源码断言：initEmbedding 的失败分支确实接线了自愈（防止实现被删而测试仍绿）', () => {

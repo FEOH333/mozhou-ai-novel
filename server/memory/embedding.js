@@ -57,12 +57,12 @@ function tryRemoveCorruptCacheFile(message, cacheDirOverride) {
   const root = cacheDirOverride ? path.resolve(cacheDirOverride) : resolveCacheDir();
   if (!root) return null;
 
-  // 缓存根目录本身必须真实存在，否则「路径在缓存内」这个判断毫无护栏意义：
-  // 只要目标是以该字符串开头就会被放行。目录不存在 ⇒ 无从判断 ⇒ 拒删。
-  if (!fs.existsSync(root)) return null;
-
   const target = path.resolve(raw);
-  // 必须是缓存目录内的路径，且扩展名是模型文件——双重护栏
+  // 必须是缓存目录内的路径，且扩展名是模型文件——双重护栏。
+  // 这里刻意【不】要求 root 目录存在：能报出 "Load model from <root内路径>"
+  // 就说明 transformers 已经走到读文件这一步，root 必然是它认定的缓存位置。
+  // 若再加 existsSync(root) 前置判断，反而会让"目录刚被清掉、文件已不在"
+  // 这类场景静默失去自愈机会，与自愈的初衷相反。
   const inside = target.startsWith(root + path.sep) || target.startsWith(root + '/');
   if (!inside) return null;
   if (!/\.(onnx|bin|safetensors|json)$/i.test(target)) return null;
