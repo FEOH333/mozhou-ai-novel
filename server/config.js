@@ -292,6 +292,29 @@ const LEGACY_ROUTE_VARIANTS = {
 
 let _global = null;
 
+/**
+ * V0.109.1：密钥环境变量覆盖——磁盘上不再需要以明文保存 API Key。
+ *
+ * 优先顺序：环境变量 > config.json。只在环境变量**非空**时覆盖，因此：
+ * - 没设环境变量的老用户完全零影响；
+ * - 想改 Key 时改环境变量即可，不必动配置文件；
+ * - 前端设置页仍可写 config.json，但一旦设了环境变量就以后者为准（避免两处真源打架，
+ *   与项目「单一真源」原则一致）。
+ *
+ * 支持两个变量：
+ *   NOVEL_API_KEY          → 主端点 apiKey
+ *   NOVEL_BACKUP_API_KEY   → 备用端点 backup.apiKey
+ */
+function applySecretEnvOverrides(global) {
+  const primary = String(process.env.NOVEL_API_KEY || '').trim();
+  if (primary) global.apiKey = primary;
+  const backup = String(process.env.NOVEL_BACKUP_API_KEY || '').trim();
+  if (backup) {
+    global.backup = { ...(global.backup || {}), apiKey: backup };
+  }
+  return global;
+}
+
 export function getGlobal() {
   if (_global) return _global;
   let disk = {};
@@ -299,6 +322,7 @@ export function getGlobal() {
     disk = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
   } catch { /* 首次运行无配置文件 */ }
   _global = deepMerge(DEFAULT_GLOBAL, disk);
+  _global = applySecretEnvOverrides(_global);
   // V0.98.13：旧版韧性假定制迁移（V0.47 默认组合写入的 resilience 挡住 V0.95.3/V0.98.13 调优）
   _global = migrateLegacyResilience(_global);
   // V0.32：旧版持久化的韧性参数升级（V0.29 前默认 20s/180s 会误杀 OpenCode Go 非流式长生成任务，
@@ -342,10 +366,27 @@ export function getGlobal() {
 export function saveGlobal(patch) {
   const cur = getGlobal();
   const merged = deepMerge(cur, patch || {});
+  const persisted = stripSecretEnvOverrides(merged);
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), { mode: 0o600 });
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(persisted, null, 2), { mode: 0o600 });
   _global = merged;
   return merged;
+}
+
+/** 落盘视图：把环境变量接管过的密钥字段换回磁盘原值（读不到磁盘值则留空）。 */
+function stripSecretEnvOverrides(global) {
+  if (!String(process.env.NOVEL_API_KEY || '').trim()
+    && !String(process.env.NOVEL_BACKUP_API_KEY || '').trim()) return global;
+  let disk = {};
+  try {
+    disk = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+  } catch { /* 无配置即空 */ }
+  const out = { ...global };
+  if (String(process.env.NOVEL_API_KEY || '').trim()) out.apiKey = disk.apiKey || '';
+  if (String(process.env.NOVEL_BACKUP_API_KEY || '').trim()) {
+    out.backup = { ...(out.backup || {}), apiKey: disk.backup?.apiKey || '' };
+  }
+  return out;
 }
 
 /** 当前服务商预设信息（含默认模型映射与专属参数开关） */

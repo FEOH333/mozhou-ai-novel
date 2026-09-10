@@ -48,7 +48,8 @@ cd ai-novel-writer
 npm install          # 只有 @huggingface/transformers 一个依赖
 
 cp data-config.example.json data/config.json
-# 编辑 data/config.json，填入你自己的模型 API Key
+cp secrets.env.example secrets.env
+# 编辑 secrets.env，填入你自己的模型 API Key
 
 start.bat            # Windows 一键启动（推荐）
 # 或
@@ -59,19 +60,43 @@ npm start            # 任意平台： http://127.0.0.1:8770
 
 ### 配置模型
 
-`data/config.json` 只需填一个 OpenAI 兼容端点：
+`data/config.json` 只需填一个 OpenAI 兼容端点（**密钥建议留空，走环境变量**）：
 
 ```json
 {
   "baseUrl": "https://your-endpoint/v1",
-  "apiKey": "<YOUR_API_KEY>",
+  "apiKey": "",
   "model": "your-model-name"
 }
 ```
 
-支持**双端点自动切换**：写入 `fallbackBaseUrl` / `fallbackApiKey` 后，主端点失败会自动降级，调用记录会标注实际来源。
+支持**双端点自动切换**：写入 `backup.baseUrl` / `backup.apiKey` 后，主端点失败会自动降级，调用记录会标注实际来源。
 
-> ⚠️ `data/` 已在 `.gitignore` 中，Key 不会进版本库；但请勿把含真实 Key 的配置文件分享给他人。
+### 用环境变量管理密钥（推荐）
+
+**不要在配置文件里写明文 Key**。填进环境变量即可：
+
+```bash
+# Git Bash / macOS / Linux
+cp secrets.env.example secrets.env   # secrets.env 已被 .gitignore 排除
+# 编辑 secrets.env 填入真实 Key，然后：
+source secrets.env
+npm start
+```
+
+```powershell
+# PowerShell（当前会话）
+$env:NOVEL_API_KEY = "sk-xxxxxxxx"
+$env:NOVEL_BACKUP_API_KEY = "sk-yyyyyyyy"   # 可选，备用端点
+npm start
+
+# 持久化（重开终端生效）
+setx NOVEL_API_KEY "sk-xxxxxxxx"
+```
+
+优先顺序为 **环境变量 > `config.json`**，且环境变量提供的密钥**绝不会被回写磁盘**——即使在设置页点了「保存」，`config.json` 里落盘的仍是原来那串（空）值。密钥只存在于环境变量里。
+
+> ⚠️ `data/` 与 `secrets.env` 均已在 `.gitignore` 中，密钥不会进版本库。
 
 ### 无 Key 试用
 
@@ -102,6 +127,8 @@ NOVEL_DATA_DIR=./data-experiment npm start
 
 | 变量 | 作用 |
 | --- | --- |
+| `NOVEL_API_KEY` | 主端点密钥，覆盖 `config.json` 的 `apiKey`（推荐用这个，不落盘） |
+| `NOVEL_BACKUP_API_KEY` | 备用端点密钥，覆盖 `config.json` 的 `backup.apiKey` |
 | `NOVEL_DATA_DIR` | 数据目录，默认 `./data`（含 `novel.db` + `config.json`） |
 | `NOVEL_MOCK_LLM=1` | 走确定性 mock 模型，用于测试与零成本试跑 |
 | `NOVEL_NO_OPEN=1` | 启动后不自动打开浏览器 |

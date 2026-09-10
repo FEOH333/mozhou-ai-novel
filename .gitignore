@@ -10,8 +10,12 @@ tmp-*/
 /backups/
 
 # 本地配置与密钥（绝不提交）
+# 注意：secrets.env.example 是模板，必须保留在仓库中（供使用者复制），故不作通配排除
 .env
 .env.*
+!/**.env.example
+secrets.env
+!secrets.env.example
 config.local.json
 data/config.json
 
