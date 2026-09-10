@@ -1,0 +1,100 @@
+name: Bug 报告
+description: 报告一个可复现的缺陷
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请尽量把信息填全——墨舟是长流程系统，"复现不出来"是最高频的沟通成本。
+
+        ⚠️ **安全漏洞请勿在此提交**，请走 [SECURITY.md](https://github.com/FEOH333/mozhou-ai-novel/blob/main/SECURITY.md) 的私密渠道。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已搜索过现有 Issue，确认这不是重复报告
+          required: true
+        - label: 我已用最新 `main` 分支复现过（旧版本的问题可能已修复）
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 实际发生了什么？你期望发生什么？
+      placeholder: |
+        实际：点击「生成卷纲」后卡在「生成中」，5 分钟无响应，日志出现 XXX。
+        期望：应当在 1 分钟内产出 15 卷卷纲。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 越具体越好。涉及流水线时请写明从哪一步开始。
+      placeholder: |
+        1. 新建作品，题材选「历史」
+        2. 完成世界设定与书纲
+        3. 点击「生成卷纲」
+        4. 观察到……
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 出问题的环节
+      multiple: true
+      options:
+        - 灵感 / 书契约
+        - 世界 / 人物设定
+        - 书纲 / 卷纲 / 章纲
+        - 场景正文生成
+        - 审校 / 修订
+        - 覆盖检查 / 结算
+        - 阶段审阅 / 完本判定
+        - 返工 / 恢复
+        - 成本与缓存
+        - Web 界面
+        - 安装 / 启动
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 请把版本号填全，很多问题是运行时不匹配造成的。
+      value: |
+        - 墨舟版本（package.json 的 version 或 git commit）：
+        - Node.js 版本（`node -v`）：
+        - 操作系统：
+        - 模型服务商 / 模型名：
+        - 是否启用备用端点：
+        - 是否使用 NOVEL_MOCK_LLM：
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志或报错
+      description: |
+        请粘贴控制台输出或 `data/` 下的日志。
+        **粘贴前务必删除 API Key**（形如 `sk-...` 的字符串），以及你不想公开的正文内容。
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 补充说明
+      description: 截图、你的猜测、临时绕过办法等。
+    validations:
+      required: false

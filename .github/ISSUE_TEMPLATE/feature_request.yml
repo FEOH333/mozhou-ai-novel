@@ -1,0 +1,62 @@
+name: 功能建议
+description: 提出一个新能力或改进方向
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        墨舟对"什么样的改动是好的"有明确立场，请先读 [CONTRIBUTING.md](https://github.com/FEOH333/mozhou-ai-novel/blob/main/CONTRIBUTING.md)——
+        特别是「四条铁律」与「框架扩展范式」。
+
+        一句话原则：**新文学能力要进管线成为框架能力，而不是给某本书打一次性补丁。**
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你要解决的真实问题
+      description: 请描述"写作时遇到的痛点"，而不是直接给方案。痛点清楚了，方案可能比你想的更好。
+      placeholder: |
+        写到第 30 章时，我发现配角的说话方式开始和前 10 章不一致，但我没有任何工具能发现这件事。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你设想的做法
+      description: 如果有具体设计思路，请写在这里。
+    validations:
+      required: false
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: 你认为它属于哪一层
+      description: 不确定就选「说不准」，这本来就是讨论的一部分。
+      options:
+        - 纪律文本（文学技法 / 题材包 / 史实锚点）
+        - 确定性校验（本地可判定的红线）
+        - 审校维度（需 LLM 判断的新 issue 类型）
+        - 台账 / 落库（需要跨章记账）
+        - 框架 / 管线流程
+        - Web 观察面
+        - 说不准
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 你考虑过的替代方案
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: principle
+    attributes:
+      label: 自查
+      options:
+        - label: 我的建议不依赖某本具体作品的名字或 id（作品名永不进框架）
+        - label: 我的建议不会破坏提示词的恒定缓存前缀（L1/L2）
+        - label: 我理解"机械红线可量化，文学目标不写成规则墙"

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞（请勿公开提交）
+    url: https://github.com/FEOH333/mozhou-ai-novel/security/advisories/new
+    about: 通过 GitHub 私密漏洞报告提交，不要用公开 Issue。
+  - name: 使用问题 / 讨论
+    url: https://github.com/FEOH333/mozhou-ai-novel/discussions
+    about: 不确定是不是 bug？想聊聊创作工作流？来这里。

@@ -7,8 +7,8 @@
 ## 0. 快速上手
 
 ```bash
-git clone <this-repo>
-cd ai-novel-writer
+git clone https://github.com/FEOH333/mozhou-ai-novel.git
+cd mozhou-ai-novel
 npm install
 npm test              # 应当全绿；这是提交前的底线
 ```

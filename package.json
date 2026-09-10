@@ -16,11 +16,19 @@
   "dependencies": {
     "@huggingface/transformers": "^3.7.0"
   },
+  "overrides": {
+    "sharp": "^0.35.4"
+  },
   "license": "AGPL-3.0-or-later",
+  "author": "FEOH333",
   "repository": {
     "type": "git",
-    "url": "https://github.com/<YOUR_ACCOUNT>/mozhou-ai-novel.git"
+    "url": "git+https://github.com/FEOH333/mozhou-ai-novel.git"
   },
+  "bugs": {
+    "url": "https://github.com/FEOH333/mozhou-ai-novel/issues"
+  },
+  "homepage": "https://github.com/FEOH333/mozhou-ai-novel#readme",
   "keywords": [
     "novel",
     "ai-writing",

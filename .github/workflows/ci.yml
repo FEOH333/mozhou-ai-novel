@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 同一分支的重复推送取消旧任务，节省 CI 配额
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: 测试 (Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # 项目要求 Node >= 23.4（依赖内置 node:sqlite 的稳定行为）
+        node: ['23.4', '24.x']
+        os: [ubuntu-latest]
+        include:
+          # Windows 是主要开发平台，额外跑一遍防止路径/换行相关回归
+          - node: '24.x'
+            os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 运行测试
+        run: npm test
+        env:
+          # 走确定性 mock 模型：不触网、零成本、可复现
+          NOVEL_MOCK_LLM: '1'
+          # 仅使用隔离的临时数据目录
+          NOVEL_DATA_DIR: ./data-ci
+
+      - name: 校验配置模板（JSON 合法性）
+        run: node -e "JSON.parse(require('fs').readFileSync('data-config.example.json','utf8'));console.log('data-config.example.json OK')"
+
+  # 汇总任务：把多平台矩阵收敛成单一状态检查，便于配置分支保护
+  ci-status:
+    name: CI 状态
+    if: always()
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查上游任务结果
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ]; then
+            echo "测试任务未通过：${{ needs.test.result }}"
+            exit 1
+          fi
+          echo "全部通过"

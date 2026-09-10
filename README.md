@@ -5,6 +5,11 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D23.4-brightgreen.svg)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/tests-1556%20passed-brightgreen.svg)](#测试)
+[![Dependencies](https://img.shields.io/badge/dependencies-1-brightgreen.svg)](./package.json)
+[![Local First](https://img.shields.io/badge/local--first-%E6%95%B0%E6%8D%AE%E4%B8%8D%E5%87%BA%E6%9C%AC%E6%9C%BA-blueviolet.svg)](#本地优先)
+
+**简体中文** | [English](./README.en.md)
 
 ---
 
@@ -43,8 +48,8 @@
 ### 安装与启动
 
 ```bash
-git clone <this-repo>
-cd ai-novel-writer
+git clone https://github.com/FEOH333/mozhou-ai-novel.git
+cd mozhou-ai-novel
 npm install          # 只有 @huggingface/transformers 一个依赖
 
 cp data-config.example.json data/config.json
@@ -177,6 +182,26 @@ tests/             1500+ 用例（node:test）
 - **禁止动缓存前缀**：恒定前缀与动态注入分层严格，新纪律只进最后一条 user 指令。
 - **写审同源**：同一条纪律同时注入写作与审校指令；注入必可检。
 - **改工具优先**：审读发现的问题优先转成确定性防线或纪律文本，直接改稿只是例外。
+
+---
+
+## 本地优先
+
+- 你的书稿全部存在本机 `data/novel.db`。除了你自己的模型 API 调用，没有任何数据被上传。
+- 服务默认只绑定 `127.0.0.1`，设计上不面向公网。
+- 密钥可以完全不落到磁盘上的配置文件（见上文）。
+
+**请勿把服务直接暴露到公网**，除非你自行加上认证层。完整安全模型见 [`SECURITY.md`](./SECURITY.md)。
+
+---
+
+## 测试
+
+```bash
+npm test
+```
+
+基于 Node 内置测试运行器（`node:test`）。**必须使用 Node ≥ 23.4**——更低版本会因 `node:sqlite` 行为差异失败，那不是项目逻辑的问题。
 
 ---
 
