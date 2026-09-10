@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 process.env.NOVEL_MOCK_LLM = '1';
-process.env.NOVEL_DATA_DIR = fs.mkdtempSync(`${os.tmpdir()}\\v120-align-`);
+process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v120-align-'));
 
 const store = await import('../server/db/store.js');
 const alignment = await import('../server/engine/alignment.js');
