@@ -10,6 +10,7 @@ import { estimateChineseChars } from '../llm/tokenizer.js';
 import {
   polishDiagnoseInstruction, polishConsistencyInstruction, polishExecuteInstruction, smoothTransitionInstruction,
   midStoryReviewInstruction, // V0.71：创作中期审阅指令（过程打磨）
+  CREATIVE_AI_FLAVOR_BRIEF, // V0.109.3：AI 腔简报（打磨同源）
 } from './prompts.js';
 import { styleRulesText } from '../data/creative_packs.js'; // V0.83：打磨注入文风（防修订漂移）
 import { buildLifecycleContext, lifecyclePromptText } from './longform_lifecycle.js'; // V0.92 阶段型前瞻审阅
@@ -760,6 +761,8 @@ export async function runPolish(bookId, opts = {}) {
           styleRules: styleRulesText(store.books.settings(bookId).styleProfile, store.books.settings(bookId).styleSample, {
             isHistory: book.genre === '历史', compact: true,
           }),
+          // V0.109.3：打磨同样注入 AI 腔简报（与写作/审校同一把尺，写审同源）
+          aiFlavorBrief: CREATIVE_AI_FLAVOR_BRIEF,
         }), bookId, { targetChapterIdx: ch.idx }),
       }]), signal,
     });

@@ -1869,7 +1869,11 @@ function blockingProseIssues(text, ruleOptions = {}) {
     .filter(issue => ['medium', 'high'].includes(String(issue?.severity)))
     // V0.105：发稿占用轴是近窗软项，不是返工文风闸的 AI 模板腔/母题。
     // 把 travel_ending 等算进 blocking 会让旧稿多一项、候选同构不过闸（闸必须与改写单元同职责）。
-    .filter(issue => !issue.axis);
+    .filter(issue => !issue.axis)
+    // V0.109.3：篇章级分布指标（句式同质化/段落均质/连接词密度/情感温度/事实锚点）同理排除。
+    // 局部改写不会改变整章的句长分布与段落起伏——旧稿有一项、候选必然还有一项，
+    // 算进闸就是批量误杀（同"闸必须与改写单元同职责"）。词句级 AI 腔不排除，仍参与闸。
+    .filter(issue => !issue.statistical);
 }
 
 /**

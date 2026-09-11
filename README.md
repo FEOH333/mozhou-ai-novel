@@ -6,7 +6,7 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D23.8-brightgreen.svg)](https://nodejs.org/)
 [![CI](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml/badge.svg)](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-1556%20passed-brightgreen.svg)](#测试)
+[![Tests](https://img.shields.io/badge/tests-1594%20passed-brightgreen.svg)](#测试)
 [![Dependencies](https://img.shields.io/badge/dependencies-1-brightgreen.svg)](./package.json)
 [![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-brightgreen.svg)](https://github.com/FEOH333/mozhou-ai-novel/security/dependabot)
 [![Local First](https://img.shields.io/badge/local--first-%E6%95%B0%E6%8D%AE%E4%B8%8D%E5%87%BA%E6%9C%AC%E6%9C%BA-blueviolet.svg)](#本地优先)
@@ -34,6 +34,7 @@
 | 前后矛盾、伏笔忘了回收 | 伏笔台账 + 跨章复读窗口 + 覆盖检查，超期自动老化或转长期线 |
 | 大纲和正文越走越远 | 正文是权威源，摘要/事实/人物/伏笔只是**投影**；换版必须整体切换 |
 | AI 味、模板句、复读 | 反模板化戏剧契约 + 句式族轮换 + 词根重复检测 + 零套话词表 |
+| 机器腔（抽象黑话/翻译腔/顿悟收束） | 通用中文 AI 腔防线：写时注入纪律、写后 11 个确定性检测器（抽象黑话、翻译腔、"的"字地狱、假升华、万能状语、三段排比、句式同质化、段落均质、连接词密度、情感温度、事实锚点），命中进入审校与修订自愈 |
 | 一章写崩整本重来 | 候选正文先在影子版本验证，失败保留整套旧版本 |
 | 跑一半断了要重来 | 服务端后台作业持久化，浏览器只是观察面；断线可重放、可恢复 |
 | 成本失控 | 提示词缓存分层（恒定前缀 + 动态尾部）、成本双口径视图、注入上限护栏 |

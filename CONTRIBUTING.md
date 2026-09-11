@@ -59,13 +59,19 @@ if (book.title === '某本书') { ... }
 if (book.settings?.someFeature === true) { ... }
 ```
 
-### ③ 禁止绕过既有框架
+### ③ 禁止绕过既有安全链路（但鼓励为承载新能力升级框架）
 
 - 完成态判定只用 `chapter_status.isCompletedChapter`
 - 章节状态只经 `transitionChapterStatus` 状态机
 - 正文落库只走 `writeScene → reviseScene → validateChapterRewrite → applyValidatedChapterRewrite`
   （场景级走 `applyValidatedSceneRewrite`，同源同闸）
 - **不新增直写 store 的 HTTP 入口**；不为同一状态造第二套写法
+
+上面这些是**不可绕过**的数据安全与状态收敛约束。但若某项能力受限于框架的**表达力**
+（例如新增一类纪律却因类型语义硬编码在多个消费点而无法触发修订自愈），正确做法是
+**升级框架**（把语义收敛为单一真源），而不是放弃这项能力、也不是打补丁绕过约束。
+
+判据：新纪律接入时若需要"改多处才能生效"，说明框架缺一层抽象——先补那层抽象，再接入纪律。
 
 ### ④ 禁止动提示词缓存前缀
 
@@ -100,7 +106,9 @@ if (book.settings?.someFeature === true) { ... }
 2. **槽位注入** —— 在 `server/engine/prompts.js` 对应指令函数加参数与注入位；
    引擎侧加 `buildXxxContext(...)` 纯函数
 3. **确定性校验** —— 可本地判定的进 `rules.js` / `audit.js` / `*_guardrails.js`；
-   需 LLM 判定的进审校 typeEnum（新 issue type 必须进记债路由）
+   需 LLM 判定的进审校 typeEnum。**任何新 issue type 必须同时登记进
+   `server/data/issue_types.js`**——该表是「可修 / 记债 / 纯文本级」语义的单一真源，
+   漏登记会让新纪律**静默不触发修订自愈**（`tests/v1093_ai_flavor.test.js` 有覆盖断言守着）
 4. **台账/落库** —— 需跨章记账的加表（`schema.sql` + `store.js` 迁移）；
    状态进 `materials`（动态）或 `settings_json`，**不进公共前缀**
 5. **测试** —— 每个行为变化一个断言，先 RED 后 GREEN；

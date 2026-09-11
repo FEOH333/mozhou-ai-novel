@@ -4,6 +4,7 @@
 
 import * as store from '../db/store.js';
 import { OPENER_TIC_PATTERNS } from '../data/redlines.js';
+import { isClicheOnlyType } from '../data/issue_types.js'; // V0.109.3：类型语义单一真源
 import { narrativePatternFeatures, narrativePatternSignature } from './narrative_patterns.js';
 
 export const PATTERN_AXES = ['opening', 'initiative', 'counterforce', 'resolution', 'artifact', 'ending'];
@@ -305,7 +306,8 @@ function clicheOnlyIssues(issues = []) {
   return issues.every(issue => {
     const type = String(issue?.type || '');
     const blob = `${issue?.issue || ''}${issue?.quote || ''}`;
-    if (type === '语句质量') return true;
+    // V0.109.3：类型判定改查 issue_types 注册表（新增 AI 腔类文本问题自动纳入）
+    if (isClicheOnlyType(type)) return true;
     return /似乎|缓缓|微微|顿了顿|一股/.test(blob);
   });
 }

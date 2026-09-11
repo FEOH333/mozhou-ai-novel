@@ -11,12 +11,23 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v060-'));
 
 describe('V0.60 防屎山', () => {
-  test('audit 落库过滤：语句质量/文学性/low 级不记债，仅需圆场类型 medium+ 记债', () => {
+  test('audit 落库过滤：语句质量/文学性/low 级不记债，仅需圆场类型 medium+ 记债', async () => {
+    // V0.109.3：类型语义迁入 issue_types 注册表单一真源——audit 只查表，不再内嵌白名单。
+    // 「是否接线」用源码断言，「语义是否正确」直接 import 注册表判定（比 grep 更强）。
     const src = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
-    assert.ok(src.includes('NEEDS_ROUNDUP'), '应有圆场类型白名单');
-    assert.ok(src.includes("'语句质量' || type === '文学性'") || src.includes("type === '语句质量' || type === '文学性'"), '文本质量类不记债');
+    assert.ok(src.includes('needsRoundup'), 'audit 应查 issue_types 的 needsRoundup');
+    // 只允许注释里提到旧名（迁移溯源）；不得再出现第二份白名单**声明**
+    assert.ok(!/const\s+NEEDS_ROUNDUP\s*=/.test(src), '不应再内嵌第二份白名单（单一真源）');
     assert.ok(src.includes("=== 'low'"), 'low 级不记债');
-    assert.ok(src.includes('伏笔遗忘') && src.includes('时间线冲突'), '白名单含伏笔/时间线');
+
+    const { needsRoundup } = await import(pathToFileURL(path.join(ROOT, 'server/data/issue_types.js')));
+    assert.equal(needsRoundup('语句质量'), false, '文本质量类不记债（修复即了结）');
+    assert.equal(needsRoundup('文学性'), false, '文学性不记债');
+    assert.equal(needsRoundup('AI 腔'), false, 'AI 腔不记债（同属文本级）');
+    assert.equal(needsRoundup('伏笔遗忘'), true, '伏笔遗忘需后章圆场');
+    assert.equal(needsRoundup('时间线冲突'), true, '时间线冲突需后章圆场');
+    assert.equal(needsRoundup('人称视角'), false, '仅提示类不记债');
+    assert.equal(needsRoundup('从未登记过的类型'), false, '未登记类型默认不记债（保持旧行为）');
   });
 
   test('conflicts.pruneBefore 清理窗口 + removeByType', async () => {

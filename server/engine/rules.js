@@ -3,6 +3,12 @@
 // V0.95.0：量化红线与词表迁移至 data/redlines.js 单一真源（此前分散 5 处维护，
 // V0.93.4/0.93.7/审计三次写审脱节）；本文件只做检测逻辑，数字与词表一律 import。
 import { REDLINES, AI_TASTE_FULL, EXTREME_CLICHES, STRICT_MOTIFS, COMMON_MOTIFS, CLOSEOUT_TIC_PATTERNS, OPENER_TIC_PATTERNS, ENDING_TIC_PATTERNS, TITLE_EVENT_LEXICON } from '../data/redlines.js';
+import {
+  ABSTRACT_JARGON, GRAND_ABSTRACTION, HEDGING_WORDS, AI_CONNECTORS,
+  TRANSLATIONESE_PATTERNS, PSEUDO_SUBLIMATION_PATTERNS, MANNER_ADVERBIAL_PATTERNS,
+  RULE_OF_THREE_PATTERNS, EMOTION_LEXICON, SUBJECTIVE_MARKERS, COLLOQUIAL_MARKERS,
+  FACT_ANCHOR_PATTERNS,
+} from '../data/ai_flavor.js'; // V0.109.3：通用中文 AI 腔规则（与 redlines 零重叠）
 import { isWarfareText } from '../data/literary_techniques.js'; // V0.98.13：战争章门控（与写作注入同一判定）
 import { openerStructureTemplate } from './chapter_diversity.js';
 import { detectCraftIssues } from './craft_occupancy.js';
@@ -790,6 +796,321 @@ export function detectInSceneEventRestarts(text) {
   }
   return issues;
 }
+
+// ============================================================================
+// V0.109.3 通用中文 AI 腔检测（ai_flavor.js 消费）
+//
+// 与上方「网文套话」检测（detectClichés 等，产出 type='语句质量'）的分工：
+//   语句质量 —— 词计数口径：「嘴角勾起一抹」出现几次。
+//   AI 腔    —— 篇章统计口径：句长分布、段落起伏、连接词密度、抽象度、有无情感与实地。
+//
+// 为什么另立类型而不是塞进「语句质量」：两者的**修法不同**（换词 vs 重排句式/补具体细节），
+// 且分别统计才能知道一部书到底是"用词油"还是"结构像机器"。类型语义见 data/issue_types.js。
+//
+// 统一护栏：统计型指标对短文本噪声极敏感，低于最小句数/段数一律不判；
+// 对白内律动本就更口语化，易误报的维度（的-字、假升华）在对白内豁免。
+// ============================================================================
+
+/** 构造一条 AI 腔 issue（统一形状，与既有检测器一致）
+ *
+ * statistical=true 表示这是**篇章级分布指标**（句长占比/段落均质/连接词密度/情感温度/事实锚点），
+ * 而非词句级问题。这个标记有实际作用：返工文风闸（recommendation_recovery.blockingProseIssues）
+ * 必须排除它——闸的职责是"候选不能新增词句级 AI 腔"，而局部改写并不会改变整章的句长分布，
+ * 把它算进闸会造成"旧稿有一项、候选仍有一项 → 同构不过闸"的批量误杀（项目既有教训即
+ * "闸必须与改写单元同职责"，见 recommendation_recovery 里发稿占用轴的同类处理）。
+ * 词句级问题（黑话/翻译腔/的字地狱/假升华/万能状语/三段排比）不带此标记，正常参与闸与修订。
+ */
+function aiFlavorIssue(severity, quote, issue, fix, { statistical = false } = {}) {
+  const item = { type: 'AI 腔', severity, quote: String(quote || '').slice(0, 60), issue, fix };
+  if (statistical) item.statistical = true;
+  return item;
+}
+
+/** 按 storySentenceUnits 分句并去掉空白项 */
+function aiFlavorSentences(text) {
+  return storySentenceUnits(text).map(s => s.trim()).filter(Boolean);
+}
+
+/** 句子在原文中的偏移区间（供把正则命中归位到句子，进而按句去重） */
+function aiFlavorSentenceSpans(text) {
+  const src = String(text || '');
+  const re = /[^。！？!?；\n]+[。！？!?；]?/gu;
+  const spans = [];
+  let m;
+  while ((m = re.exec(src)) !== null) {
+    if (m[0].trim()) spans.push({ start: m.index, end: m.index + m[0].length });
+  }
+  return spans;
+}
+
+function spanIndexAt(spans, pos) {
+  for (let i = 0; i < spans.length; i++) {
+    if (pos >= spans[i].start && pos < spans[i].end) return i;
+  }
+  return -1;
+}
+
+/**
+ * 收集正则型 AI 腔命中，**同一句只报一次**。
+ *
+ * 为什么必须按句去重：一句话常被多个模式同时命中（如"这一刻他终于明白了这一切的意义"
+ * 同时命中 moment-realize / realize-meaning / all-meaning 三条），逐条输出会把一个
+ * 根因拆成三条噪声，既抬高 issue 数又让修订工单重复。项目原则是"同一根因的多处证据
+ * 合并为一条"（审校指令第 6 条），故此处按句归并。
+ */
+function collectPatternHits(src, patterns, { skipDialogue = false } = {}) {
+  const spans = aiFlavorSentenceSpans(src);
+  const seen = new Set();
+  const hits = [];
+  for (const { re, label } of patterns) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(src)) !== null) {
+      if (skipDialogue && insideDialogue(src, m.index)) continue;
+      const si = spanIndexAt(spans, m.index);
+      if (si < 0 || seen.has(si)) continue;
+      seen.add(si);
+      hits.push({ quote: m[0], label });
+    }
+  }
+  // 按出现顺序输出，便于人工核对
+  return hits.sort((a, b) => src.indexOf(a.quote) - src.indexOf(b.quote));
+}
+
+/** 按空行/换行分段，去掉空白段 */
+function aiFlavorParagraphs(text) {
+  return String(text || '').split(/\n+/).map(p => p.trim()).filter(Boolean);
+}
+
+/** 抽象黑话与抽象大词：叙事里出现商业/管理学词汇即出戏 */
+export function detectAbstractJargon(text) {
+  const src = String(text || '');
+  const hits = [];
+  for (const w of [...ABSTRACT_JARGON, ...GRAND_ABSTRACTION, ...HEDGING_WORDS]) {
+    let n = 0, idx = 0;
+    while ((idx = src.indexOf(w, idx)) >= 0) { n++; idx += w.length; }
+    if (n > 0) hits.push({ word: w, n });
+  }
+  const total = hits.reduce((s, h) => s + h.n, 0);
+  if (total < REDLINES.abstractJargonMax) return [];
+  const list = hits.map(h => `「${h.word}」×${h.n}`).join('、');
+  return [aiFlavorIssue('medium',
+    hits[0].word,
+    `叙事中出现 ${total} 处抽象黑话/空泛大词（${list}）——这类词只在商业或评论语境成立，写进小说即出戏`,
+    '换成本场景的具体动作、器物或数字；抽象评价交给事件自己体现，不由叙述者贴标签')];
+}
+
+/** 翻译腔句式：从英文句法直译的框架，中文原生写作不会这么组织 */
+export function detectTranslationese(text) {
+  const src = String(text || '');
+  // 翻译腔框架在谁嘴里都odd，不做对白豁免
+  const issues = collectPatternHits(src, TRANSLATIONESE_PATTERNS).map(({ quote, label }) =>
+    aiFlavorIssue('low', quote,
+      `「${quote.slice(0, 30)}」是翻译腔句式（${label}），中文原生叙述不这样组织`,
+      '拆成短句直接说事：删掉框架词，把动作和对象直连'));
+  if (issues.length >= 2) issues.forEach(i => { i.severity = 'medium'; });
+  return issues;
+}
+
+/** "的"字地狱：单句多个"的"层层套叠，是翻译腔与机器生成的共同特征 */
+export function detectDeChain(text) {
+  const src = String(text || '');
+  const issues = [];
+  for (const sentence of aiFlavorSentences(src)) {
+    const positions = [];
+    const re = /的/g;
+    let m;
+    while ((m = re.exec(sentence)) !== null) positions.push(m.index);
+    if (positions.length < REDLINES.deChainMax) continue;
+    const at = src.indexOf(sentence);
+    // 是否在对白内，要用**跨过阈值的那一个"的"**的位置来判：
+    // 引号常开在句中（"他说：'……'），拿句首位置判会漏掉整个对白豁免。
+    const probe = at >= 0 ? at + positions[REDLINES.deChainMax - 1] : -1;
+    if (probe >= 0 && insideDialogue(src, probe)) continue;
+    issues.push(aiFlavorIssue('low', sentence,
+      `单句出现 ${positions.length} 个"的"，层层套叠（"的"字地狱）`,
+      '拆句或改动词：把修饰关系改成动作句，删掉可有可无的修饰'));
+  }
+  if (issues.length >= 2) issues.forEach(i => { i.severity = 'medium'; });
+  return issues;
+}
+
+/** 假升华：在情绪高点用道理/顿悟收束，而不是用画面收束 */
+export function detectPseudoSublimation(text) {
+  const src = String(text || '');
+  // 人物在对话里说"这一刻我明白了"是合法的——只有叙述层用顿悟收束才是 AI 腔
+  const issues = collectPatternHits(src, PSEUDO_SUBLIMATION_PATTERNS, { skipDialogue: true })
+    .map(({ quote, label }) => aiFlavorIssue('low', quote,
+      `「${quote.slice(0, 30)}」是顿悟式升华收束（${label}），道理代替了画面`,
+      '删掉顿悟句，改用动作、物件或场景收束——读者记住的是画面不是道理'));
+  if (issues.length >= 2) issues.forEach(i => { i.severity = 'medium'; });
+  return issues;
+}
+
+/** 万能状语：给动作贴抽象情绪标签，用状语代替具体表演 */
+export function detectMannerAdverbial(text) {
+  const src = String(text || '');
+  const issues = collectPatternHits(src, MANNER_ADVERBIAL_PATTERNS).map(({ quote, label }) =>
+    aiFlavorIssue('low', quote,
+      `「${quote.slice(0, 30)}」是万能状语（${label}）——情绪被状语直接说出，人物没有真的演出来`,
+      '删掉状语，用具体的表情、动作或说话内容让情绪自己显形'));
+  if (issues.length >= 2) issues.forEach(i => { i.severity = 'medium'; });
+  return issues;
+}
+
+/**
+ * 三段式排比：三连同构短句并列，是机器追求"节奏感"的典型痕迹。
+ *
+ * 误报风险最高的一条（排比是中文正当修辞），故要求三重机器签名同时成立才报：
+ * 三句长度极差 ≤1（人手极少写得完全等长）且同字起头。详见 ai_flavor.js 的规则注释。
+ */
+export function detectRuleOfThree(text) {
+  const src = String(text || '');
+  const spans = aiFlavorSentenceSpans(src);
+  const seen = new Set();
+  const issues = [];
+  for (const { re, label } of RULE_OF_THREE_PATTERNS) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(src)) !== null) {
+      const parts = [m[1], m[2], m[3]].map(p => p.trim());
+      const lens = parts.map(p => p.length);
+      // 签名②：三句长度极差 ≤1（完全等长的工整并列）
+      if (Math.max(...lens) - Math.min(...lens) > 1) continue;
+      // 签名③：三句同字起头（机器并行生成的痕迹）
+      if (!(parts[0][0] === parts[1][0] && parts[1][0] === parts[2][0])) continue;
+      const si = spanIndexAt(spans, m.index);
+      if (si < 0 || seen.has(si)) continue;
+      seen.add(si);
+      issues.push(aiFlavorIssue('low', m[0],
+        `「${m[0].slice(0, 34)}」是三段等长同字起头的短句并列（${label}）——工整得不像人写的`,
+        '拆掉排比：保留信息最实的一句，其余改成具体动作或直接删'));
+    }
+  }
+  if (issues.length > REDLINES.ruleOfThreeMax) {
+    issues.forEach(i => { i.severity = 'medium'; });
+  }
+  return issues;
+}
+
+/**
+ * 句式同质化（篇章统计口径）：短句占比过低 / 连续同字起句。
+ * 与 detectLongParagraphs（单段字数）互补——这里管的是**句子的节奏分布**。
+ */
+export function detectSentenceMonotony(text) {
+  const src = String(text || '');
+  const sentences = aiFlavorSentences(src);
+  if (sentences.length < REDLINES.aiFlavorMinSentences) return [];
+  const issues = [];
+
+  // 1) 短句占比：全是长句说明节奏板结，没有呼吸
+  const lens = sentences.map(s => s.replace(/[\s，。！？；：、“”‘’（）《》—…·]/g, '').length);
+  const shortCount = lens.filter(n => n <= REDLINES.shortSentenceMax).length;
+  const ratio = shortCount / sentences.length;
+  if (ratio < REDLINES.shortSentenceRatioMin) {
+    issues.push(aiFlavorIssue('medium',
+      sentences[0],
+      `短句占比仅 ${Math.round(ratio * 100)}%（${shortCount}/${sentences.length} 句 ≤${REDLINES.shortSentenceMax} 字），通篇长句使节奏板结、无呼吸`,
+      '把关键动作与转折拆成短句独立成句；该断的地方断开，长句只留给蓄势与铺陈',
+      { statistical: true }));
+  }
+
+  // 2) 连续同字起句：连续 ≥3 句以同一字开头，是机器行文的同构痕迹
+  let streak = 1;
+  for (let i = 1; i < sentences.length; i++) {
+    const prev = sentences[i - 1][0];
+    const cur = sentences[i][0];
+    streak = (prev && cur && prev === cur) ? streak + 1 : 1;
+      if (streak >= 3) {
+        issues.push(aiFlavorIssue('low',
+          sentences.slice(i - 2, i + 1).join(''),
+          `连续 ${streak} 句以「${cur}」字开头，句式同构`,
+          '调整起句方式：把其中几句改为环境、动作或对话起笔，打散同一领起',
+          { statistical: true }));
+        break; // 同一根因只报一次
+      }
+  }
+  return issues;
+}
+
+/** 段落均质度：各段长度过于接近，是机器排版的整齐感（人手写作段落长短错落） */
+export function detectParagraphEvenness(text) {
+  const paragraphs = aiFlavorParagraphs(text);
+  if (paragraphs.length < REDLINES.aiFlavorMinParagraphs) return [];
+  const lens = paragraphs.map(p => p.length).sort((a, b) => a - b);
+  const min = lens[0];
+  const max = lens[lens.length - 1];
+  if (min <= 0) return [];
+  const ratio = max / min;
+  if (ratio >= REDLINES.paragraphEvennessMin) return [];
+  return [aiFlavorIssue('low',
+    paragraphs[0],
+    `段落长度过于均质（最长 ${max} 字 / 最短 ${min} 字 = ${ratio.toFixed(2)}，低于 ${REDLINES.paragraphEvennessMin}）——` +
+    '每段都差不多长，读起来像机器排的版',
+    '有意拉长或压缩部分段落：一个动作单独成段，一段环境描写展开写透，让长短形成错落',
+    { statistical: true })];
+}
+
+/** 连接词密度：整章靠连接词硬接逻辑的程度（次/千字） */
+export function detectConnectorDensity(text) {
+  const src = String(text || '');
+  const chars = src.replace(/\s/g, '').length;
+  if (!chars) return [];
+  // 密度口径需足够体量才有意义（沿用句数护栏的等效字数尺度）
+  if (chars < REDLINES.aiFlavorMinSentences * 10) return [];
+  let total = 0;
+  const hits = [];
+  for (const w of AI_CONNECTORS) {
+    let n = 0, idx = 0;
+    while ((idx = src.indexOf(w, idx)) >= 0) { n++; idx += w.length; }
+    if (n > 0) { total += n; hits.push(`${w}×${n}`); }
+  }
+  const perK = (total / chars) * 1000;
+  if (perK <= REDLINES.connectorPerKCharsMax) return [];
+  return [aiFlavorIssue('medium',
+    hits[0] || '',
+    `连接词密度 ${perK.toFixed(1)} 次/千字，超过 ${REDLINES.connectorPerKCharsMax}（${hits.join('、')}）——靠连接词硬接逻辑`,
+    '删掉连接词，让事件顺序与人物动作自己承担因果；段落之间靠场景切换而非"此外/同时"过渡',
+    { statistical: true })];
+}
+
+/**
+ * 情感温度（软信号，恒为 low）：整章叙事完全没有任何情绪承载、主观视角或口语，
+ * 说明写的是说明书而不是小说。三支全无才报，避免误伤克制的白描。
+ */
+export function detectEmotionTemperature(text) {
+  const src = String(text || '');
+  const sentences = aiFlavorSentences(src);
+  if (sentences.length < REDLINES.aiFlavorMinSentences) return [];
+  const has = (list) => list.some(w => src.includes(w));
+  if (has(EMOTION_LEXICON) || has(SUBJECTIVE_MARKERS) || has(COLLOQUIAL_MARKERS)) return [];
+  return [aiFlavorIssue('low',
+    sentences[0],
+    '整章没有任何情绪承载、主观视角或口语表达——叙事温度为零，读起来像事件说明书',
+    '至少给人物一处真实的情绪落点：让情绪从身体反应、说话方式或选择里透出来',
+    { statistical: true })];
+}
+
+/**
+ * 事实锚点（软信号，恒为 low）：整章没有任何具体时间、数量或专名，
+ * 全是可以放进任何一本书的抽象概括——读者抓不到"实地"。
+ */
+export function detectFactAnchor(text) {
+  const src = String(text || '');
+  const sentences = aiFlavorSentences(src);
+  if (sentences.length < REDLINES.aiFlavorMinSentences) return [];
+  const hit = FACT_ANCHOR_PATTERNS.some(({ re }) => {
+    re.lastIndex = 0;
+    return re.test(src);
+  });
+  if (hit) return [];
+  return [aiFlavorIssue('low',
+    sentences[0],
+    '整章没有出现任何具体时间、数量或地名——全是抽象概括，读者没有可感的实地',
+    '给关键的场景与动作一个可数的落点：具体时刻、具体数目、具体地点',
+    { statistical: true })];
+}
+
 /** 全文规则检查（合并所有规则；可指定重点规则集）。
  *  scope='window' 表示被检文本只是章节内的连续场景窗口：章级构成规则
  *  （对话占比、章末零钩）在窗口粒度上无法满足，强行套用会把低对话场景
@@ -823,6 +1144,19 @@ export function runLocalRules(text, { focus, scope = 'chapter', endsAtChapterEnd
     ...detectEvidenceCertaintyStack(text, { threshold: evidenceThreshold }),
     ...detectNumericDataDump(text),
     ...detectCraftIssues(text),
+    // V0.109.3：通用中文 AI 腔（抽象黑话/翻译腔/的字地狱/假升华/万能状语/三段排比/
+    // 句式同质化/段落均质/连接词密度/情感温度/事实锚点）。与上方网文套话检测互补不重叠。
+    ...detectAbstractJargon(text),
+    ...detectTranslationese(text),
+    ...detectDeChain(text),
+    ...detectPseudoSublimation(text),
+    ...detectMannerAdverbial(text),
+    ...detectRuleOfThree(text),
+    ...detectSentenceMonotony(text),
+    ...detectParagraphEvenness(text),
+    ...detectConnectorDensity(text),
+    ...detectEmotionTemperature(text),
+    ...detectFactAnchor(text),
   ];
   if (scope === 'chapter' || endsAtChapterEnd) all.push(...detectWeakEnding(text));
   if (focus && focus.length) return all.filter(i => focus.includes(i.type));

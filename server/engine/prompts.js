@@ -994,7 +994,7 @@ ${diversityText ? `${diversityText}\n` : ''}${craftOccupancyText ? `${craftOccup
 - 质感：只用当前人物、地点与动作链本场景特有的细节，不复用提示词示范。
 ${isLastScene ? '- 收尾：完整落下本章行动与代价，再保留由该结果自然产生的疑问、关系余波、信息差或局势变化；不另塞无因事故。' : '- 收尾：当前节拍形成结果即停，下一场景的动作尚未开始；不制造章末式悬崖。'}
 ${endingHook ? '- 【细纲给出的章末余力（只兑现其因果功能，不必逐字复刻或写成机械悬崖）】' + endingHook + '\n' : ''}
-${plotBrief ? plotBrief + '\n\n' : ''}${historyBrief ? historyBrief + '\n\n' : ''}${eraContext ? '【时代红线/可改史点（本章不得触犯红线）】' + eraContext + '\n\n' : ''}${eraBoundary ? eraBoundary + '\n\n' : ''}${poetryBrief ? poetryBrief + '\n\n' : ''}${techniqueBrief ? techniqueBrief + '\n\n' : ''}${contrastReq ? contrastReq + '\n\n' : ''}${hardReq ? hardReq + '\n\n' : ''}${dynamicStyle ? dynamicStyle + '\n\n' : ''}${warfareBrief ? warfareBrief + '\n\n' : ''}${courtBrief ? courtBrief + '\n\n' : ''}${environmentBrief ? environmentBrief + '\n\n' : ''}${psychologyBrief ? psychologyBrief + '\n\n' : ''}${continuityBrief ? continuityBrief + '\n\n' : ''}${valleyBrief ? valleyBrief + '\n\n' : ''}${CREATIVE_BOUNDARY_BRIEF}\n\n${dialogueBrief ? dialogueBrief + '\n\n' : ''}【写作要求】
+${plotBrief ? plotBrief + '\n\n' : ''}${historyBrief ? historyBrief + '\n\n' : ''}${eraContext ? '【时代红线/可改史点（本章不得触犯红线）】' + eraContext + '\n\n' : ''}${eraBoundary ? eraBoundary + '\n\n' : ''}${poetryBrief ? poetryBrief + '\n\n' : ''}${techniqueBrief ? techniqueBrief + '\n\n' : ''}${contrastReq ? contrastReq + '\n\n' : ''}${hardReq ? hardReq + '\n\n' : ''}${dynamicStyle ? dynamicStyle + '\n\n' : ''}${warfareBrief ? warfareBrief + '\n\n' : ''}${courtBrief ? courtBrief + '\n\n' : ''}${environmentBrief ? environmentBrief + '\n\n' : ''}${psychologyBrief ? psychologyBrief + '\n\n' : ''}${continuityBrief ? continuityBrief + '\n\n' : ''}${CREATIVE_AI_FLAVOR_BRIEF}\n\n${valleyBrief ? valleyBrief + '\n\n' : ''}${CREATIVE_BOUNDARY_BRIEF}\n\n${dialogueBrief ? dialogueBrief + '\n\n' : ''}【写作要求】
 1. 只写场景「${scene.id}」：${scene.beat}
 1.5 【场景边界硬约束】下一场景节拍是「${(sceneAfter?.beat || '（无）').slice(0, 60)}」；不得提前写出其过程或结果。
 2. POV：${scene.pov || '跟随主要在场角色'}；${perspective === 'first' ? '全程用"我"叙述。' : '用"他/她/角色名"叙述，不得出现第一人称"我"作旁白。'}
@@ -1004,7 +1004,7 @@ ${chapterBudgetText ? chapterBudgetText + '\n' : ''}3. 【字数硬约束】输�
 5. ${rules || '遵守作品设定、事实与用户锁定规则。'}
 6. 只有确需新增且无法用现有设定表达的名词，才在正文末尾单独标记：【新设定:名词——简述】。
 
-【机械防线】这些项目由写后本地审校计数，不要围着数字组织文句：整章破折号不超过 20 个${dashBudget ? `（本场景预算约 ${dashBudget} 个）` : ''}；单段不超过 200 字；高频套话词同词每章不超过 2 次；抽象对举式偈语（含跨句拆分）不超过 2 处；段首第三人称代词比例目标不超过 35%；动作母题、比喻、起手式与收束须轮换，跨章也不得复用同一比喻或近章专属意象；同一句话不得章内或近章逐字重复。
+【机械防线】这些项目由写后本地审校计数，不要围着数字组织文句：整章破折号不超过 20 个${dashBudget ? `（本场景预算约 ${dashBudget} 个）` : ''}；单段不超过 200 字；高频套话词同词每章不超过 2 次；抽象对举式偈语（含跨句拆分）不超过 2 处；段首第三人称代词比例目标不超过 35%；动作母题、比喻、起手式与收束须轮换，跨章也不得复用同一比喻或近章专属意象；同一句话不得章内或近章逐字重复；单句"的"不超过 3 个，短句（20 字以内）不少于三成，抽象黑话合计不超过 2 处。
 ${craftQuotaText ? `${craftQuotaText}\n` : ''}${styleRules ? styleRules + '\n\n' : ''}【铁律】只输出正文本身，不要解释、标题、检查清单或前后缀。`;
 }
 
@@ -1127,7 +1127,7 @@ export function auditInstruction(ctx) {
   const { bookTitle, chapterTitle, chapterText, factsText, foreshadowsText, characterStates, contract, deceasedText = '', perspective = 'third', chapterOutline = '', eraContext = '', warfareCheck = false, courtCheck = false, chapterYear = null, prevChapterYear = null, scaleRegisterText = '', continuityCraft = '', openingContractText = '', cardText = '', diversityText = '', craftOccupancyText = '' } = ctx; // V0.87 战役章战争逻辑核查 // V0.88 朝堂/权谋章权谋逻辑核查 // V0.94 年份坐标（时间线量词核查） // V0.95.8 山河尺度纪律（历史长篇分层配额） // V0.97 细节一致与章法轮换（写审同源） // V0.98 读者前置契约（仅结构） / V0.103 近窗换轴
   // V0.87：战争逻辑为独立类型（非历史书不误标「史实错误」）；类型枚举仅战役章追加，1.6 核查边界也仅战役章注入（P2-4 条件注入）
   // V0.88：权谋逻辑同法——仅朝堂/权谋章追加「权谋逻辑」类型与 1.7 核查边界（条件注入）
-  const typeEnum = `角色矛盾|时间线冲突|设定冲突|人称视角|伏笔遗忘|事实编造|事实矛盾|语句质量|大纲偏离|情感连贯性|文学性|史实错误|环境描写缺失|心理描写标签化${warfareCheck ? '|战争逻辑' : ''}${courtCheck ? '|权谋逻辑' : ''}`;
+  const typeEnum = `角色矛盾|时间线冲突|设定冲突|人称视角|伏笔遗忘|事实编造|事实矛盾|语句质量|AI 腔|大纲偏离|情感连贯性|文学性|史实错误|环境描写缺失|心理描写标签化${warfareCheck ? '|战争逻辑' : ''}${courtCheck ? '|权谋逻辑' : ''}`;
   const warfareBoundary = warfareCheck ? `1.6 战争逻辑核查（V0.87，仅战役章节，草稿含攻城/守城/围城/北伐/决战等战役内容时执行）：
    - 敌方无脑硬冲/降智送死（攻城不写战术手段：云梯/地道/断粮/招降/夜袭/砲石，直接"喊杀冲上城墙"）→ medium「战争逻辑」（战争逻辑崩坏，全员智商在线是硬要求）；
    - 奇袭/偷袭无铺垫无反制（直接得手、守方毫无反应）→ medium「战争逻辑」；
@@ -1247,6 +1247,17 @@ ${warfareBoundary}${courtBoundary}1.8 叙事视角核查（V0.90，贴身限知�
    - 对手/反派的行动无法从其立场/利益/目标解释（无脑针对主角："哪里有主角就去对付哪里"；明知代价远超收益仍硬冲；角色卡"他的立场"与实际行为完全脱节）→ medium「角色矛盾」（反派不降智——真正危险的反派无法停手，不是无脑送）；
    - 配角/对手的行为与其自身目标/性格完全无关、纯粹为推动主角剧情而存在（工具人：出现只为递情报/挡刀/送台阶，无自身生活线）→ low「角色矛盾」（主观性强，宁缺毋滥；只有明显"纸片人化"才报）；
    - 情绪只用旁白标签直述（"他悲痛欲绝/她很委屈"）而无任何具体身体反应或生活细节承载 → low「心理描写标签化」。
+3.17 AI 腔核查（V0.109.3，全文通用——写审同源【AI 腔纪律】，本地检测同源同阈值）：
+   - 叙事层出现商业/管理学黑话与空洞大词（赋能/闭环/底层逻辑/抓手/颗粒度/交织/画卷/时代洪流之类）→ medium「AI 腔」（这类词只在评论与商业语境成立，写进小说即出戏）；
+   - 翻译腔框架（"在……的过程中""进行了……的讨论""对于……来说""被……所……""做出了……的决定"）→ medium「AI 腔」；
+   - 叙述层用顿悟/道理收束情绪高点（"这一刻他终于明白""终于懂得了……的意义""这一切都有了意义"）→ medium「AI 腔」；注意：**人物在对白里说自己想通了不算违规**，只有叙述层用道理代替画面才报；
+   - 万能状语代替表演（"带着一丝嘲讽""带着几分无奈""用……的语气说"）→ medium「AI 腔」；
+   - 三句等长且同字起头的短句并列（排比凑势）→ low「AI 腔」；**正常的长短并列不报**（中文排比是正当修辞，只在工整到等长同字起头时才判机器痕迹）；
+   - 单句"的"≥3 且属叙述层（层层套叠的"的字地狱"）→ low「AI 腔」；对白内的"的"多属口语自然，不报；
+   - 整章短句（20 字以内）占比不足三成、或连续三句同字起头 → low「AI 腔」（句式板结）；
+   - 整章连接词（此外/同时/更重要的是/换句话说等）密度显著偏高、靠连接词硬接逻辑 → low「AI 腔」；
+   - 整章无任何情绪承载与主观视角、或通篇无具体时间/数目/地名 → low「AI 腔」（叙事没有温度与实地）；
+   - 注意：文风偏好一律不报。上面各项都有本地确定性检测同源裁决，此处只复核本地难以判定的语义情形；单项命中即报，不要因为"整体还行"而放过明确的黑话与顿悟收束。
 ${scaleRegisterText ? `3.12 山河尺度核查（V0.95.8，历史长篇——对照下方【山河尺度纪律】的层级配额执行）：
    - 本章远景/中景/全景配额未达（按章合计核查，quote 引最接近的段落）→ medium「文学性」（书名承诺的山河与时代格局在正文缺位，正文缩成主角五感胶囊），且 verdict 至少 fix；
    - 大战章（围城/决战/陷落）无时代全景开篇或收束、战役不联动后方（朝堂/粮道/增援零反应）→ medium「文学性」；
@@ -1306,7 +1317,7 @@ ${chapterText}
  *  V0.73 质量修复：补上原文 + 长度硬约束——此前只有 scene.beat 与一句"约 N 字"，
  *  模型常把修订理解为"输出精简修正片段"，导致 revised 场景缩水到 200-500 字
  *  （实测 3 章字数跌至目标 25% 以下）。现在明确"完整重写、保持篇幅"并给 min/max 硬区间。 */
-export function reviseInstruction({ bookTitle, chapterTitle, scene, issues, extraNote, styleRules = '', continuityCraft = '', diversityText = '', craftOccupancyText = '' }) {
+export function reviseInstruction({ bookTitle, chapterTitle, scene, issues, extraNote, styleRules = '', continuityCraft = '', aiFlavorCraft = '', diversityText = '', craftOccupancyText = '' }) {
   const target = scene.target_words || 1000;
   const minWords = Math.round(target * 0.65);
   const maxWords = Math.round(target * 1.7);
@@ -1332,7 +1343,7 @@ ${issueList.map(i => `- [${i.severity}] ${i.type}：${i.issue}\n  原文：${i.q
 
 ${minChange}
 【附加要求】${extraNote || '保持原场景的情节走向与节拍，只修正问题；不要引入新情节。'}
-${diversityText ? `${diversityText}\n` : ''}${craftOccupancyText ? `${craftOccupancyText}\n` : ''}${styleRules ? styleRules + '\n' : ''}${continuityCraft ? continuityCraft + '\n' : ''}
+${diversityText ? `${diversityText}\n` : ''}${craftOccupancyText ? `${craftOccupancyText}\n` : ''}${styleRules ? styleRules + '\n' : ''}${continuityCraft ? continuityCraft + '\n' : ''}${aiFlavorCraft ? aiFlavorCraft + '\n' : ''}
 【新设定登记】若剧情确实需要引入指令之外的新人物/新地点/新物品（例如细纲或前文出现但未登记的配角），可在正文末尾用【新设定:名词——简述】标记登记（系统会自动收录），而不是删掉该角色或情节；只有纯属多余的编造才删除。
 请只输出重写后的完整正文，不要任何解释、标题或标记。`;
 }
@@ -1466,7 +1477,7 @@ ${fullText}
   "structure": "结构节奏问题（如：高潮位置、铺垫过长、章间衔接生硬）",
   "character": "人设/台词问题（如：角色语气同质化、行为与性格矛盾）",
   "logic": "设定逻辑硬伤（如：力量体系失衡、规则前后矛盾）",
-  "style": "文风 AI 味问题（如：句式套路、高频词）",
+  "style": "文风 AI 味问题（句式套路、高频词，以及 V0.109.3 新增的机器腔维度：抽象黑话/空洞大词、翻译腔框架、单句多重'的'、叙述层顿悟升华收束、'带着一丝X'式万能状语、三句等长同字起头的排比凑势、整章句式板结（短句不足三成）、连接词硬接逻辑、通篇无情绪落点或无具体时间数目地名）",
   "priorities": [
     {"priority": "P0|P1|P2", "chapter": 章节号, "type": "logic|transition|style|rhythm|dialogue|polish", "issue": "问题描述", "feedback": "50-150字的修改意见"}
   ]
@@ -1491,12 +1502,14 @@ export function polishConsistencyInstruction({ bookTitle, outlines, summaries, f
 规则：只报客观矛盾，拿不准不报。请输出 JSON。`;
 }
 
-/** 工单执行：最小化修订指定章节 */
-export function polishExecuteInstruction({ bookTitle, chapterIdx, chapterTitle, chapterText, feedback, prevChapterTail, styleRules = '' }) {
+/** 工单执行：最小化修订指定章节
+ *  V0.109.3：注入 AI 腔简报——打磨工单里若涉及机器腔（抽象黑话/翻译腔/顿悟收束等），
+ *  执行模型须按与写作、审校同一把尺去改（写审同源），否则改完仍是同一股机器味。 */
+export function polishExecuteInstruction({ bookTitle, chapterIdx, chapterTitle, chapterText, feedback, prevChapterTail, styleRules = '', aiFlavorBrief = '' }) {
   return `请对《${bookTitle}》第${chapterIdx}章《${chapterTitle}》按以下工单做最小化修订（只改涉及部分，不改其他内容，保持情节走向不变）。
 
 【修改要求】${feedback}
-${styleRules ? styleRules + '\n' : ''}
+${styleRules ? styleRules + '\n' : ''}${aiFlavorBrief ? aiFlavorBrief + '\n' : ''}
 ${prevChapterTail ? `【上一章结尾】（确保衔接自然）\n${prevChapterTail}\n` : ''}
 
 【本章原文】
@@ -1531,6 +1544,17 @@ const CREATIVE_PLOT_BRIEF = `【剧情发展去AI味】
 - 冲突别一次清空：结果必须改变局势，但对手、关系或代价仍按自身逻辑继续作用。
 - 配角别都懂事：每个关键配角保留自己的目标、误判和拒绝权。
 - 巧合要限流；情绪节奏和解决方式不得复制近章。`;
+
+/** V0.109.3 通用中文 AI 腔简报（与 AI_FLAVOR_TEXT 同源压缩，写审同一把尺）
+ *  恒注入：AI 腔是全题材共性问题，不按题材开关；压缩到 6 行控注入预算（v128 有 25k 护栏）。
+ *  导出供 polish 执行指令复用（打磨工单同源同一把尺）。 */
+export const CREATIVE_AI_FLAVOR_BRIEF = `【语言去机器腔】
+- 抽象落地：不写商业黑话与空洞大词；判断由本场景可点算的物件、动作或数目做出来。
+- 不做翻译腔框架（"在……的过程中""进行了……的讨论""对于……来说"），动作与对象直接相接。
+- 单句"的"不超过 3 个；不用"带着一丝X"式万能状语代替表演。
+- 叙述层不用顿悟收束（"这一刻他终于明白"），情绪高点落在本场景特有的画面。
+- 句式有呼吸：短句不少于三成，连续三句不同字起头；段落长短错落。
+- 少用"此外/同时/更重要的是"接逻辑；一章内至少有一处真实情绪落点与一处具体时间、数目或地名。`;
 
 const CREATIVE_ENVIRONMENT_BRIEF = `【环境描写纪律】
 - 只选一至三个能影响行动、暴露关系或标记时代的场景特有细节，织入人物正在做的事；删掉也不影响场景的写景不写。

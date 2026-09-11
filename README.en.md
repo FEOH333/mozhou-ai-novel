@@ -6,7 +6,7 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D23.8-brightgreen.svg)](https://nodejs.org/)
 [![CI](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml/badge.svg)](https://github.com/FEOH333/mozhou-ai-novel/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-1556%20passed-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-1594%20passed-brightgreen.svg)](#testing)
 [![Dependencies](https://img.shields.io/badge/dependencies-1-brightgreen.svg)](./package.json)
 [![Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-brightgreen.svg)](https://github.com/FEOH333/mozhou-ai-novel/security/dependabot)
 [![Local First](https://img.shields.io/badge/local--first-your%20data%20never%20leaves%20your%20machine-blueviolet.svg)](#local-first)
@@ -34,6 +34,7 @@ Every artifact is **persisted, traceable, and rollback-able**. It targets the re
 | Contradictions and forgotten foreshadowing | Foreshadowing ledger + cross-chapter repetition window + coverage check; overdue threads are aged out or promoted to long arcs |
 | Outline and prose drift apart | **Prose is the authority**; summaries / facts / characters / foreshadowing are only *projections*. Version switches are all-or-nothing |
 | AI flavor, template sentences, repetition | Anti-templating dramatic contract + sentence-family rotation + word-root repetition detection + banlist for clichés |
+| Machine-flavored prose (jargon / translationese / epiphany endings) | General-purpose Chinese AI-flavor defense: a discipline injected at write time, plus 11 deterministic detectors (abstract jargon, translationese, '的' stacking, pseudo-sublimation, manner adverbials, rule-of-three, sentence monotony, paragraph evenness, connector density, emotional temperature, factual anchors); hits flow into audit and self-healing revision |
 | One bad chapter forces a full rewrite | Candidate prose is validated in a shadow version first; on failure the entire previous version is kept |
 | A crash mid-run loses everything | Server-side background jobs are persisted; the browser is only an observation surface. Disconnects are replayable and resumable |
 | Runaway cost | Layered prompt caching (constant prefix + dynamic tail), dual-view cost accounting, injection-size guardrails |

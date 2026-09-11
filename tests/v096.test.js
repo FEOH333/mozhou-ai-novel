@@ -126,7 +126,9 @@ describe('V0.88 朝堂权谋专项', () => {
     // audit.js：计算 + 记债路由
     const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
     assert.ok(auditSrc.includes('courtCheck = isCourtIntrigueText'), 'audit.js 计算 courtCheck');
-    assert.ok(auditSrc.includes("'权谋逻辑'"), '权谋逻辑进记债路由 NEEDS_ROUNDUP');
+    // V0.109.3：记债语义迁入 issue_types 注册表（audit 只查 needsRoundup）
+    const { needsRoundup } = await import(pathToFileURL(path.join(ROOT, 'server/data/issue_types.js')));
+    assert.equal(needsRoundup('权谋逻辑'), true, '权谋逻辑进记债路由（注册表 roundup:true）');
   });
 
   test('⑧端到端：朝堂章 auditChapter 计算 courtCheck 并注入审校指令', async () => {

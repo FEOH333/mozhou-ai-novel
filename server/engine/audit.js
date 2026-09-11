@@ -6,11 +6,12 @@ import { runTask } from '../llm/router.js';
 import { extractJSON } from '../util/json.js';
 import { auditInstruction, coverageInstruction, reviseInstruction } from './prompts.js';
 import { runLocalRules, runSceneContinuityRules, detectCrossChapterRepeats, detectCrossChapterMetaphors, detectTitleGap, detectTimelineAnchorConflict, detectSceneTailDuplication, detectWeakEnding, detectMotifRepetition, detectChapterOpenerTic, detectChapterEndingTic, detectTitleDuplication, detectTimePromiseBreak, detectBloodlessCombat, detectOpenerRepeat, detectSpeechForbidHits, detectOpenerStructureSaturation, detectGoldenPhraseRepeats, chapterTitleDeliveryIssues, newCharacterDensityIssues } from './rules.js';
-import { CONTINUITY_CRAFT_TEXT } from '../data/literary_techniques.js'; // V0.97：细节一致与章法轮换（写审同源）
+import { CONTINUITY_CRAFT_TEXT, AI_FLAVOR_TEXT } from '../data/literary_techniques.js'; // V0.97：细节一致与章法轮换（写审同源）// V0.109.3：AI 腔纪律（写审同源）
 import { formatFacts, characterStatesText, relevantFactsSmart } from './factbook.js'; // V0.83 语义增强审校事实
 import { allForeshadowsText } from './foreshadow.js';
 import { characterRollCallText, characterCardsText } from './characters.js'; // V0.37：已退场角色硬规则 // V0.101：审校注入同场语音卡
 import { styleRulesText } from '../data/creative_packs.js'; // V0.83：修订注入文风（防漂移）
+import { isFixableIssue, needsRoundup } from '../data/issue_types.js'; // V0.109.3：类型语义单一真源
 import { estimateChineseChars as estimateWordCount } from '../llm/tokenizer.js';
 import { autoHealSceneLength, stripNewSettingMarkers } from './write.js'; // V0.73：修订后长度自愈 + 新设定标记清理
 import { logFlow } from '../util/oplog.js'; // V0.85：覆盖校验截断重试记录
@@ -477,27 +478,26 @@ export async function auditChapter(bookId, chapterId, { signal, streamCb } = {})
   const rawVerdict = parsed.verdict;
   const llmVerdict = rawVerdict === 'pass' ? 'accept' : rawVerdict;
   // V0.73：medium 语句质量（本地规则升级后）也触发 fix 修订——否则整套 AI 味检测形同虚设
-  const hasFixable = llmIssues.some(i => i.severity === 'high' || (i.severity === 'medium' && i.type === '语句质量'))
-    || localIssues.some(i => i.severity === 'high' || (i.severity === 'medium' && i.type === '语句质量'));
+  // V0.109.3：类型语义改查 issue_types 注册表（新增纪律如「AI 腔」零成本接入，不再改这里）
+  const hasFixable = llmIssues.some(isFixableIssue) || localIssues.some(isFixableIssue);
   const hasHigh = llmIssues.some(i => i.severity === 'high') || localIssues.some(i => i.severity === 'high');
   // V0.22：S/A/B/C/D 质量等级（spark-arc-studio Critic 五档思路）
   const grade = ['S', 'A', 'B', 'C', 'D'].includes(parsed?.grade) ? parsed.grade
     : (llmIssues.length ? (hasHigh ? 'C' : 'B') : (hasFixable ? 'B' : 'A'));
-  // V0.73：本地规则命中 medium 语句质量（AI 味确凿）时即使 LLM 判 accept 也强制 fix
-  const verdict = (hasHigh || localIssues.some(i => i.severity === 'medium' && i.type === '语句质量'))
+  // V0.73：本地规则命中 medium 可修类型（AI 味确凿）时即使 LLM 判 accept 也强制 fix
+  const verdict = (hasHigh || localIssues.some(isFixableIssue))
     && llmVerdict === 'accept' ? 'fix' : llmVerdict;
 
   // 落冲突记录（V0.60 防屎山：只记"需要后续章节圆场"的问题——
-  // 语句质量类一律不落（不需要圆场，直接丢弃）；low 级一律不落；其余 medium+ 才记债务）
+  // 文本级问题一律不落（不需要圆场，直接丢弃）；low 级一律不落；其余 medium+ 才记债务）
+  // V0.109.3：是否记债改查 issue_types 注册表（原 NEEDS_ROUNDUP 白名单已迁入其中）
   const existing = new Set(store.conflicts.list(bookId).map(c => `${c.chapter_id}|${c.type}|${c.issue}`));
-  const NEEDS_ROUNDUP = ['伏笔遗忘', '设定冲突', '时间线冲突', '角色矛盾', '事实编造', '事实矛盾', '大纲偏离', '史实错误', '战争逻辑', '权谋逻辑'];
   const all = [...llmIssues, ...localIssues];
   for (const issue of all) {
     if (!issue.issue) continue;
     if ((issue.severity || 'medium') === 'low') continue; // low 级不记债
     const type = issue.type || '语句质量';
-    if (type === '语句质量' || type === '文学性') continue; // 文本质量问题不记债（修复即了结）
-    if (!NEEDS_ROUNDUP.includes(type)) continue; // 其他类型（如人称视角）不记债
+    if (!needsRoundup(type)) continue; // 文本质量问题与仅提示类均不记债
     const key = `${chapterId}|${type}|${issue.issue}`;
     if (existing.has(key)) continue;
     existing.add(key);
@@ -595,6 +595,7 @@ export async function reviseScene(bookId, chapterId, sceneId, opts = {}) {
     bookTitle: book.title, chapterTitle: chapter.title,
     scene, issues, extraNote, styleRules,
     continuityCraft: CONTINUITY_CRAFT_TEXT, // V0.97：修订同源注入细节一致/章法轮换纪律（防修一处造一处）
+    aiFlavorCraft: AI_FLAVOR_TEXT, // V0.109.3：修订同源注入 AI 腔纪律（审出什么就能按同一把尺改掉）
     diversityText: diversityContract.text,
     craftOccupancyText: craftOccupancy.text,
   });

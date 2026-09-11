@@ -20,6 +20,7 @@ import { fulfillOpeningReaderContract } from './opening_intervention.js';
 import { ensureNarrativeStateReady } from './narrative_state.js';
 import { stampOpeningTimelineProseFix, isImmediateReplanIssue } from './historical_guardrails.js';
 import { markNarrativeLessonsUsed } from './narrative_lessons.js';
+import { isAllTextOnly } from '../data/issue_types.js'; // V0.109.3：文本级类型语义单一真源
 
 // V0.78 细纲根因类型：设定冲突/时间线/角色矛盾/事实编造/事实矛盾/大纲偏离——正文修订
 // 解决不了（源于细纲设计与既定事实冲突），high 级时应 replan 重生成细纲而非 revise 正文。
@@ -369,11 +370,11 @@ export async function runChapterFlow(bookId, chapterId, opts = {}) {
         audit = { verdict: 'replan', issues: audit.issues };
         continue;
       }
-      // V0.78 彻底修复：纯文本级问题（语句质量/文学性 = AI 味词高频，如 ch121 的"缓缓×5/微微×5"）
+      // V0.78 彻底修复：纯文本级问题（语句质量/文学性/AI 腔 = 文风词高频，如 ch121 的"缓缓×5/微微×5"）
       // 修订 1 轮后仍无法消除（模型重写后 AI 味词又冒出来，3 轮死循环）→ 记债放行，不再死磕。
       // AI 味是可接受的小瑕疵，不该让整章卡死；细纲根因问题不受影响（走上面的 replan 分支）。
-      const textOnly = fixable.length > 0 && serious.length === 0
-        && fixable.every(i => i.type === '语句质量' || i.type === '文学性');
+      // V0.109.3：类型语义改查 issue_types 注册表（新增文本级纪律自动纳入，无需改这里）
+      const textOnly = serious.length === 0 && isAllTextOnly(fixable);
       if (textOnly && reviseRound >= 1 && fixable.length <= 5) {
         emit('debt', { message: `本章 ${fixable.length} 处 AI 味文本问题经 ${reviseRound} 轮修订仍存在，已记债由后续卷体检/打磨处理（不阻塞章节完成）` });
         audit = { ...audit, verdict: 'defer', issues: audit.issues };

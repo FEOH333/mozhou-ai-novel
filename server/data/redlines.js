@@ -78,6 +78,23 @@ export const REDLINES = {
   staircaseMaxChars: 8,        // 碎段假排版单段上限
   staircaseRun: 4,             // 连续碎段条数
   midStoryWordGate: 100000,    // 中期审阅字数关
+  // —— V0.109.3：通用中文 AI 腔（ai_flavor.js 消费；句式/段落/密度类统计阈值）——
+  // 这些是「篇章级统计口径」，与上面的词计数口径互补：不是"某个词用了几次"，而是
+  // "整章的句长分布/段落起伏/连接词密度是否像机器写的"。
+  aiFlavorMinSentences: 20,    // 最少句子数——低于此不判句式统计（短章/片段噪声过大）
+  aiFlavorMinParagraphs: 8,    // 最少段落数——低于此不判段落均质度
+  shortSentenceMax: 20,        // 短句字数上限（≤此算短句）
+  shortSentenceRatioMin: 0.3,  // 短句占比下限——低于此说明通篇长句，节奏板结
+  // 注意：长句地板**不在此处另立**——复用既有 longSentenceChars: 40（同一事实只写一份）。
+  // 本区块只新增「分布形态」口径（短句占比/句长变化/段落均质），不重复既有阈值。
+  paragraphEvennessMin: 2,     // 最长段/最短段比值下限——低于此段落长度过于均质（机器排版感）
+  connectorPerKCharsMax: 3,    // 连接词**总密度**上限（次/千字）——区别于既有 connectorDetectMedium
+                               // （那是"同一连接词重复几次"，此处是"整章靠连接词硬接逻辑的程度"）
+  abstractJargonMax: 2,        // 抽象黑话命中上限（>=此数报 medium）
+  deChainMax: 3,               // 单句"的"字上限——超过即"的字地狱"
+  ruleOfThreeMax: 1,           // 三段式排比全章上限（>=2 处即显套路）
+  emotionTemperatureMin: 1,    // 情感温度最少命中项（情绪词/主观标记/口语标记 三支合计）
+  factAnchorMin: 1,            // 事实锚点最少命中数（整章零锚点=无可感实地）
 };
 
 /** V0.97 章首起手式族（S1 实证：34 章中 14+ 章「天没亮+雾/露/潮」开篇——行文结构级 AI 味）

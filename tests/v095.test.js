@@ -133,7 +133,9 @@ describe('V0.87 战争写作专项', () => {
     // audit.js：计算 + 记债路由
     const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
     assert.ok(auditSrc.includes('warfareCheck = isWarfareText'), 'audit.js 计算 warfareCheck');
-    assert.ok(auditSrc.includes("'战争逻辑'"), '战争逻辑进记债路由 NEEDS_ROUNDUP');
+    // V0.109.3：记债语义迁入 issue_types 注册表（audit 只查 needsRoundup）
+    const { needsRoundup } = await import(pathToFileURL(path.join(ROOT, 'server/data/issue_types.js')));
+    assert.equal(needsRoundup('战争逻辑'), true, '战争逻辑进记债路由（注册表 roundup:true）');
   });
 
   test('⑧端到端：战役章 auditChapter 计算 warfareCheck 并注入审校指令', async () => {
