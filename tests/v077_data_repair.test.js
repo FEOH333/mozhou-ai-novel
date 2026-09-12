@@ -90,7 +90,7 @@ function insertChapter(db, { id, idx, volumeId = 'vol-1', parts, status = 'revis
 }
 
 function createFixture(t) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'anw-feizhai-repair-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'anw-data-repair-'));
   const dbPath = path.join(dir, 'fixture.db');
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const db = new DatabaseSync(dbPath);
