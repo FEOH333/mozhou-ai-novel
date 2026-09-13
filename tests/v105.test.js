@@ -231,7 +231,9 @@ test('V0.105 占用编译器接入写章路径且不新增模型任务', () => {
   const writeSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
   const polishSrc = fs.readFileSync(path.join(ROOT, 'server/engine/quality/polish.js'), 'utf8');
   const clientSrc = fs.readFileSync(path.join(ROOT, 'server/llm/client.js'), 'utf8');
-  const recoverySrc = fs.readFileSync(path.join(ROOT, 'server/engine/recovery/recommendation_recovery.js'), 'utf8');
+  // V0.109.5：blockingProseIssues 已随拆分移入 recovery_rewrite.js（与唯一调用方同处），
+  // 断言随之指向新位置——校验的行为契约不变。
+  const recoverySrc = fs.readFileSync(path.join(ROOT, 'server/engine/recovery/recovery_rewrite.js'), 'utf8');
   assert.match(writeSrc, /healCraftMorphology/);
   assert.match(writeSrc, /compileBookCraftOccupancy/);
   assert.match(polishSrc, /shouldRunMidStoryReview/);

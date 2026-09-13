@@ -286,7 +286,8 @@ describe('V0.109.3 通用中文 AI 腔', () => {
   // ---------- ⑤ 架构：闸与改写单元同职责 ----------
 
   test('返工文风闸排除篇章级分布指标（防"旧稿有一项→候选必然还有一项"批量误杀）', () => {
-    const src = read('server/engine/recovery/recommendation_recovery.js');
+    // V0.109.5：blockingProseIssues 移入 recovery_rewrite.js（与唯一调用方同处），断言指向新位置。
+    const src = read('server/engine/recovery/recovery_rewrite.js');
     assert.match(src, /filter\(issue => !issue\.statistical\)/,
       'blockingProseIssues 应排除 statistical 指标（与 axis 同类处理）');
   });
