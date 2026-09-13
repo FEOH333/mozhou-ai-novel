@@ -51,17 +51,17 @@ test('V0.25: 事实库 status 过滤（store 层）', () => {
 test('V0.25: 版本标识全局一致', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
   const lock = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package-lock.json'), 'utf8'));
-  // V0.109.3：通用中文 AI 腔（抽象黑话/翻译腔/句式同质化/假升华）+ issue 类型语义注册表。
-  assert.equal(pkg.version, '0.109.3');
-  assert.equal(lock.version, '0.109.3');
+  // V0.109.4：通用中文 AI 腔（抽象黑话/翻译腔/句式同质化/假升华）+ issue 类型语义注册表。
+  assert.equal(pkg.version, '0.109.4');
+  assert.equal(lock.version, '0.109.4');
   const idx = fs.readFileSync(path.join(process.cwd(), 'server/index.js'), 'utf8');
   const web = fs.readFileSync(path.join(process.cwd(), 'web/index.html'), 'utf8');
   const versionModule = fs.readFileSync(path.join(process.cwd(), 'server/version.js'), 'utf8');
   assert.ok(idx.includes('version: APP_VERSION'), 'health 端点应使用统一版本常量');
-  assert.ok(versionModule.includes("'0.109.3'"), '统一版本常量应为 0.109.3');
-  assert.ok(web.includes('brand-ver">V0.109.3</span>'), '网页版本标识应为 V0.109.3');
+  assert.ok(versionModule.includes("'0.109.4'"), '统一版本常量应为 0.109.4');
+  assert.ok(web.includes('brand-ver">V0.109.4</span>'), '网页版本标识应为 V0.109.4');
   assert.match(pkg.description, /有界创作上下文.*原子叙事版本重建.*自进化/);
-  assert.ok(pkg.description.includes('V0.109.3'), '包描述应同步当前版本');
+  assert.ok(pkg.description.includes('V0.109.4'), '包描述应同步当前版本');
   assert.ok(!pkg.description.includes('灏'), 'package.json description 不应含乱码');
 });
 

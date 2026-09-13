@@ -92,6 +92,128 @@ export function openForeshadowCount(bookId) {
 /** 配置默认值（V0.44）：低于该字数视为必未完本；超过该章数视为安全上限 */
 export const ENDING_DEFAULTS = { minChars: 200000, maxChapters: 500, maxContinuations: 40 };
 
+// ============================================================================
+// V0.109.4 紧急完本（收束卷）
+//
+// 场景：作者不想再写下去了（书扑了 / 精力转移 / 只想给读者一个交代）。
+// 但现有完本判定是"故事讲完了才算完"，于是只剩两条路——继续写几百章，或永远挂着未完本。
+// 紧急完本给出第三条路：**规划一个短收束卷（默认 4 章），把未回收伏笔集中兑付，写完即完本。**
+//
+// 关键设计：
+//  - 状态存在 `materials.emergency_finish`（不进 L2 公共前缀，与 mid_story_review_cursor 同类）
+//  - 它**优先级高于**常规完本判定：收束卷写完即完本，不受 20 万字下限与 500 章上限约束
+//  - 收束卷章数可配（3-8），越少越紧凑，但太少会让伏笔收不干净
+// ============================================================================
+
+/** materials 中的 kind 名 */
+export const EMERGENCY_FINISH_KIND = 'emergency_finish';
+export const EMERGENCY_FINISH_DEFAULT_CHAPTERS = 4;
+
+/** 读取紧急完本状态（无则 null） */
+export function readEmergencyFinish(bookId) {
+  try {
+    const raw = store.materials.get(bookId, EMERGENCY_FINISH_KIND)?.content;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 紧急完本当前处于什么状态（纯查询，无副作用）。
+ * @returns {{active:boolean, volumeIdx?:number, targetChapters?:number,
+ *            writtenChapters?:number, done?:boolean, startedAt?:number}}
+ */
+export function emergencyFinishState(bookId) {
+  const st = readEmergencyFinish(bookId);
+  if (!st || !st.volumeId) return { active: false };
+  const vol = store.volumes.get(st.volumeId);
+  if (!vol) return { active: false }; // 卷被删 → 视为未启用，不能让一个悬空记录永久劫持完本判定
+  const chapters = store.chapters.listByVolume(vol.id);
+  const written = chapters.filter(ch => isCompletedChapter(ch)).length;
+  const target = Number(st.targetChapters) || chapters.length || EMERGENCY_FINISH_DEFAULT_CHAPTERS;
+  return {
+    active: true,
+    volumeId: vol.id,
+    volumeIdx: vol.idx,
+    targetChapters: target,
+    totalChapters: chapters.length,
+    writtenChapters: written,
+    // 判定用 target 与实际建章数的**较小值**：细纲可能因伏笔数量生成了更多章，
+    // 以实际建章为准才不会永远等一个不存在的章号。
+    done: written > 0 && written >= Math.min(target, chapters.length || target),
+    startedAt: st.startedAt || null,
+    openForeshadowsAtStart: st.openForeshadows || 0,
+  };
+}
+
+/**
+ * 启动紧急完本：建立收束卷并生成它的卷纲。
+ *
+ * 不写正文——正文仍由正常自动创作流程写（这样质量防线、结算、审校全部照常生效，
+ * 不会因为"急着收尾"而绕过任何一道闸）。
+ */
+export async function planEmergencyFinish(bookId, { chapters = EMERGENCY_FINISH_DEFAULT_CHAPTERS, onEvent, signal } = {}) {
+  const emit = (stage, message) => onEvent?.({ type: 'stage', stage, message });
+  const book = store.books.get(bookId);
+  if (!book) throw new Error('作品不存在');
+  if (finishedChapterCount(bookId) === 0) throw new Error('还没有任何完成章节，无需紧急完本；请先正常创作或直接删除本书');
+
+  const existing = emergencyFinishState(bookId);
+  if (existing.active && !existing.done) {
+    throw new Error(`紧急完本已在进行中（第 ${existing.volumeIdx} 卷，已写 ${existing.writtenChapters}/${existing.targetChapters} 章）`);
+  }
+
+  const open = store.foreshadows.list(bookId).filter(f => f.status === 'planted' || f.status === 'advanced');
+  const targetChapters = Math.min(Math.max(Number(chapters) || EMERGENCY_FINISH_DEFAULT_CHAPTERS, 3), 8);
+  const vols = store.volumes.list(bookId);
+  const nextIdx = vols.reduce((m, v) => Math.max(m, v.idx || 0), 0) + 1;
+
+  emit('setup', `启动紧急完本：为 ${open.length} 条未回收伏笔规划第 ${nextIdx} 卷收束卷（${targetChapters} 章）…`);
+
+  const vol = store.volumes.create(bookId, nextIdx, {
+    title: '终卷·收束',
+    goal: '收束全书：集中兑付未回收伏笔，给读者一个完整的结局。',
+    status: 'planned',
+    outline: {
+      emergencyFinish: true,
+      chapterCount: targetChapters,
+      openForeshadows: open.length,
+    },
+  });
+
+  store.materials.set(bookId, EMERGENCY_FINISH_KIND, JSON.stringify({
+    volumeId: vol.id,
+    volumeIdx: nextIdx,
+    targetChapters,
+    openForeshadows: open.length,
+    startedAt: Date.now(),
+  }));
+
+  // 复用既有卷纲生成（它已注入未回收伏笔清单），不另造一套写法。
+  await generateVolumeOutline(bookId, vol.id, { chapterCount: targetChapters }, { onEvent, signal });
+
+  logFlow({
+    op: '紧急完本·规划收束卷',
+    detail: `第 ${nextIdx} 卷，目标 ${targetChapters} 章，待兑付伏笔 ${open.length} 条`,
+    bookId,
+  });
+
+  return { volumeId: vol.id, volumeIdx: nextIdx, targetChapters, openForeshadows: open.length };
+}
+
+/** 取消紧急完本（回到常规完本判定）。收束卷本身保留，可继续当普通卷写。 */
+export function cancelEmergencyFinish(bookId) {
+  const st = readEmergencyFinish(bookId);
+  if (!st) return { cancelled: false };
+  store.materials.set(bookId, EMERGENCY_FINISH_KIND, '');
+  logFlow({ op: '紧急完本·已取消', detail: `原收束卷 idx=${st.volumeIdx}`, bookId });
+  return { cancelled: true };
+}
+
+
 function lifecycleGateEnabled(bookId) {
   const book = store.books.get(bookId);
   const settings = store.books.settings(bookId);
@@ -110,6 +232,25 @@ function lifecycleGateEnabled(bookId) {
  */
 export function localEndingCheck(bookId, opts = {}) {
   const { minChars = ENDING_DEFAULTS.minChars, maxChapters = ENDING_DEFAULTS.maxChapters } = opts;
+
+  // V0.109.4 紧急完本优先于一切常规判定：作者已决定收束，就不该再被
+  // 「字数不足」「伏笔没回收完」「还有 200 章空间」拦住。收束卷写完即完本。
+  const emergency = emergencyFinishState(bookId);
+  if (emergency.active) {
+    if (emergency.done) {
+      return {
+        done: true, shouldContinue: false, needsHuman: false, finished: true,
+        reason: `紧急完本：收束卷已完成 ${emergency.writtenChapters} 章，全书按计划收束`,
+        emergency,
+      };
+    }
+    return {
+      done: true, shouldContinue: true, needsHuman: false, finished: false,
+      reason: `紧急完本进行中：第 ${emergency.volumeIdx} 卷收束卷已写 ${emergency.writtenChapters}/${emergency.targetChapters} 章，完成后即完本`,
+      emergency,
+    };
+  }
+
   const chapters = finishedChapterCount(bookId);
   // V0.92：安全上限只是资源保护，不是叙事完成证据。达到上限一律暂停人工确认，
   // 绝不能由 pilot 继续走 book_done / 全书打磨，避免“写满500章=自动完本”。

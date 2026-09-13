@@ -1,7 +1,7 @@
 // web/js/views/workshop.js —— 写作台：细纲→正文→审校→结算 全流程
 // V0.25：rerender 替代整页刷新；章节查询参数改走路由 query（修复切章白屏）
 'use strict';
-import { get, post, patch, put, sse, openingApi, publicationApi, narrativeApi, writeApi } from '../api.js';
+import { get, post, patch, put, del, sse, openingApi, publicationApi, narrativeApi, writeApi } from '../api.js';
 import { el, toast, confirmDialog, openModal, icon, fmt, fmtTokens, fmtMoney, fmtPct, esc, pageHead, progressCard, CHAPTER_STATUS, CHAPTER_STATUS_TAG, chapterStatusLabel } from '../ui.js';
 import { state, refreshBook, refreshGlobal, rerender, registerSSE, unregisterSSE } from '../app.js';
 import { chapterIdxFromEvent, pilotGridSize, resolvePilotTarget } from '../pilot-observe.js';
@@ -541,6 +541,8 @@ function renderAutoCreationCard(book, root) {
         '完本后打磨',
       ),
       el('button', { id: 'polish-btn', class: 'sm ghost', text: '全书打磨', onclick: (ev) => runPolishNow(book, root, ev.currentTarget) }),
+      el('button', { id: 'emergency-btn', class: 'sm ghost', text: '紧急完本', title: '不想再写了：规划一个短收束卷集中兑付伏笔，写完即完本', onclick: (ev) => openEmergencyFinish(book, root, ev.currentTarget) }),
+      el('button', { id: 'sequel-btn', class: 'sm ghost', text: '写续作', title: '以本书为母本开新书：继承世界观、设定与可选角色，重新立契约', onclick: (ev) => openSequel(book, root, ev.currentTarget) }),
     ),
     el('div', { id: 'pilot-progress', class: 'mt sticky-progress' }),
   );
@@ -2257,6 +2259,107 @@ async function runPilot(book, root, btn, opts = {}) {
 }
 
 /** 全书打磨（polish）：诊断→核查→工单→逐章修订 */
+/**
+ * V0.109.4 紧急完本：不想再写下去时，规划一个短收束卷集中兑付伏笔，写完即完本。
+ * 不绕过任何质量闸——收束卷的正文仍走正常写作/审校/结算流程，只是不再受字数下限与章数上限约束。
+ */
+async function openEmergencyFinish(book, root, btn) {
+  let st = null;
+  try { st = await get(`/api/books/${book.id}/emergency-finish`); } catch { /* 未启动时也能进 */ }
+
+  if (st?.active && !st.done) {
+    const { close } = openModal({
+      title: '紧急完本进行中',
+      body: el('div', {},
+        el('p', { text: `第 ${st.volumeIdx} 卷（收束卷）已写 ${st.writtenChapters}/${st.targetChapters} 章，完成后自动判为完本。` }),
+        el('p', { class: 'small muted', text: '继续点「开始自动创作」把它写完即可。取消紧急完本会保留收束卷，可当普通卷继续写。' }),
+      ),
+      actions: [
+        { text: '取消紧急完本', class: 'ghost', onclick: async () => {
+          await del(`/api/books/${book.id}/emergency-finish`);
+          toast('已取消紧急完本');
+          close(); rerender();
+        } },
+        { text: '知道了', onclick: () => close() },
+      ],
+    });
+    return;
+  }
+
+  const chapterAttrs = { type: 'number', min: '3', max: '8', value: '4', style: 'width:90px' };
+  const { close } = openModal({
+    title: '紧急完本',
+    body: el('div', {},
+      el('p', { text: '系统会规划一个「收束卷」，把未回收的伏笔集中兑付，写完即完本。' }),
+      el('p', { class: 'small muted', text: '不绕过任何质量防线：收束卷的正文照常写作、审校、结算，只是不再受 20 万字下限与 500 章上限约束。' }),
+      el('div', { class: 'row mt' },
+        el('label', { class: 'small', text: '收束卷章数' }),
+        el('input', chapterAttrs),
+        el('span', { class: 'small muted', text: '3-8 章；越少越紧凑，太少可能收不干净' }),
+      ),
+      el('p', { class: 'small muted mt', text: '启动后请继续点「开始自动创作」，系统会先把收束卷写完再停下。' }),
+    ),
+    actions: [
+      { text: '取消', class: 'ghost', onclick: () => close() },
+      { text: '启动紧急完本', onclick: async () => {
+        try {
+          await post(`/api/books/${book.id}/emergency-finish`, { chapters: Number(chapterAttrs.value) || 4 });
+          toast('已启动紧急完本，正在规划收束卷…');
+          close();
+          if (root) runPilot(book, root, document.getElementById('pilot-btn'));
+          else rerender();
+        } catch (e) { toast(e.message || '启动失败', 'error'); }
+      } },
+    ],
+  });
+}
+
+/** V0.109.4 续作：以本书为母本派生新书，继承世界观/设定/可选角色，重新立契约 */
+async function openSequel(book, root, btn) {
+  let cand = null;
+  try { cand = await get(`/api/books/${book.id}/sequel-candidates`); } catch (e) { toast(e.message || '读取母本失败', 'error'); return; }
+  if (!cand) { toast('母本不存在', 'error'); return; }
+
+  const titleAttrs = { type: 'text', value: `${cand.title}·续`, style: 'width:220px' };
+  const worldAttrs = { type: 'checkbox', checked: cand.world.available };
+  const factsAttrs = { type: 'checkbox', checked: cand.facts.available };
+  const charsAttrs = { type: 'checkbox', checked: cand.characters.available };
+  const castAttrs = { type: 'checkbox' };
+
+  const { close } = openModal({
+    title: '写续作（衍新书）',
+    body: el('div', {},
+      el('p', { text: `以《${cand.title}》为母本开新书。继承世界观与设定，但契约与主线重新立——续作是新书，不是把旧账接着记。` }),
+      el('div', { class: 'row mt' }, el('label', { class: 'small', text: '新书标题' }), el('input', titleAttrs)),
+      el('div', { class: 'mt' },
+        el('label', { class: 'small', style: 'display:block;margin-bottom:6px', text: '继承内容' }),
+        el('label', { class: 'small', style: 'display:block' }, el('input', worldAttrs), ` 世界观（${cand.world.chars} 字）`),
+        el('label', { class: 'small', style: 'display:block' }, el('input', factsAttrs), ` 事实库（${cand.facts.count} 条）`),
+        el('label', { class: 'small', style: 'display:block' }, el('input', charsAttrs), ` 角色（${cand.characters.count} 位：${cand.characters.names.slice(0, 6).join('、')}${cand.characters.count > 6 ? '…' : ''}）`),
+        el('label', { class: 'small', style: 'display:block' }, el('input', castAttrs), ' 旧主角弧光材料（默认不带——它描述旧主角的成长线，可能与新主线打架）'),
+      ),
+      el('p', { class: 'small muted mt', text: '旧卷、旧章、旧角色当前状态都不会带过去，避免新书开篇与自己的设定打架。' }),
+    ),
+    actions: [
+      { text: '取消', class: 'ghost', onclick: () => close() },
+      { text: '创建续作', onclick: async () => {
+        try {
+          const r = await post(`/api/books/${book.id}/sequel`, {
+            title: titleAttrs.value,
+            inherit: {
+              world: worldAttrs.checked, facts: factsAttrs.checked,
+              characters: charsAttrs.checked, cast: castAttrs.checked,
+            },
+          });
+          toast(`已创建《${r.title}》：世界 ${r.inherited.world ? '✓' : '—'}、事实 ${r.inherited.facts} 条、角色 ${r.inherited.characters} 位`);
+          close();
+          location.hash = `#/book/${r.bookId}/workshop`;
+        } catch (e) { toast(e.message || '创建失败', 'error'); }
+      } },
+    ],
+  });
+}
+
 async function runPolishNow(book, root, btn, opts = {}) {
   let jobId = opts.jobId || (book.activeWriteJob?.type === 'polish' ? book.activeWriteJob.id : null);
   const progressBox = document.getElementById('pilot-progress');

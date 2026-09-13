@@ -34,6 +34,8 @@ import { indexBook } from './memory/indexer.js';
 import { semanticSearch } from './memory/vectorstore.js';
 import { acquireBookLease } from './jobs/book-lease.js';
 import { recoveryJobs, writeJobs } from './jobs/recovery-jobs.js';
+import { emergencyFinishState, planEmergencyFinish, cancelEmergencyFinish } from './engine/pipeline/continuation.js'; // V0.109.4 紧急完本
+import { sequelCandidates, deriveSequel } from './engine/planning/sequel.js'; // V0.109.4 续作（衍新书）
 import { batchQualityScan } from './engine/quality/batch_scan.js'; // V0.96：引擎概览（批次自检现场跑）
 import { resolveCraftProfile, formatCraftProfileLine } from './engine/quality/craft_profile.js';
 import { snapshotDiffOverview, snapshotChapterDiff } from './engine/pipeline/data_safety.js'; // V0.96.4：快照 diff 对比
@@ -693,6 +695,44 @@ route('DELETE', '/api/books/:id/volumes/:vid', (req, res, p) => {
   store.volumes.remove(p.vid);
   sendJSON(res, 200, { ok: true });
 }, { owned: OWNED.volume });
+
+// V0.109.4 紧急完本：规划一个收束卷，写完即完本（不受字数下限与章数上限约束）
+route('GET', '/api/books/:id/emergency-finish', (req, res, p) => {
+  sendJSON(res, 200, emergencyFinishState(p.id));
+});
+route('POST', '/api/books/:id/emergency-finish', async (req, res, p) => {
+  const body = await readBody(req);
+  const job = writeJobs.start({
+    bookId: p.id,
+    taskKey: 'emergency-finish',
+    type: 'emergency-finish',
+    task: async ({ signal, emit }) => planEmergencyFinish(p.id, {
+      chapters: body.chapters,
+      onEvent: ev => emit(ev),
+      signal,
+    }),
+  });
+  sendJSON(res, 202, { jobId: job.id });
+});
+route('DELETE', '/api/books/:id/emergency-finish', (req, res, p) => {
+  sendJSON(res, 200, cancelEmergencyFinish(p.id));
+});
+
+// V0.109.4 续作（衍新书）：以完本作品为母本，继承世界观/设定/可选角色，重新立契约
+route('GET', '/api/books/:id/sequel-candidates', (req, res, p) => {
+  const cand = sequelCandidates(p.id);
+  if (!cand) return sendJSON(res, 404, { error: '母本作品不存在' });
+  sendJSON(res, 200, cand);
+});
+route('POST', '/api/books/:id/sequel', async (req, res, p) => {
+  const body = await readBody(req);
+  try {
+    const result = deriveSequel(p.id, { title: body.title, inherit: body.inherit || {} });
+    sendJSON(res, 200, result);
+  } catch (e) {
+    sendJSON(res, 400, { error: e.message });
+  }
+});
 // V0.73：书籍一键导出（纯文本，按卷分组，网文排版，方便复制粘贴/下载）
 // V0.74：支持 ?chapterIds=id1,id2 选择章节导出；响应附 chapterList 供前端勾选
 route('GET', '/api/books/:id/export', (req, res, p) => {
