@@ -32,7 +32,7 @@ test('V0.98 平台指导区分官方事实、创作指导、样本观察与未�
 
 test('V0.98 三类开篇提示词使用分层证据且不预测平台指标', async () => {
   const promptsSource = fs.readFileSync('server/engine/prompts.js', 'utf8');
-  const attractionSource = fs.readFileSync('server/engine/attraction.js', 'utf8');
+  const attractionSource = fs.readFileSync('server/engine/quality/attraction.js', 'utf8');
   assert.doesNotMatch(promptsSource, /番茄铁律|三秒原则|expected_retention|expected_follow_rate|avg_chapter_completion/);
   assert.doesNotMatch(attractionSource, /番茄铁律|三秒原则/);
 
@@ -77,7 +77,7 @@ test('V0.98 历史题材画像保留严肃沉浸路线，不强塞系统与打�
 });
 
 test('V0.98 本作画像把情感债翻译为行动回报并记录来源', async () => {
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   const profile = await buildStoryPromiseProfile(book.id, {
     data: {
       premise_in_one_breath: '九岁失去故园的孩子，用四十年学会让山河不再抛下百姓',
@@ -102,7 +102,7 @@ test('V0.98 本作画像把情感债翻译为行动回报并记录来源', async
 });
 
 test('V0.98 重建画像不得覆盖作者锁定字段', async () => {
-  const { buildStoryPromiseProfile, lockStoryPromiseFields } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile, lockStoryPromiseFields } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: {
     premise_in_one_breath: '初始', primary_attraction_axis: '亲情', secondary_axes: [],
     protagonist_now: { lack: '弱小', immediate_need: '活下去', agency_pattern: '观察' },
@@ -127,7 +127,7 @@ test('V0.98 重建画像不得覆盖作者锁定字段', async () => {
 });
 
 test('V0.98 书契约或大纲变化会让画像变陈旧，作者锁仍保留', async () => {
-  const { buildStoryPromiseProfile, lockStoryPromiseFields, storyPromiseStatus } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile, lockStoryPromiseFields, storyPromiseStatus } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: {
     premise_in_one_breath: '初始', primary_attraction_axis: '亲情', secondary_axes: [],
     protagonist_now: { lack: '弱小', immediate_need: '活下去', agency_pattern: '观察' },
@@ -144,8 +144,8 @@ test('V0.98 书契约或大纲变化会让画像变陈旧，作者锁仍保留',
 });
 
 test('V0.98 开篇蓝图必须消费最新创作宪章，只有显式跳过才允许降级', async () => {
-  const { generateOpeningBlueprint } = await import('../server/engine/opening.js');
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { generateOpeningBlueprint } = await import('../server/engine/planning/opening.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   const draft = {
     hook_ladder: [{ chapter: 1, title: '开篇', hook: '问题', payoff: '选择', beat: '行动' }],
     pleasure_pacing: [], golden_finger: null, protagonist_goal_ladder: [], promise_deadlines: [],
@@ -172,7 +172,7 @@ test('V0.98 开篇蓝图必须消费最新创作宪章，只有显式跳过才�
 });
 
 test('V0.98 mock 主流程能生成严格创作宪章', async () => {
-  const { ensureStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { ensureStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   const fresh = store.books.create({ title: '画像主流程', genre: '历史', platform: '番茄', blurb: '一个孩子在乱世学会保护别人' });
   store.materials.set(fresh.id, 'contract', '无系统，严肃历史成长');
   store.materials.set(fresh.id, 'outline', '从流民到守城者');
@@ -186,7 +186,7 @@ test('V0.98 mock 主流程能生成严格创作宪章', async () => {
 });
 
 test('V0.98 pilot 顺序是设定完成后建立宪章，再生成开篇蓝图', () => {
-  const source = fs.readFileSync('server/engine/pilot.js', 'utf8');
+  const source = fs.readFileSync('server/engine/pipeline/pilot.js', 'utf8');
   const settingsAt = source.indexOf('await generateBookSettings');
   const promiseAt = source.indexOf('await ensureStoryPromiseProfile');
   const openingAt = source.indexOf('generateOpeningBlueprint');

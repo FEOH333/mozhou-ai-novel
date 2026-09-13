@@ -28,7 +28,7 @@ describe('V0.75 通用化成长引擎与补救', () => {
 
   test('②growthStatus：题材感知（玄幻/都市/言情不同维度，不出现修仙词）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { growthStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
+    const { growthStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
     const x = store.books.create({ title: '玄幻书', genre: '玄幻', blurb: 'x' });
     store.characters.create(x.id, { name: '主角', tier: 'protagonist', state: { 境界: '练气一层' }, abilities: '[]' });
     const gx = growthStatus(x.id);
@@ -56,7 +56,7 @@ describe('V0.75 通用化成长引擎与补救', () => {
 
   test('③protagonistPowerStatus 兼容封装：结构不变', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { protagonistPowerStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
+    const { protagonistPowerStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
     const b = store.books.create({ title: '兼容书', genre: '玄幻', blurb: 'x' });
     store.characters.create(b.id, { name: '主角', tier: 'protagonist', state: { 境界: '练气二层' }, abilities: '[]' });
     const r = protagonistPowerStatus(b.id);
@@ -77,7 +77,7 @@ describe('V0.75 通用化成长引擎与补救', () => {
   });
 
   test('⑤parseGrowthPace：契约与题材包提取', async () => {
-    const { parseGrowthPace } = await import(pathToFileURL(path.join(ROOT, 'server/engine/growth.js')));
+    const { parseGrowthPace } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/growth.js')));
     assert.deepEqual(parseGrowthPace('前10章必有打脸\n每10章至少一次境界突破或重大收获', '玄幻'), { everyChapters: 10, source: '契约' });
     assert.deepEqual(parseGrowthPace('每5章一次成长', '玄幻'), { everyChapters: 5, source: '契约' });
     // 玄幻题材包 rewardRhythm"每 5-8 章一次境界突破"→ 取 5（不应误取小爽点 1-2 章）
@@ -90,7 +90,7 @@ describe('V0.75 通用化成长引擎与补救', () => {
 
   test('⑥detectGrowthDeviation：117章停滞→severe；新书→不偏离；中期→非severe', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { detectGrowthDeviation } = await import(pathToFileURL(path.join(ROOT, 'server/engine/growth.js')));
+    const { detectGrowthDeviation } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/growth.js')));
     const nb = store.books.create({ title: '新书', genre: '玄幻', blurb: 'x' });
     const nv = store.volumes.create(nb.id, 1, { title: 'V1', goal: 'g' });
     for (let i = 1; i <= 5; i++) store.chapters.create(nb.id, nv.id, i, { title: '第' + i + '章', status: 'done' });
@@ -115,7 +115,7 @@ describe('V0.75 通用化成长引擎与补救', () => {
 
   test('⑦planRemedyBridge：mock 生成补救桥段并落库，幂等', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { planRemedyBridge, growthRemedyText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/growth.js')));
+    const { planRemedyBridge, growthRemedyText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/growth.js')));
     const b = store.books.create({ title: '补救书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', '每10章至少一次境界突破');
     store.characters.create(b.id, { name: '主角', tier: 'protagonist', state: { 丹田微流: '近干涸' }, abilities: '[]' });
@@ -134,7 +134,7 @@ describe('V0.75 通用化成长引擎与补救', () => {
 
   test('⑧compressProtagonistState：>30 键压缩，过时键删除', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { compressProtagonistState } = await import(pathToFileURL(path.join(ROOT, 'server/engine/growth.js')));
+    const { compressProtagonistState } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/growth.js')));
     const b = store.books.create({ title: '压缩书', genre: '玄幻', blurb: 'x' });
     const state = { 位置: '演武场', 境界: '练气一层', 心境: '坚定', 持有物: '钥匙' };
     for (let i = 0; i < 34; i++) state['过时键' + i] = '叙事';
@@ -148,7 +148,7 @@ describe('V0.75 通用化成长引擎与补救', () => {
 
   test('⑨续卷注入：generateNextVolume 触发补救并注入 remedyText', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateNextVolume } = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+    const { generateNextVolume } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
     const { volumeOutlineInstruction } = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
     const b = store.books.create({ title: '续卷补救书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', '每10章至少一次境界突破');

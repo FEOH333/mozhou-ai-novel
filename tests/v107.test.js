@@ -10,7 +10,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v107-reward-audit-'));
 const ROOT = process.cwd();
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
 
 describe('V0.91 阅读回报计划与审计', () => {

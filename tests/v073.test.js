@@ -16,7 +16,7 @@ const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')))
 describe('V0.73 书籍一键导出', () => {
   test('①后端 export 路由存在且返回 {title,text,chapters,chars}', () => {
     const idx = fs.readFileSync(path.join(ROOT, 'server/index.js'), 'utf8');
-    const exporter = fs.readFileSync(path.join(ROOT, 'server/engine/export.js'), 'utf8');
+    const exporter = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/export.js'), 'utf8');
     assert.ok(idx.includes("'/api/books/:id/export'"), '应有 export 路由');
     assert.ok(exporter.includes('━━━━━━━━━━━━━━━━━━━━━━━━━━━━'), '应有卷分隔线');
     assert.ok(idx.includes('fullTexts'), '应按章取全文');

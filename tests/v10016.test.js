@@ -14,7 +14,7 @@ const {
   restoreSceneParagraphBreaks,
   normalizeChapterParagraphs,
   applyValidatedChapterRewrite,
-} = await import('../server/engine/polish.js');
+} = await import('../server/engine/quality/polish.js');
 const { checkProseStructure, DEFAULTS } = await import('../server/maintenance/doctor.js');
 
 const stripNl = (s) => String(s || '').replace(/[\r\n]+/g, '');

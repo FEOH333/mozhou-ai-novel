@@ -10,7 +10,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { phaseCoveredByText, historicalOutlineIssues } from '../server/engine/historical_guardrails.js';
+import { phaseCoveredByText, historicalOutlineIssues } from '../server/engine/longform/historical_guardrails.js';
 
 const SEAM_PHASE = '接住上卷出口，建立新压力源（难民+围城前夕）';
 
@@ -75,7 +75,7 @@ test('V0.102.3 章纲指令列出可核验动作而非要求抄规划套话', ()
 });
 
 test('V0.102.3 非历史题材不走阶段任务硬闸（零影响）', () => {
-  const outlineJs = fs.readFileSync('server/engine/outline.js', 'utf8');
+  const outlineJs = fs.readFileSync('server/engine/planning/outline.js', 'utf8');
   assert.match(outlineJs, /book\.genre === '历史'/);
   assert.match(outlineJs, /historicalOutlineIssues/);
 });

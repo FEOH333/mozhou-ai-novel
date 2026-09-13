@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './helper.js';
-import { parseAuditResponse } from '../server/engine/audit.js';
+import { parseAuditResponse } from '../server/engine/pipeline/audit.js';
 
 test('V0.95.3 verdict 枚举外变体不再卡章：按 issues 严重度推断裁决（ch27 实证形态）', () => {
   // 思考模型实测输出形态：verdict 是长句、issues 正常

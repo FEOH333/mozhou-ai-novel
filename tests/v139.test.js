@@ -51,7 +51,7 @@ describe('V0.94.2 卷体检 parse_failed 误报修复', () => {
 
   test('行为闭环：解析失败落 failed + 兜底 C（非质量判定）→ 进补审候选 → 故障解除重审恢复', async () => {
     const { store, b, v } = await makeReviewedBook();
-    const { runVolumeReview, reviewDueVolumes } = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
+    const { runVolumeReview, reviewDueVolumes } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
 
  // ① 注入解析故障（复现本作卷3 实况：输出截断不可解析）
     process.env.NOVEL_VOLREVIEW_PARSEFAULT = '1';

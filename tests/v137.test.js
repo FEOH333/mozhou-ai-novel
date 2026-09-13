@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { chapterOutlineQualityIssues, lengthProfileOf } from '../server/engine/outline.js';
+import { chapterOutlineQualityIssues, lengthProfileOf } from '../server/engine/planning/outline.js';
 import { writeSceneInstruction, chapterOutlineInstruction, auditInstruction, lengthRequirementText } from '../server/engine/prompts.js';
 import { SCENE_BOUNDARY_TEXT, DIALOGUE_VOICE_TEXT } from '../server/data/literary_techniques.js';
 import { RED_LINES } from '../server/data/history.js';
@@ -115,7 +115,7 @@ describe('V0.94 指令注入断言（写审同源）', () => {
   });
 
   test('audit.js 接线新检测器（源码断言）', () => {
-    const src = read('server/engine/audit.js');
+    const src = read('server/engine/pipeline/audit.js');
     assert.match(src, /detectSceneTailDuplication/, '场景尾部重演接线');
     assert.match(src, /detectTitleGap/, '章名兑现接线');
     assert.match(src, /detectTimelineAnchorConflict/, '时间线锚点接线');
@@ -124,7 +124,7 @@ describe('V0.94 指令注入断言（写审同源）', () => {
   });
 
   test('write.js 硬闸与安全合并接线（源码断言）', () => {
-    const src = read('server/engine/write.js');
+    const src = read('server/engine/pipeline/write.js');
     assert.match(src, /safelyMergeContinuation\(content, cont\.content\)/, '自愈续写走安全合并');
     assert.match(src, /enforceSceneDashBudget\(content, dashBudget\)/, '写后破折号硬闸');
   });

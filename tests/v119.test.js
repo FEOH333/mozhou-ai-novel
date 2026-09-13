@@ -9,7 +9,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v119-recovery-'));
 
 const store = await import('../server/db/store.js');
-const { replanFrom } = await import('../server/engine/recovery.js');
+const { replanFrom } = await import('../server/engine/recovery/recovery.js');
 
 describe('V0.93 恢复后的陈旧状态核销', () => {
   test('场景补写完成后自动关闭生成失败与已被正文修掉的引用冲突', () => {

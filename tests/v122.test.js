@@ -10,10 +10,10 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v122-completion-'));
 
 const store = await import('../server/db/store.js');
-const { isCompletedChapter } = await import('../server/engine/chapter_status.js');
-const { reviewDueVolumes } = await import('../server/engine/volumereview.js');
-const { settleChapter } = await import('../server/engine/settle.js');
-const { applyValidatedChapterRewrite } = await import('../server/engine/polish.js');
+const { isCompletedChapter } = await import('../server/engine/pipeline/chapter_status.js');
+const { reviewDueVolumes } = await import('../server/engine/planning/volumereview.js');
+const { settleChapter } = await import('../server/engine/pipeline/settle.js');
+const { applyValidatedChapterRewrite } = await import('../server/engine/quality/polish.js');
 
 const sha256 = text => createHash('sha256').update(text).digest('hex');
 
@@ -83,7 +83,7 @@ describe('V0.93 完成态单一真源', () => {
 
     assert.equal(applied.ok, true);
     // V0.100.16：引擎闸对零换行超长候选做确定性重分段，落库正文以 normalize 后为准。
-    const { normalizeChapterParagraphs } = await import('../server/engine/polish.js');
+    const { normalizeChapterParagraphs } = await import('../server/engine/quality/polish.js');
     const storedAfter = normalizeChapterParagraphs(after);
     assert.equal(store.chapters.fullText(chapter.id), storedAfter);
     assert.equal(store.chapters.get(chapter.id).word_count, [...after].filter(char => /[\u4e00-\u9fff]/.test(char)).length);

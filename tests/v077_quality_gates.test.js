@@ -2,12 +2,12 @@
 import './helper.js'; // V0.95.2：测试隔离（此前读真实 config.json，默认值巧合通过）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAuditResponse, parseCoverageResponse } from '../server/engine/audit.js';
-import * as auditModule from '../server/engine/audit.js';
+import { parseAuditResponse, parseCoverageResponse } from '../server/engine/pipeline/audit.js';
+import * as auditModule from '../server/engine/pipeline/audit.js';
 import { DEFAULT_ROUTES, resolveRoute } from '../server/config.js';
 import * as routerModule from '../server/llm/router.js';
 import { auditInstruction } from '../server/engine/prompts.js';
-import { chooseCompressedScene } from '../server/engine/write.js';
+import { chooseCompressedScene } from '../server/engine/pipeline/write.js';
 
 test('审校响应必须是完整、结构合法且 verdict 受控的 JSON', () => {
   assert.throws(

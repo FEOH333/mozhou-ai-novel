@@ -8,7 +8,7 @@ import path from 'node:path';
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v118-history-'));
 
-const guardrails = await import('../server/engine/historical_guardrails.js');
+const guardrails = await import('../server/engine/longform/historical_guardrails.js');
 const prompts = await import('../server/engine/prompts.js');
 
 describe('V0.93 历史跨年过渡', () => {

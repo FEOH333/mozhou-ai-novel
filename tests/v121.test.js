@@ -9,7 +9,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v121-ledger-'));
 
 const store = await import('../server/db/store.js');
-const pleasure = await import('../server/engine/pleasure.js');
+const pleasure = await import('../server/engine/quality/pleasure.js');
 
 describe('V0.93 期待账本语义结算', () => {
   test('同一兑现事件即使语序与措辞不同也能匹配', async () => {

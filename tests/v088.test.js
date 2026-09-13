@@ -20,14 +20,14 @@ const promiseData = {
 };
 
 async function completePromise(bookId) {
-  const { buildStoryPromiseProfile } = await import(pathToFileURL(path.join(ROOT, 'server/engine/story_promise.js')));
+  const { buildStoryPromiseProfile } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/story_promise.js')));
   return buildStoryPromiseProfile(bookId, { data: promiseData });
 }
 
 describe('V0.80 签约模拟评审 + 开篇重写 + 漂移吸引力信号', () => {
   test('①signingDue：番茄前3章有正文且画像就绪 → true，不伪造固定平台字数门槛', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { signingDue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/signing.js')));
+    const { signingDue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/signing.js')));
     const b = store.books.create({ title: '评审书', genre: '玄幻', blurb: 'x', platform: '番茄' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     for (let i = 1; i <= 3; i++) {
@@ -48,7 +48,7 @@ describe('V0.80 签约模拟评审 + 开篇重写 + 漂移吸引力信号', () =
     process.env.NOVEL_SIGNING_FAULT = '1';
     try {
       const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-      const { simulateSigningReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/signing.js')));
+      const { simulateSigningReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/signing.js')));
       const b = store.books.create({ title: '评审书2', genre: '玄幻', blurb: 'x', platform: '番茄' });
       store.materials.set(b.id, 'contract', '前3章打脸');
       const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -69,7 +69,7 @@ describe('V0.80 签约模拟评审 + 开篇重写 + 漂移吸引力信号', () =
 
   test('③文本预审读取真实正文、保存指纹；正文变化后自动到期重审', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { collectSigningInput, signingDue, simulateSigningReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/signing.js')));
+    const { collectSigningInput, signingDue, simulateSigningReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/signing.js')));
     const b = store.books.create({ title: '真实文本书', genre: '历史', blurb: '要保护一座城', platform: '番茄' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     let firstScene;
@@ -105,7 +105,7 @@ describe('V0.80 签约模拟评审 + 开篇重写 + 漂移吸引力信号', () =
 
   test('④rewriteOpening：自动评审只登记开篇修订任务，原正文保持可用', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { rewriteOpening } = await import(pathToFileURL(path.join(ROOT, 'server/engine/signing.js')));
+    const { rewriteOpening } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/signing.js')));
     const b = store.books.create({ title: '重写书', genre: '玄幻', blurb: 'x', platform: '番茄' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -135,7 +135,7 @@ describe('V0.80 签约模拟评审 + 开篇重写 + 漂移吸引力信号', () =
 
   test('⑤漂移吸引力信号：2章情绪≤3 → 触发寡淡信号', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { detectDrift } = await import(pathToFileURL(path.join(ROOT, 'server/engine/recovery.js')));
+    const { detectDrift } = await import(pathToFileURL(path.join(ROOT, 'server/engine/recovery/recovery.js')));
     const b = store.books.create({ title: '漂移书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     for (let i = 1; i <= 3; i++) {

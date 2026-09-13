@@ -6,8 +6,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './helper.js';
 import * as store from '../server/db/store.js';
-import { settleHookLedger } from '../server/engine/pleasure.js';
-import { applyForeshadowActions } from '../server/engine/foreshadow.js';
+import { settleHookLedger } from '../server/engine/quality/pleasure.js';
+import { applyForeshadowActions } from '../server/engine/narrative/foreshadow.js';
 
 function seedBook() {
   return store.books.create({ title: '台账测试书', genre: '玄幻' });

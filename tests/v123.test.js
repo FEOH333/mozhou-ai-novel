@@ -83,7 +83,7 @@ describe('V0.93.1 全面审查清理', () => {
   });
 
   test('P1 完成态判定收敛：五个模块不再裸写 done/settled 终态比较', () => {
-    const files = ['server/engine/write.js', 'server/engine/pilot.js', 'server/engine/pipeline.js', 'server/engine/polish.js', 'server/index.js'];
+    const files = ['server/engine/pipeline/write.js', 'server/engine/pipeline/pilot.js', 'server/engine/pipeline/pipeline.js', 'server/engine/quality/polish.js', 'server/index.js'];
     for (const rel of files) {
       const src = read(rel);
       assert.ok(!/=== ['"]settled['"]/.test(src), `${rel} 不得再裸写 === 'settled' 比较（收敛到 chapter_status）`);
@@ -94,8 +94,8 @@ describe('V0.93.1 全面审查清理', () => {
   });
 
   test('P1 生命周期去双写：历史适配器反向依赖通用单源', () => {
-    const generic = read('server/engine/longform_lifecycle.js');
-    const historical = read('server/engine/historical_longform.js');
+    const generic = read('server/engine/longform/longform_lifecycle.js');
+    const historical = read('server/engine/longform/historical_longform.js');
  assert.doesNotMatch(generic, /isHistoricalSampleBook|示例历史长篇/,
       '通用生命周期不得反向依赖具体书名特判');
     assert.match(historical, /import\s*\{[^}]*LONGFORM_STAGES[^}]*lifecycleStageIdForPosition[^}]*\}\s*from\s*['"]\.\/longform_lifecycle\.js['"]/s,
@@ -110,7 +110,7 @@ describe('V0.93.1 全面审查清理', () => {
     const textUtil = await import(pathToFileURL(path.join(ROOT, 'server/util/text.js')));
     assert.equal(typeof textUtil.extractVolumeTitle, 'function');
     assert.equal(typeof textUtil.lastChapterTail, 'function');
-    for (const rel of ['server/engine/growth.js', 'server/engine/world_expansion.js']) {
+    for (const rel of ['server/engine/planning/growth.js', 'server/engine/planning/world_expansion.js']) {
       const src = read(rel);
       assert.ok(!/^function (lastChapterTail|extractVolumeTitle)/m.test(src), `${rel} 不得再本地定义 ${rel.includes('growth') ? 'lastChapterTail/extractVolumeTitle' : 'lastChapterTail/extractVolumeTitle'}`);
       assert.match(src, /util\/text\.js/, `${rel} 应导入 util/text.js`);

@@ -17,7 +17,7 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const { PROVIDER_PRESETS, resolveModelName, capReasoningEffort, pickTestModel } = await import('../server/config.js');
 const { getPrice } = await import('../server/llm/cost.js');
-const { validateNarrativeProjection } = await import('../server/engine/narrative_state.js');
+const { validateNarrativeProjection } = await import('../server/engine/narrative/narrative_state.js');
 
 // ---- OpenRouter 预设 ----
 

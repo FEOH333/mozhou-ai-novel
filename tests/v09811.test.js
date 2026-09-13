@@ -17,7 +17,7 @@ const promiseData = {
 let book, volume, firstScene;
 beforeEach(async () => {
   ({ book, volume, firstScene } = createOpeningFixture(store));
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: promiseData });
 });
 
@@ -29,7 +29,7 @@ const planFields = ({ kind, family, signature, content = '' }) => ({
 });
 
 test('V0.98.11 同模型两轮同胜者：status=single_model_advisory 且 message 引导手动采用', async () => {
-  const { composeOpeningCandidates, compareOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, compareOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
  const content = '开庆元年七月，钓鱼城北崖，砲石压进膛口。主角拽开传令兵，自己探身看江面。\n\n十八年前，淳祐元年的秋天，他九岁。';
   const composed = await composeOpeningCandidates(book.id, { mode: 'repair', data: { candidates: [{
     ...planFields({ kind: 'chapter1_cold_open', family: 'future_result_present_question', signature: '1259|守城少年|城下异动|回望', content }),

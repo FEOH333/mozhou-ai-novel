@@ -9,7 +9,7 @@ let book, firstScene;
 
 beforeEach(async () => {
   ({ book, firstScene } = createOpeningFixture(store));
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: {
     premise_in_one_breath: '一个孩子学会保护别人', primary_attraction_axis: '保护与成长', secondary_axes: [],
     protagonist_now: { lack: '弱小', immediate_need: '护住家人', agency_pattern: '观察后保护' },
@@ -20,7 +20,7 @@ beforeEach(async () => {
 });
 
 test('V0.98 openingSlices 返回稳定首屏且本地信号只报告客观事实', async () => {
-  const { openingSlices, localOpeningSignals, openingFingerprint } = await import('../server/engine/opening_diagnosis.js');
+  const { openingSlices, localOpeningSignals, openingFingerprint } = await import('../server/engine/planning/opening_diagnosis.js');
   const text = '晒场上的秋阳还带着热，天边压着一线暗红。'.repeat(30) + '北边来信了。';
   const slices = openingSlices(text);
   assert.equal(slices.head80.length, 80);
@@ -39,7 +39,7 @@ test('V0.98 openingSlices 返回稳定首屏且本地信号只报告客观事实
 });
 
 test('V0.98 吸引力本地词表只作信号，不把含蓄历史场景误判为平淡或无钩子', async () => {
-  const { attractionLocalRules, countAgencySignals } = await import('../server/engine/attraction.js');
+  const { attractionLocalRules, countAgencySignals } = await import('../server/engine/quality/attraction.js');
  const text = '晒场上的秋阳还带着热，天边压着一线暗红。主角把弟弟往上颠了颠。北边摊主忽然收担，父亲夜里仍在磨刀。最后，那点红光比先前更亮了。';
   const issues = attractionLocalRules(text, { isHistory: true });
   assert.equal(issues.some(issue => issue.type === '平淡开场'), false);
@@ -48,7 +48,7 @@ test('V0.98 吸引力本地词表只作信号，不把含蓄历史场景误判�
 });
 
 test('V0.98 openingFingerprint 对正文和简介敏感、对对象键顺序稳定', async () => {
-  const { openingFingerprint } = await import('../server/engine/opening_diagnosis.js');
+  const { openingFingerprint } = await import('../server/engine/planning/opening_diagnosis.js');
   const chapters = [{ idx: 1, title: '一', text: '正文' }];
   const a = openingFingerprint({ title: 'X', blurb: '简介' }, chapters);
   const b = openingFingerprint({ blurb: '简介', title: 'X' }, chapters);
@@ -104,8 +104,8 @@ test('V0.98 诊断提示词先做冷读，再整理证据，不用平均分或�
 });
 
 test('V0.98 诊断保存双指纹，正文或创作画像变化后自动陈旧', async () => {
-  const { diagnoseOpening, openingDiagnosisStatus } = await import('../server/engine/opening_diagnosis.js');
-  const { lockStoryPromiseFields } = await import('../server/engine/story_promise.js');
+  const { diagnoseOpening, openingDiagnosisStatus } = await import('../server/engine/planning/opening_diagnosis.js');
+  const { lockStoryPromiseFields } = await import('../server/engine/planning/story_promise.js');
   const first = await diagnoseOpening(book.id, { data: validDiagnosis });
   assert.equal(first.ok, true);
   assert.equal(first.report.version, 3);
@@ -122,7 +122,7 @@ test('V0.98 诊断保存双指纹，正文或创作画像变化后自动陈旧',
 });
 
 test('V0.98 坏诊断 fail-closed，保留旧报告并记录失败', async () => {
-  const { diagnoseOpening, openingDiagnosisStatus } = await import('../server/engine/opening_diagnosis.js');
+  const { diagnoseOpening, openingDiagnosisStatus } = await import('../server/engine/planning/opening_diagnosis.js');
   await diagnoseOpening(book.id, { data: validDiagnosis });
   const before = store.materials.get(book.id, 'opening_diagnosis').content;
   await assert.rejects(
@@ -134,7 +134,7 @@ test('V0.98 坏诊断 fail-closed，保留旧报告并记录失败', async () =>
 });
 
 test('V0.98 单条 issue 引文无法核验时隔离该意见，其他有效诊断照常保存', async () => {
-  const { diagnoseOpening, openingDiagnosisStatus } = await import('../server/engine/opening_diagnosis.js');
+  const { diagnoseOpening, openingDiagnosisStatus } = await import('../server/engine/planning/opening_diagnosis.js');
   const report = structuredClone(validDiagnosis);
   report.strategies.push({
     kind: 'head_rewrite', creative_hypothesis: '依赖第二条意见', expected_gain: '未知', risks: [],
@@ -165,14 +165,14 @@ test('V0.98 单条 issue 引文无法核验时隔离该意见，其他有效诊�
 });
 
 test('V0.98 含平台流量预测字段时仍然拒绝保存', async () => {
-  const { diagnoseOpening } = await import('../server/engine/opening_diagnosis.js');
+  const { diagnoseOpening } = await import('../server/engine/planning/opening_diagnosis.js');
   const prediction = structuredClone(validDiagnosis);
   prediction.expected_retention = '60%';
   await assert.rejects(diagnoseOpening(book.id, { data: prediction }), error => error?.code === 'OPENING_DIAG_INVALID');
 });
 
 test('V0.98 tradeoff 引文无法核验时同样隔离，不让软意见拖垮诊断', async () => {
-  const { validateOpeningDiagnosis } = await import('../server/engine/opening_diagnosis.js');
+  const { validateOpeningDiagnosis } = await import('../server/engine/planning/opening_diagnosis.js');
   const report = structuredClone(validDiagnosis);
   report.tradeoffs = [{
     chapter: 2, start: 0, end: 8, quote: '模型概括出的近似句', reason: '某类读者可能偏好更快节奏',
@@ -187,7 +187,7 @@ test('V0.98 tradeoff 引文无法核验时同样隔离，不让软意见拖垮�
 });
 
 test('V0.98 issue 引文真实但模型字符范围错误时由本地正文精确校准', async () => {
-  const { validateOpeningDiagnosis } = await import('../server/engine/opening_diagnosis.js');
+  const { validateOpeningDiagnosis } = await import('../server/engine/planning/opening_diagnosis.js');
   const text = store.chapters.fullText(firstScene.chapter_id);
  const quote = '主角把弟弟往上颠了颠';
   const report = structuredClone(validDiagnosis);
@@ -205,7 +205,7 @@ test('V0.98 issue 引文真实但模型字符范围错误时由本地正文精�
 });
 
 test('V0.98 smallest_fix 不得把正文外的新人物事件带入候选链', async () => {
-  const { validateOpeningDiagnosis } = await import('../server/engine/opening_diagnosis.js');
+  const { validateOpeningDiagnosis } = await import('../server/engine/planning/opening_diagnosis.js');
   const text = store.chapters.fullText(firstScene.chapter_id);
  const quote = '主角把弟弟往上颠了颠';
   const report = structuredClone(validDiagnosis);
@@ -221,7 +221,7 @@ test('V0.98 smallest_fix 不得把正文外的新人物事件带入候选链', a
 });
 
 test('V0.98 只针对另一类读者偏好的速度意见不进自动修改链', async () => {
-  const { validateOpeningDiagnosis } = await import('../server/engine/opening_diagnosis.js');
+  const { validateOpeningDiagnosis } = await import('../server/engine/planning/opening_diagnosis.js');
   const text = store.chapters.fullText(firstScene.chapter_id);
   const quote = '天边压着一线暗红';
   const preference = structuredClone(validDiagnosis);
@@ -242,7 +242,7 @@ test('V0.98 只针对另一类读者偏好的速度意见不进自动修改链',
 });
 
 test('V0.98 issue 只有换行空白差异时校准为正文中的逐字引文', async () => {
-  const { validateOpeningDiagnosis } = await import('../server/engine/opening_diagnosis.js');
+  const { validateOpeningDiagnosis } = await import('../server/engine/planning/opening_diagnosis.js');
  const text = '天边压着一线暗红。\n\n主角把弟弟往上颠了颠。';
   const report = structuredClone(validDiagnosis);
   report.issues = [{
@@ -259,8 +259,8 @@ test('V0.98 issue 只有换行空白差异时校准为正文中的逐字引文',
 });
 
 test('V0.98 诊断材料不进入历史堆或普通下一章消息', async () => {
-  const { diagnoseOpening } = await import('../server/engine/opening_diagnosis.js');
-  const { ensureHistory, rebuildHistory } = await import('../server/engine/outline.js');
+  const { diagnoseOpening } = await import('../server/engine/planning/opening_diagnosis.js');
+  const { ensureHistory, rebuildHistory } = await import('../server/engine/planning/outline.js');
   const { assembleMessages } = await import('../server/llm/cache.js');
   const report = structuredClone(validDiagnosis);
   report.recommendation.reason = 'DIAGNOSIS_PRIVATE_MARKER';

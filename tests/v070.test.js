@@ -42,11 +42,11 @@ describe('V0.70 五轮大检查修复', () => {
   });
 
   test('④replace 返回 changes + 失败回退置空当前场景 seq（防悬空）', () => {
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(w.includes('store.history.replace(bookId, scene.history_seq') , 'replace 校验');
     assert.ok(w.includes('historySeq: null }'), '失败回退置空当前场景');
     assert.ok(w.includes('done/settled 章补写场景时不降级'), 'done 章不降级 drafted');
-    const a = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const a = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(a.includes('applyValidatedSceneRewrite(bookId, liveScene.id, content')
       || a.includes('applyValidatedSceneRewrite(bookId, sceneId, content'), 'audit 修订必须走共享原子安全门');
     const st = fs.readFileSync(path.join(ROOT, 'server/db/store.js'), 'utf8');
@@ -54,7 +54,7 @@ describe('V0.70 五轮大检查修复', () => {
   });
 
   test('⑤archive 缝隙误删修复（全量章节查找 next）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/archive.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/archive.js'), 'utf8');
     assert.ok(src.includes('allChapters'), '应从全量章节找下一章');
     assert.ok(!src.includes('删除 firstSeq 之后全部'), '不再删到 lastSeq');
   });
@@ -62,18 +62,18 @@ describe('V0.70 五轮大检查修复', () => {
   test('⑥计价用 route.model + 滚动摘要截断 + timeline 限量', () => {
     const r = fs.readFileSync(path.join(ROOT, 'server/llm/router.js'), 'utf8');
     assert.ok(r.includes('computeCost(route.model'), '计价用配置侧模型名');
-    const s = fs.readFileSync(path.join(ROOT, 'server/engine/rolling.js'), 'utf8');
+    const s = fs.readFileSync(path.join(ROOT, 'server/engine/narrative/rolling.js'), 'utf8');
     assert.ok(s.includes('RECENT_KEEP') && s.includes('slice(-RECENT_KEEP)'), '滚动摘要截断（V0.95 两段式，settle 侧截断迁入 rolling.js）');
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(w.includes('slice(-8)'), 'timeline 注入应采用有界窗口');
     assert.ok(!w.includes('slice(-20)'), '不得恢复旧的 20 条膨胀窗口');
   });
 
   test('⑦动态 import 静态化 + continuationCount 死代码删除', () => {
-    const p = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const p = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(!p.includes("await import('./roster.js')") && !p.includes("await import('./factbook.js')"), '动态 import 静态化');
-    assert.ok(p.includes("from './roster.js'"), '静态 import roster'); // V0.83：runCastDesign 随行静态导入
-    const c = fs.readFileSync(path.join(ROOT, 'server/engine/continuation.js'), 'utf8');
+    assert.ok(p.includes("from '../narrative/roster.js'"), '静态 import roster'); // V0.83：runCastDesign 随行静态导入
+    const c = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/continuation.js'), 'utf8');
     assert.ok(!c.includes('continuationCount'), '死代码删除');
   });
 });

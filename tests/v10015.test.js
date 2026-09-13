@@ -7,11 +7,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const store = await import('../server/db/store.js');
-const recovery = await import('../server/engine/recommendation_recovery.js');
+const recovery = await import('../server/engine/recovery/recommendation_recovery.js');
 const prompts = await import('../server/engine/prompts.js');
 const { AI_TASTE_FULL, EXTREME_CLICHES, STRICT_MOTIFS, REDLINES } = await import('../server/data/redlines.js');
-const { RECOVERY_PLAN_CONTRACT_VERSION, RECOVERY_WINDOW_LENGTH_RATIOS } = await import('../server/engine/recovery_contract.js');
-const { runLocalRules } = await import('../server/engine/rules.js');
+const { RECOVERY_PLAN_CONTRACT_VERSION, RECOVERY_WINDOW_LENGTH_RATIOS } = await import('../server/engine/recovery/recovery_contract.js');
+const { runLocalRules } = await import('../server/engine/quality/rules.js');
 
 function fixtureText(prefix = '东坡') {
   return [

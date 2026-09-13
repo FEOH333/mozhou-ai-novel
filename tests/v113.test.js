@@ -11,8 +11,8 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v113-lifecyc
 const ROOT = process.cwd();
 
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform_lifecycle.js')));
-const volumeReview = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
+const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/longform_lifecycle.js')));
+const volumeReview = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
 
 function makeLateMiddleBook() {

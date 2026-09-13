@@ -11,8 +11,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v134-syscheck-'));
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/rules.js')));
-const continuation = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/rules.js')));
+const continuation = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
 
 describe('V0.93.11 系统性检查修复', () => {
   test('跨章句子复读：本章整句出现在前文 → medium；正常承接不拦', () => {

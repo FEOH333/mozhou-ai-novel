@@ -11,7 +11,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v103-history
 process.env.NOVEL_NO_OPEN = '1';
 const ROOT = process.cwd();
 
-const longform = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_longform.js')));
+const longform = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_longform.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
 
 const SAMPLE_BOOK = {

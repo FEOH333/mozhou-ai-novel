@@ -11,8 +11,8 @@ process.env.NOVEL_NO_OPEN = '1';
 
 test('V0.28: 设定自动生成——世界观/人物/地点/物品/势力/世界书全落库', async () => {
   const store = await import('../server/db/store.js');
-  const settings = await import('../server/engine/settings.js');
-  const outline = await import('../server/engine/outline.js');
+  const settings = await import('../server/engine/planning/settings.js');
+  const outline = await import('../server/engine/planning/outline.js');
   const b = store.books.create({ title: '未命名', genre: '玄幻', platform: '番茄', blurb: '废柴剑子捡到玉佩' });
   await outline.generateBookContract(b.id, { genre: '玄幻', blurb: '废柴剑子捡到玉佩', platform: '番茄' });
   await outline.generateBookOutline(b.id, {});
@@ -30,7 +30,7 @@ test('V0.28: 设定自动生成——世界观/人物/地点/物品/势力/世�
 });
 
 test('V0.28: 设定生成失败不抛异常且报告错误', async () => {
-  const settings = await import('../server/engine/settings.js');
+  const settings = await import('../server/engine/planning/settings.js');
   const r = await settings.generateBookSettings('bk-不存在');
   assert.equal(r.ok, false);
   assert.ok(r.error);
@@ -38,8 +38,8 @@ test('V0.28: 设定生成失败不抛异常且报告错误', async () => {
 
 test('V0.28: 抽取增强——new_entities 带 type 自动写实体卡', async () => {
   const store = await import('../server/db/store.js');
-  const outline = await import('../server/engine/outline.js');
-  const settle = await import('../server/engine/settle.js');
+  const outline = await import('../server/engine/planning/outline.js');
+  const settle = await import('../server/engine/pipeline/settle.js');
   const b = store.books.create({ title: 'T3', genre: '玄幻', blurb: 'x' });
   const vol = store.volumes.create(b.id, 1, { title: '第一卷' });
   const ch = store.chapters.create(b.id, vol.id, 1, { title: '第一章' });
@@ -89,7 +89,7 @@ test('V0.28: 日志系统——三类记录/过滤查询/容量清理', async ()
 
 test('V0.28: 生成进度——书级大纲 onEvent 收到阶段事件', async () => {
   const store = await import('../server/db/store.js');
-  const outline = await import('../server/engine/outline.js');
+  const outline = await import('../server/engine/planning/outline.js');
   const b = store.books.create({ title: 'T4', genre: '玄幻', blurb: 'x' });
   await outline.generateBookContract(b.id, { genre: '玄幻', blurb: 'x', platform: '番茄' });
   const events = [];

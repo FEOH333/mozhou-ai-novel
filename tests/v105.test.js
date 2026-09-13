@@ -14,14 +14,14 @@ const store = await import('../server/db/store.js');
 const {
   compileCraftOccupancy, craftHits, detectCraftIssues, healCraftMorphology, craftRegression,
   CRAFT_BRIEF_MAX_CHARS, compileBookCraftOccupancy, buildLedgerCheckBrief,
-} = await import('../server/engine/craft_occupancy.js');
+} = await import('../server/engine/quality/craft_occupancy.js');
 const {
   compileStageWindow, stageTaskIssues, fourElementIssues, conflictFocusIssues,
-} = await import('../server/engine/stage_window.js');
-const { chapterOutlineQualityIssues } = await import('../server/engine/outline.js');
-const { auditVerdictAfterBudget } = await import('../server/engine/pipeline.js');
-const { shouldRunMidStoryReview } = await import('../server/engine/polish.js');
-const { applyForeshadowActions } = await import('../server/engine/foreshadow.js');
+} = await import('../server/engine/planning/stage_window.js');
+const { chapterOutlineQualityIssues } = await import('../server/engine/planning/outline.js');
+const { auditVerdictAfterBudget } = await import('../server/engine/pipeline/pipeline.js');
+const { shouldRunMidStoryReview } = await import('../server/engine/quality/polish.js');
+const { applyForeshadowActions } = await import('../server/engine/narrative/foreshadow.js');
 const { writeSceneInstruction, chapterOutlineInstruction, midStoryReviewInstruction } = await import('../server/engine/prompts.js');
 const { platformGuidanceText } = await import('../server/data/platform_guidance.js');
 const { PREPUBLISH_CRAFT_TEXT } = await import('../server/data/literary_techniques.js');
@@ -228,10 +228,10 @@ test('V0.105 红线阈值写审同源且非历史零误杀', () => {
 });
 
 test('V0.105 占用编译器接入写章路径且不新增模型任务', () => {
-  const writeSrc = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
-  const polishSrc = fs.readFileSync(path.join(ROOT, 'server/engine/polish.js'), 'utf8');
+  const writeSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
+  const polishSrc = fs.readFileSync(path.join(ROOT, 'server/engine/quality/polish.js'), 'utf8');
   const clientSrc = fs.readFileSync(path.join(ROOT, 'server/llm/client.js'), 'utf8');
-  const recoverySrc = fs.readFileSync(path.join(ROOT, 'server/engine/recommendation_recovery.js'), 'utf8');
+  const recoverySrc = fs.readFileSync(path.join(ROOT, 'server/engine/recovery/recommendation_recovery.js'), 'utf8');
   assert.match(writeSrc, /healCraftMorphology/);
   assert.match(writeSrc, /compileBookCraftOccupancy/);
   assert.match(polishSrc, /shouldRunMidStoryReview/);
@@ -240,7 +240,7 @@ test('V0.105 占用编译器接入写章路径且不新增模型任务', () => {
 });
 
 test('V0.105 返工文风闸不把发稿占用轴当 AI 模板腔', async () => {
-  const { validateRecoveryProseImprovement } = await import('../server/engine/recommendation_recovery.js');
+  const { validateRecoveryProseImprovement } = await import('../server/engine/recovery/recommendation_recovery.js');
  const old = '众人围着火盆反复商量，天色从黄昏拖到深夜。主角始终没有作出决定，局势仍停在原处。';
  const neu = '众人围着火盆商量完，主角把腰牌按在案上：“今夜之前，名单必须到北崖。”';
   assert.equal(craftHits(old).travel_ending, true);

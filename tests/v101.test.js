@@ -16,7 +16,7 @@ describe('V0.90 设定生成自动重试', () => {
   test('①坏 JSON（缺 worldview）自动重试成功，world 材料落库', async () => {
     process.env.NOVEL_SETTINGS_FAULT = '1'; // mock 前两次返回缺 worldview 的坏 JSON
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateBookSettings } = await import(pathToFileURL(path.join(ROOT, 'server/engine/settings.js')));
+    const { generateBookSettings } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/settings.js')));
  const b = store.books.create({ title: '示例历史长篇', genre: '历史', blurb: '蜀中孤儿', platform: '番茄' });
     store.materials.set(b.id, 'contract', '【书契约】目标读者：历史爱好者。承诺：前3章立住人物。');
     const r = await generateBookSettings(b.id, {});
@@ -29,7 +29,7 @@ describe('V0.90 设定生成自动重试', () => {
   test('②正常路径不受影响（一次成功）', async () => {
     delete process.env.NOVEL_SETTINGS_FAULT;
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateBookSettings } = await import(pathToFileURL(path.join(ROOT, 'server/engine/settings.js')));
+    const { generateBookSettings } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/settings.js')));
     const b = store.books.create({ title: '玄幻书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', '【书契约】目标读者：爽文读者。');
     const r = await generateBookSettings(b.id, {});
@@ -38,7 +38,7 @@ describe('V0.90 设定生成自动重试', () => {
   });
 
   test('③重试逻辑接线：settings.js 含自动重试与失败提示注入', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/settings.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/settings.js'), 'utf8');
     assert.ok(src.includes('V0.90 自动重试'), '自动重试标注');
     assert.ok(src.includes('for (let attempt = 0; attempt < 3 && !out; attempt++)'), '≤3 次循环');
     assert.ok(src.includes('缺少 worldview 字段'), '失败原因注入');

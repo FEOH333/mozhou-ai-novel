@@ -6,8 +6,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const store = await import('../server/db/store.js');
-const recovery = await import('../server/engine/recommendation_recovery.js');
-const { RECOVERY_PLAN_CONTRACT_VERSION } = await import('../server/engine/recovery_contract.js');
+const recovery = await import('../server/engine/recovery/recommendation_recovery.js');
+const { RECOVERY_PLAN_CONTRACT_VERSION } = await import('../server/engine/recovery/recovery_contract.js');
 
 function fixtureText(prefix = '东坡') {
   return [
@@ -324,7 +324,7 @@ test('V0.100.14 返工候选指令必须注入本地文风闸检测的模板句�
 });
 
 test('V0.100.14 窗口文风闸不得套用章级对话占比与章末零钩规则', async () => {
-  const { runLocalRules } = await import('../server/engine/rules.js');
+  const { runLocalRules } = await import('../server/engine/quality/rules.js');
   const narrativeWindow = [
  '主角沿北坡旧壕走了一遍，把三处塌方按深浅记进册页。',
     '他在第二处塌方前蹲下，用木尺量了滑土的坡度，又抓了一把湿土搓开。',

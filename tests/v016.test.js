@@ -4,11 +4,11 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import * as store from '../server/db/store.js';
 import { getGlobal, saveGlobal } from '../server/config.js';
-import { ensureSceneRows } from '../server/engine/pipeline.js';
-import { writeScene } from '../server/engine/write.js';
-import { settleChapter } from '../server/engine/settle.js';
-import { runArchive, checkArchiveNeed, archiveSearch, buildChapterCard } from '../server/engine/archive.js';
-import { recordChapterHealth, detectDrift, autoRecover } from '../server/engine/recovery.js';
+import { ensureSceneRows } from '../server/engine/pipeline/pipeline.js';
+import { writeScene } from '../server/engine/pipeline/write.js';
+import { settleChapter } from '../server/engine/pipeline/settle.js';
+import { runArchive, checkArchiveNeed, archiveSearch, buildChapterCard } from '../server/engine/pipeline/archive.js';
+import { recordChapterHealth, detectDrift, autoRecover } from '../server/engine/recovery/recovery.js';
 import { assembleMessages, historyTokens } from '../server/llm/cache.js';
 
 let savedCfg;

@@ -11,9 +11,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
   isPlanningMetaPhase, historicalOutlineIssues, phaseCoveredByText, formatPhaseDutyRule,
-} from '../server/engine/historical_guardrails.js';
-import { futureOutlineBase } from '../server/engine/narrative_state.js';
-import { mergeHistoricalChapterFrame } from '../server/engine/historical_longform.js';
+} from '../server/engine/longform/historical_guardrails.js';
+import { futureOutlineBase } from '../server/engine/narrative/narrative_state.js';
+import { mergeHistoricalChapterFrame } from '../server/engine/longform/historical_longform.js';
 
 const SLOGAN_PHASE = '受挫并付代价，确立新战术逻辑';
 const BATTLE_BEAT = '干沟里第一拨夜摸队被砲石砸散，主角没拦住柳二，人拖下去时枪头还卡在泥里。王坚改口令：不再沿沟底对射，改从北崖侧后打灯诱其露头。';
@@ -109,14 +109,14 @@ test('V0.104.1 merge 不得用口号或卷名覆盖模型已写的在场阶段',
 });
 
 test('V0.104.1 硬校验失败事件必须带上具体原因，禁止只说正在重做', () => {
-  const src = fs.readFileSync('server/engine/outline.js', 'utf8');
+  const src = fs.readFileSync('server/engine/planning/outline.js', 'utf8');
   assert.match(src, /lastFailReason/, '重做细纲必须把未通过项注入下一轮');
   assert.match(src, /历史阶段或人物权限未通过硬校验[\s\S]{0,80}lastFailReason/,
     '界面事件必须带上具体硬校验原因，否则只会看见空转重做');
 });
 
 test('V0.104.1 补写遇到质量门必须落 quality_blocked，不得吞错让主循环立刻再烧一轮', () => {
-  const pilot = fs.readFileSync('server/engine/pilot.js', 'utf8');
+  const pilot = fs.readFileSync('server/engine/pipeline/pilot.js', 'utf8');
   const at = pilot.indexOf('ch.idx > maxDone + 1');
   assert.ok(at > 0, '应能定位缺章补写');
   const slice = pilot.slice(at, at + 1800);
@@ -126,7 +126,7 @@ test('V0.104.1 补写遇到质量门必须落 quality_blocked，不得吞错让�
 });
 
 test('V0.104.1 非历史题材不走阶段任务硬闸（零影响）', () => {
-  const outlineJs = fs.readFileSync('server/engine/outline.js', 'utf8');
+  const outlineJs = fs.readFileSync('server/engine/planning/outline.js', 'utf8');
   assert.match(outlineJs, /book\.genre === '历史'/);
   assert.match(outlineJs, /historicalOutlineIssues/);
 });

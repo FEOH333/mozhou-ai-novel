@@ -32,18 +32,18 @@ test('V0.95.3 router 正文空转自愈：finishReason=length 且 content 空 �
 
 test('V0.95.3 引擎硬编码 routeOverride 与 config 同步：无 enabled/medium 残留在每章路径', () => {
   // 三判定门引擎侧覆盖回退 disabled+low（写审同源：config 与 engine 同一把尺子）
-  for (const f of ['server/engine/attraction.js', 'server/engine/promise.js', 'server/engine/signing.js']) {
+  for (const f of ['server/engine/quality/attraction.js', 'server/engine/planning/promise.js', 'server/engine/planning/signing.js']) {
     const src = read(f);
     assert.ok(!src.includes("thinking: 'enabled'"), `${f} 不应再有 enabled 思考覆盖`);
     assert.ok(!src.includes("reasoningEffort: 'medium'"), `${f} 不应再有 medium effort 覆盖`);
   }
   // reviseScene：effort low 单值（不再有重复键 medium/low 并存的补丁形态）
-  const auditSrc = read('server/engine/audit.js');
+  const auditSrc = read('server/engine/pipeline/audit.js');
   assert.ok(!auditSrc.includes("reasoningEffort: 'medium'"), 'audit.js 不应再有 medium effort（reviseScene/长度自愈全 low）');
   assert.ok(/revise', bookId, chapterId, messages,\s*\n\s*routeOverride: \{\s*\n\s*thinking: 'disabled', reasoningEffort: 'low', temperature: 0\.4,/.test(auditSrc),
     'reviseScene 覆盖应为 disabled+low 单值形态');
   // 长度自愈（write.js）同款
-  const writeSrc = read('server/engine/write.js');
+  const writeSrc = read('server/engine/pipeline/write.js');
   assert.ok(!writeSrc.includes("reasoningEffort: 'medium'"), 'write.js 不应再有 medium effort');
 });
 
@@ -56,7 +56,7 @@ test('V0.95.3 config 正文/判定全线 low：write/revise/attraction/signing_r
 });
 
 test('V0.95.3 reviseScene 空结果兜底重试保留（再空才抛错，引擎级第二道保险）', () => {
-  const src = read('server/engine/audit.js');
+  const src = read('server/engine/pipeline/audit.js');
   // 断言行为而非精确格式：空结果必须先有一次同参数大预算重试
   assert.match(src, /if\s*\(!content\)\s*\{[\s\S]{0,120}?const retry = await runTask\(/,
     'revise 空结果应有一次同参数大预算重试');

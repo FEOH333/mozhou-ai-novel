@@ -58,7 +58,7 @@ test('V0.98.5 router 思考吃空自愈：正文空+reasoning 在场（finishRea
 });
 
 test('V0.98.5 精读诊断：软意见字段残缺只隔离单条，不拖垮整份报告（免费档实证）', async () => {
-  const { validateOpeningDiagnosis } = await import('../server/engine/opening_diagnosis.js');
+  const { validateOpeningDiagnosis } = await import('../server/engine/planning/opening_diagnosis.js');
   const text = store.chapters.fullText(firstScene.chapter_id);
   const report = structuredClone(validDiagnosis);
   report.issues = [

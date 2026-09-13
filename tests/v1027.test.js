@@ -6,8 +6,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
-import { auditVerdictAfterBudget } from '../server/engine/pipeline.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
+import { auditVerdictAfterBudget } from '../server/engine/pipeline/pipeline.js';
 
 test('V0.102.7 细纲与草稿不符是改稿，预算耗尽后记债放行', () => {
   const issues = stampOpeningTimelineProseFix([{

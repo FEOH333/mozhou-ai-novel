@@ -22,35 +22,35 @@ describe('V0.72 事件流与缓存深度修复', () => {
   });
 
   test('②pilot 补写 seen 登记 + 实时状态 + doneCount 目标判定', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(src.includes('seen.add(ch.id)'), '补写成功应登记 seen');
     assert.ok(src.includes('seen.delete(ch.id)'), '补写失败应放行主循环');
     assert.ok(src.includes('store.chapters.get(ch.id)'), '主循环应实时查库状态');
     assert.ok(src.includes('doneCount >= targetChapters'), '目标判定应改已完成章数');
-    const rec = fs.readFileSync(path.join(ROOT, 'server/engine/recovery.js'), 'utf8');
+    const rec = fs.readFileSync(path.join(ROOT, 'server/engine/recovery/recovery.js'), 'utf8');
     assert.ok(rec.includes("store.history.truncateFrom(bookId, minSeq, '漂移恢复重规划')"), 'recovery 应补 reason');
   });
 
   test('③write 失败回退不再 truncate（只清 historySeq）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(!src.includes("'场景重写失败回退'"), 'write 失败回退不应 truncate');
     assert.ok(src.includes('失败回退**不再 truncate**'), '应有注释说明');
     assert.ok(src.includes('onUsageCost'), 'write 应透传 usage_cost');
   });
 
   test('④rebuildHistoryFromChapters 逐场景 replace（不再整书 truncate(3)）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/polish.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/quality/polish.js'), 'utf8');
     assert.ok(src.includes('store.history.replace(bookId, sc.history_seq'), '应逐场景 replace');
     assert.ok(!src.includes('truncateFrom(bookId, 3)'), '不应整书 truncate(3)');
   });
 
   test('⑤settings 设定生成后 rebuildHistory（世界观进历史堆）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/settings.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/settings.js'), 'utf8');
     assert.ok(src.includes("rebuildHistory(bookId, '设定生成"), '设定生成应重建历史堆');
   });
 
   test('⑥集成：补写完成的章主循环不再重写（3 章目标全 done 且不误续卷）', async () => {
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: '集成书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     store.materials.set(b.id, 'outline', '书纲');
@@ -68,7 +68,7 @@ describe('V0.72 事件流与缓存深度修复', () => {
   });
 
   test('⑦集成：修订场景历史堆 replace 而非 truncate（前缀保持）', async () => {
-    const { writeScene } = await import(pathToFileURL(path.join(ROOT, 'server/engine/write.js')));
+    const { writeScene } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/write.js')));
     const b = store.books.create({ title: '替换书', genre: '玄幻' });
     const ch = store.chapters.create(b.id, null, 1, { title: 'C1', status: 'planned' });
     store.chapters.update(ch.id, { outline: { title: 'C1', scenes: [

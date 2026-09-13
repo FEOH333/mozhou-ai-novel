@@ -9,7 +9,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
-const { narrativeLessonsText, lessonsForChapter } = await import('../server/engine/narrative_lessons.js');
+const { narrativeLessonsText, lessonsForChapter } = await import('../server/engine/quality/narrative_lessons.js');
 
 test('V0.100 only active, confident and in-scope lessons enter creative prompts', () => {
   const book = store.books.create({ title: '经验作用域测试' });
@@ -39,8 +39,8 @@ test('V0.100 only active, confident and in-scope lessons enter creative prompts'
 
 test('V0.100 outline and prose prompts consume the same scoped learning ledger', () => {
   const root = process.cwd();
-  const outline = fs.readFileSync(path.join(root, 'server/engine/outline.js'), 'utf8');
-  const write = fs.readFileSync(path.join(root, 'server/engine/write.js'), 'utf8');
+  const outline = fs.readFileSync(path.join(root, 'server/engine/planning/outline.js'), 'utf8');
+  const write = fs.readFileSync(path.join(root, 'server/engine/pipeline/write.js'), 'utf8');
   const prompts = fs.readFileSync(path.join(root, 'server/engine/prompts.js'), 'utf8');
   assert.match(outline, /narrativeLessonsText\(bookId, chapter\.idx\)/);
   assert.match(write, /narrativeLessonsText\(bookId, chapter\.idx\)/);

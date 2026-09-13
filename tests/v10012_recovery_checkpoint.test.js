@@ -6,7 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const store = await import('../server/db/store.js');
-const recovery = await import('../server/engine/recommendation_recovery.js');
+const recovery = await import('../server/engine/recovery/recommendation_recovery.js');
 
 function paragraphs(segments, size = 5) {
   const groups = [];

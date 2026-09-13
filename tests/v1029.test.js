@@ -7,7 +7,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as store from '../server/db/store.js';
-import { settleChapter } from '../server/engine/settle.js';
+import { settleChapter } from '../server/engine/pipeline/settle.js';
 
 function makeChapter() {
   const book = store.books.create({ title: '结算降级书', genre: '玄幻' });

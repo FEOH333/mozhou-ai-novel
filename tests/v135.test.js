@@ -13,10 +13,10 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v135-syscheck-'));
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const names = await import(pathToFileURL(path.join(ROOT, 'server/engine/names.js')));
-const settle = await import(pathToFileURL(path.join(ROOT, 'server/engine/settle.js')));
+const names = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/names.js')));
+const settle = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/settle.js')));
 const doctor = await import(pathToFileURL(path.join(ROOT, 'server/maintenance/doctor.js')));
-const continuation = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+const continuation = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
 
 describe('V0.93.11 系统性检查修复', () => {
   test('实体类型门：物品/短语名不得冒充地点/势力/物品（与 doctor 同源）', () => {

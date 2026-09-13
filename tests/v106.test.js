@@ -10,7 +10,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v106-history-throughline-'));
 const ROOT = process.cwd();
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_longform.js')));
+const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_longform.js')));
 const book = { title: '示例历史长篇', genre: '历史', blurb: '1241年九岁，1259年钓鱼城，四十年山河。' };
 
 describe('V0.91 历史长篇贯通', () => {

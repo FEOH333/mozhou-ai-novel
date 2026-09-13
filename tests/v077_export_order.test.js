@@ -1,7 +1,7 @@
 // V0.77 导出安全：损坏的卷归属不能打乱全书章节顺序
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildBookExport } from '../server/engine/export.js';
+import { buildBookExport } from '../server/engine/pipeline/export.js';
 
 test('导出始终按章节全局 idx 排序，即使卷归属交叉或为空', () => {
   const volumes = [

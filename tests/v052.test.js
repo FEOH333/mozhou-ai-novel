@@ -12,7 +12,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v052-'));
 
 describe('V0.52 自动创作自动整理', () => {
   test('pilot.js 主循环含每 5 章自动 tidyRoster 调用', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(src.includes('tidyRoster'), 'pilot 应调用 tidyRoster');
     assert.ok(src.includes('written % 5 === 0'), '应每 5 章触发一次');
     assert.ok(src.includes('auto_tidy'), '应发 auto_tidy 事件');
@@ -26,7 +26,7 @@ describe('V0.52 自动创作自动整理', () => {
 
   test('mock 冒烟：pilot 写 6 章后触发 auto_tidy 事件（第 5 章时）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: '自动整理书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', '【书契约】核心卖点：主角逆袭登顶');
     store.materials.set(b.id, 'outline', JSON.stringify({ title: '自动整理书', volumes: [{ idx: 1, title: '第一卷' }] }));

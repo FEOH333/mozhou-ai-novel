@@ -16,10 +16,10 @@ const {
   formatVolumeSeamText,
   formatChapterHorizonText,
   hooksDueToAge,
-} = await import('../server/engine/horizon.js');
-const { buildVolumeSeam, buildChapterHorizon } = await import('../server/engine/horizon.js');
+} = await import('../server/engine/planning/horizon.js');
+const { buildVolumeSeam, buildChapterHorizon } = await import('../server/engine/planning/horizon.js');
 const { volumeOutlineInstruction, chapterOutlineInstruction } = await import('../server/engine/prompts.js');
-const { settleHookLedger } = await import('../server/engine/pleasure.js');
+const { settleHookLedger } = await import('../server/engine/quality/pleasure.js');
 
 function seedHistoryBook() {
   return store.books.create({ title: '卷缝测试', genre: '历史' });
@@ -200,5 +200,5 @@ test('V0.102 无前卷的新书：store 编译缝为空，校验通过（非长�
 });
 
 test('V0.102 卷缝编译器文件仍在树中（版本号由 v025 单源断言）', () => {
-  assert.ok(fs.existsSync(path.join(process.cwd(), 'server/engine/horizon.js')));
+  assert.ok(fs.existsSync(path.join(process.cwd(), 'server/engine/planning/horizon.js')));
 });

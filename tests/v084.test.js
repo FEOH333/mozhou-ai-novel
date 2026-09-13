@@ -14,8 +14,8 @@ const ROOT = process.cwd();
 describe('V0.80 开篇蓝图 + 快感计划贯通', () => {
   test('①generateOpeningBlueprint 落 settings + materials，幂等', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateOpeningBlueprint } = await import(pathToFileURL(path.join(ROOT, 'server/engine/opening.js')));
-    const { ensureStoryPromiseProfile } = await import(pathToFileURL(path.join(ROOT, 'server/engine/story_promise.js')));
+    const { generateOpeningBlueprint } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/opening.js')));
+    const { ensureStoryPromiseProfile } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/story_promise.js')));
     const b = store.books.create({ title: '蓝图书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', '前3章必有打脸');
     store.materials.set(b.id, 'outline', '书纲');
@@ -34,8 +34,8 @@ describe('V0.80 开篇蓝图 + 快感计划贯通', () => {
 
   test('②openingBlueprintForChapter 返回本章槽位', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateOpeningBlueprint, openingBlueprintForChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/opening.js')));
-    const { ensureStoryPromiseProfile } = await import(pathToFileURL(path.join(ROOT, 'server/engine/story_promise.js')));
+    const { generateOpeningBlueprint, openingBlueprintForChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/opening.js')));
+    const { ensureStoryPromiseProfile } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/story_promise.js')));
     const b = store.books.create({ title: '蓝图书2', genre: '玄幻', blurb: 'x' });
     assert.equal((await ensureStoryPromiseProfile(b.id)).ok, true, '应先建立创作宪章');
     await generateOpeningBlueprint(b.id, {});
@@ -51,7 +51,7 @@ describe('V0.80 开篇蓝图 + 快感计划贯通', () => {
 
   test('③planBookPleasure 传真实契约 + 写 materials(pleasure) + arc_plan 播种', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { planBookPleasure } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+    const { planBookPleasure } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
     const b = store.books.create({ title: '贯通书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', '前3章必有打脸。主角靠自身努力成长。');
     const r = await planBookPleasure(b.id, {});
@@ -67,8 +67,8 @@ describe('V0.80 开篇蓝图 + 快感计划贯通', () => {
 
   test('④卷大纲 mock 不被注入的"快感"段串线', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { planBookPleasure } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
-    const { generateVolumeOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { planBookPleasure } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
+    const { generateVolumeOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: '串线书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     await planBookPleasure(b.id, {});
@@ -79,7 +79,7 @@ describe('V0.80 开篇蓝图 + 快感计划贯通', () => {
 
   test('⑤pilot 骨架：设定后先建创作宪章再生成开篇蓝图，全流程走通', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: '骨架书', genre: '玄幻', blurb: '被废剑宗弟子捡玉佩' });
     const r = await runBookPilot(b.id, { targetChapters: 1 });
     assert.equal(r.written, 1, '应写完目标章');

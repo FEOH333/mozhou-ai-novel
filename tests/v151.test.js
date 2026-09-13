@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import './helper.js';
 import {
   historicalScaleTier, historicalScaleRegisterText, historicalScaleBeatRule,
-} from '../server/engine/historical_longform.js';
+} from '../server/engine/longform/historical_longform.js';
 import * as prompts from '../server/engine/prompts.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -71,7 +71,7 @@ describe('V0.95.8 山河尺度分层', () => {
 
 describe('V0.95.8 三处注入接线（写审同源源断言）', () => {
   test('write.js：场景指令注入 scaleRegisterText（历史门控）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(src.includes('historicalScaleRegisterText(volumeIdx, volumePhase)'),
       'write.js 应按卷计算并注入尺度纪律');
   });
@@ -100,8 +100,8 @@ describe('V0.95.8 三处注入接线（写审同源源断言）', () => {
   });
 
   test('outline.js / audit.js 注入接线（源断言）', () => {
-    const outlineSrc = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
-    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const outlineSrc = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
+    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(outlineSrc.includes('historicalScaleBeatRule(vol?.idx || 1'), '细纲生成应按卷注入节拍规则');
     assert.ok(auditSrc.includes('historicalScaleRegisterText('), '审校应按卷注入同一把尺');
   });

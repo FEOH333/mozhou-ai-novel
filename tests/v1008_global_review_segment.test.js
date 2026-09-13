@@ -17,8 +17,8 @@ const {
   GLOBAL_REVIEW_SEGMENT_CHARS,
   executeRecommendationRecovery,
   planGlobalReviewSegments,
-} = await import('../server/engine/recommendation_recovery.js');
-const { validateChapterRewrite } = await import('../server/engine/polish.js');
+} = await import('../server/engine/recovery/recommendation_recovery.js');
+const { validateChapterRewrite } = await import('../server/engine/quality/polish.js');
 const { recommendationRecoveryGlobalReviewInstruction } = await import('../server/engine/prompts.js');
 
 function fixtureText() {

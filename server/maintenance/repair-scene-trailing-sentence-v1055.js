@@ -7,7 +7,7 @@
 // 用法：node server/maintenance/repair-scene-trailing-sentence-v1055.js [--book=<id>] [--apply|--verify]
 'use strict';
 import * as store from '../db/store.js';
-import { closeTrailingSentence, applyValidatedSceneRewrite } from '../engine/polish.js';
+import { closeTrailingSentence, applyValidatedSceneRewrite } from '../engine/quality/polish.js';
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');

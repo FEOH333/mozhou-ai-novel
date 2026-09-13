@@ -18,8 +18,8 @@ test('V0.29: 契约进公共材料前缀——buildPublicMaterials 含书契约�
 
 test('V0.29: 裸调用修复——pleasure_audit/contract_score 走 assembleMessages 复用历史堆', async () => {
   const store = await import('../server/db/store.js');
-  const outline = await import('../server/engine/outline.js');
-  const pleasure = await import('../server/engine/pleasure.js');
+  const outline = await import('../server/engine/planning/outline.js');
+  const pleasure = await import('../server/engine/quality/pleasure.js');
   const b = store.books.create({ title: 'T1', genre: '玄幻', platform: '番茄', blurb: 'x' });
   await outline.generateBookContract(b.id, { genre: '玄幻', blurb: 'x', platform: '番茄' });
   await outline.generateBookOutline(b.id, {});
@@ -30,9 +30,9 @@ test('V0.29: 裸调用修复——pleasure_audit/contract_score 走 assembleMess
   const audit = await pleasure.auditPleasure(b.id, ch.id, 1, {});
   assert.ok(audit.ok !== false || audit.ok === undefined, '快感审计可执行');
   // 静态验证：源码已走 assembleMessages
-  const src = fs.readFileSync(path.join(process.cwd(), 'server/engine/pleasure.js'), 'utf8');
+  const src = fs.readFileSync(path.join(process.cwd(), 'server/engine/quality/pleasure.js'), 'utf8');
   assert.ok(src.includes("assembleMessages(bookId"), 'pleasure_audit 应走 assembleMessages');
-  const ideaSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/idea.js'), 'utf8');
+  const ideaSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/planning/idea.js'), 'utf8');
   assert.ok(ideaSrc.includes("assembleMessages(bookId"), 'contract_score/idea 应走 assembleMessages');
 });
 
@@ -50,8 +50,8 @@ test('V0.29: 路由表——thinking 字段随 routes 保存并可回读', async
 
 test('V0.29: 场景失败自动重试——单次故障被 pipeline 自动救回', async () => {
   const store = await import('../server/db/store.js');
-  const pipeline = await import('../server/engine/pipeline.js');
-  const outline = await import('../server/engine/outline.js');
+  const pipeline = await import('../server/engine/pipeline/pipeline.js');
+  const outline = await import('../server/engine/planning/outline.js');
   const b = store.books.create({ title: 'T2', genre: '玄幻', blurb: 'x' });
   await outline.generateBookContract(b.id, { genre: '玄幻', blurb: 'x', platform: '番茄' });
   await outline.generateBookOutline(b.id, {});

@@ -17,11 +17,11 @@ const {
   manuscriptSourceHash,
   narrativeStateStatus,
   prepareAndCommitNarrativeRevision,
-} = await import('../server/engine/narrative_state.js');
-const { generateNextVolume } = await import('../server/engine/continuation.js');
-const { generateOpeningBlueprint } = await import('../server/engine/opening.js');
-const { buildStoryPromiseProfile, ensureStoryPromiseProfile, storyPromiseStatus } = await import('../server/engine/story_promise.js');
-const { validateChapterHorizon, compileChapterHorizon, formatChapterHorizonText } = await import('../server/engine/horizon.js');
+} = await import('../server/engine/narrative/narrative_state.js');
+const { generateNextVolume } = await import('../server/engine/pipeline/continuation.js');
+const { generateOpeningBlueprint } = await import('../server/engine/planning/opening.js');
+const { buildStoryPromiseProfile, ensureStoryPromiseProfile, storyPromiseStatus } = await import('../server/engine/planning/story_promise.js');
+const { validateChapterHorizon, compileChapterHorizon, formatChapterHorizonText } = await import('../server/engine/planning/horizon.js');
 
 const sha256 = value => createHash('sha256').update(String(value || '')).digest('hex');
 const ANCHOR = '主角烧掉退路文书';
@@ -229,8 +229,8 @@ test('V0.102.1 非历史题材：已规划续卷同样跳过重生（零特判�
 });
 
 test('V0.102.1 管线写章入口改为 ensureNarrativeStateReady，断言闸仍留给结算', () => {
-  const pipeline = fs.readFileSync('server/engine/pipeline.js', 'utf8');
-  const settle = fs.readFileSync('server/engine/settle.js', 'utf8');
+  const pipeline = fs.readFileSync('server/engine/pipeline/pipeline.js', 'utf8');
+  const settle = fs.readFileSync('server/engine/pipeline/settle.js', 'utf8');
   assert.match(pipeline, /ensureNarrativeStateReady/);
   assert.match(pipeline, /await ensureNarrativeStateReady\(/);
   assert.doesNotMatch(pipeline, /assertNarrativeStateReady\(/);

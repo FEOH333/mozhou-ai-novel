@@ -17,9 +17,9 @@ before(async () => {
   store = await import('../server/db/store.js');
   packs = await import('../server/data/creative_packs.js');
   prompts = await import('../server/engine/prompts.js');
-  audit = await import('../server/engine/audit.js');
-  polish = await import('../server/engine/polish.js');
-  idea = await import('../server/engine/idea.js');
+  audit = await import('../server/engine/pipeline/audit.js');
+  polish = await import('../server/engine/quality/polish.js');
+  idea = await import('../server/engine/planning/idea.js');
   bookId = store.books.create({ title: 'V0.22测试', genre: '玄幻', blurb: 'x' }).id;
 });
 

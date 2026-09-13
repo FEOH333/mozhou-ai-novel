@@ -94,7 +94,7 @@ describe('V0.87 战争写作专项', () => {
 
   test('⑤细纲注入：战役章细纲带纪律（局部变量无 ReferenceError）', async () => {
     const { chapterOutlineInstruction } = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes('const warfareText = isWarfareText'), '细纲局部变量定义');
     assert.ok(src.includes('warfareText,'), '细纲注入槽位传参');
     assert.ok(src.includes('const chOutline = store.chapters.outline(chapterId)'), '细纲检测用解析后的 outline（修复死源）');
@@ -106,7 +106,7 @@ describe('V0.87 战争写作专项', () => {
 
   test('⑥卷纲注入：战争卷按战役纪律设计章节', async () => {
     const { volumeOutlineInstruction } = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes("warfareText: isWarfareText(vol.title, vol.goal, vol.outline_json)"), '卷纲战役检测');
     const v = volumeOutlineInstruction({ bookTitle: 'X', volumeIdx: 3, volumeTitle: '钓鱼城', bookOutline: {}, chapterCount: 8, warfareText: '【战役写作纪律】（V0.87 硬要求）\n【本时代战役考据锚点】\n【宋蒙战争战役考据锚点】' });
     assert.ok(v.includes('战役写作纪律'), '战争卷卷纲注入纪律');
@@ -131,7 +131,7 @@ describe('V0.87 战争写作专项', () => {
     assert.ok(!normal.includes('|战争逻辑'), '非战役章类型枚举无战争逻辑');
     assert.ok(!normal.includes('敌方无脑硬冲'), '非战役章无战争逻辑判据');
     // audit.js：计算 + 记债路由
-    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(auditSrc.includes('warfareCheck = isWarfareText'), 'audit.js 计算 warfareCheck');
     // V0.109.3：记债语义迁入 issue_types 注册表（audit 只查 needsRoundup）
     const { needsRoundup } = await import(pathToFileURL(path.join(ROOT, 'server/data/issue_types.js')));
@@ -140,7 +140,7 @@ describe('V0.87 战争写作专项', () => {
 
   test('⑧端到端：战役章 auditChapter 计算 warfareCheck 并注入审校指令', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { auditChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+    const { auditChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
  const b = store.books.create({ title: '示例历史长篇', genre: '历史', blurb: '守钓鱼城', platform: '番茄' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     const ch = store.chapters.create(b.id, v.id, 1, { title: '钓鱼城之战', status: 'done', outline: { scenes: [{ pov: '王坚', location: '钓鱼城', beat: '蒙军浮梁锁江围攻七门' }], checkpoints: [] } });
@@ -156,7 +156,7 @@ describe('V0.87 战争写作专项', () => {
     assert.ok(daily.includes('写作要求'), '非战役场景正常出指令');
     assert.ok(!daily.includes('战役写作纪律'), '非战役不注入纪律');
     // write.js 战役检测用 outline.goal/outline.conflict（无 ctx 引用 → 无 ReferenceError）
-    const writeSrc = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const writeSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(writeSrc.includes('isWarfareText(scene.beat, outline.goal, outline.conflict)'), 'write.js 战役检测无悬空 ctx');
     assert.ok(writeSrc.includes('WARFARE_HISTORY_TEXT'), 'write.js 接入史实锚定段');
   });

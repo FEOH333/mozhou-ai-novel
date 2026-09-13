@@ -9,7 +9,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import './helper.js';
-import { phaseCoveredByText, historicalOutlineIssues } from '../server/engine/historical_guardrails.js';
+import { phaseCoveredByText, historicalOutlineIssues } from '../server/engine/longform/historical_guardrails.js';
 
 const PHASE = '从执行者到布防者的过渡起点';
 

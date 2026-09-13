@@ -13,20 +13,20 @@ const ROOT = process.cwd();
 
 describe('V0.43 缓存优化', () => {
   test('长度自愈以目标 0.85 为下限（压缩仍为 1.7）', async () => {
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(w.includes('Math.round(target * 0.85)'), 'minWords 应 0.85，保证场景目标总和能托住章级下限');
     assert.ok(w.includes('Math.round(target * 1.7)'), 'maxWords 应 1.7');
     assert.ok(w.includes('超 70% 才压缩'), '注释说明');
   });
 
   test('审校修订收敛：low 语句质量不再触发 fix 修订', async () => {
-    const p = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline.js'), 'utf8');
+    const p = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pipeline.js'), 'utf8');
     assert.ok(p.includes("i.severity === 'high' || i.severity === 'medium'"), '只修 high+medium 语句质量');
     // 行为验证：low 语句质量 → 不可 fix
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
     const b = store.books.create({ title: 'T', genre: '玄幻', blurb: 'x' });
     // textFixable 是 pipeline 内部闭包——通过静态断言验证已足够（行为由 v015 全流程测试覆盖）
-    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     assert.ok(typeof runChapterFlow === 'function');
   });
 

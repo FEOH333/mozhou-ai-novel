@@ -17,7 +17,7 @@ describe('V0.86 创作质量与重写机制', () => {
   test('①coverage 路由 maxTokens 提升 + 截断自动重试', async () => {
     const { DEFAULT_ROUTES } = await import(pathToFileURL(path.join(ROOT, 'server/config.js')));
     assert.ok(DEFAULT_ROUTES.coverage.maxTokens >= 6000, 'coverage maxTokens 提到 6000');
-    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(auditSrc.includes("if (res.finishReason === 'length')"), '覆盖截断检测');
     assert.ok(auditSrc.includes('覆盖校验截断重试'), '截断重试记录');
   });
@@ -27,7 +27,7 @@ describe('V0.86 创作质量与重写机制', () => {
     const c = coverageInstruction({ bookTitle: 'X', chapterTitle: 'C', checkpoints: ['结尾出现"那面旗卷着烟火消失在尽头"'], chapterText: '正文' });
     assert.ok(c.includes('同义改写、意象等价、标点/用词差异均视为已覆盖'), '覆盖判定放宽原句类要点');
     assert.ok(c.includes('不必逐字复刻细纲'), '不要求逐字复刻');
-    const pipeSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline.js'), 'utf8');
+    const pipeSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pipeline.js'), 'utf8');
     assert.ok(pipeSrc.includes('已记债放行'), '收敛保护记债放行');
     assert.ok(pipeSrc.includes('store.conflicts.create'), '遗漏要点记 conflicts');
     // 细纲 checkpoints 纪律：禁止强制原句
@@ -79,7 +79,7 @@ describe('V0.86 创作质量与重写机制', () => {
 
   test('⑤rewriteChapterRange 章节重写：快照+清场景/摘要/结算+facts superseded', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { rewriteChapterRange } = await import(pathToFileURL(path.join(ROOT, 'server/engine/signing.js')));
+    const { rewriteChapterRange } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/signing.js')));
     const b = store.books.create({ title: '重写书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'world', 'w');
     const v = store.volumes.create(b.id, 1, { title: 'V1' });

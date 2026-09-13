@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './helper.js';
-import { isFlatTitle, titleHitsText } from '../server/engine/alignment.js';
+import { isFlatTitle, titleHitsText } from '../server/engine/longform/alignment.js';
 
 test('V0.96.3 章名含蓄化：意象型章名不命中白描黑名单（对齐系统不会改回）', () => {
   for (const name of ['过路的人', '北渡', '空村']) {

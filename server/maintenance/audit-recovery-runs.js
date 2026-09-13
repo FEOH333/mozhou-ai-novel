@@ -74,8 +74,8 @@ async function inspectPreparedDataDir(dbPath) {
   const store = await import('../db/store.js');
   store.db();
   const healed = store.recommendationRecoveryRuns.healOrphanedInFlight();
-  const { publicationDashboard } = await import('../engine/publication_feedback.js');
-  const { annotateRecoveryRunsResumability } = await import('../engine/recommendation_recovery.js');
+  const { publicationDashboard } = await import('../engine/quality/publication_feedback.js');
+  const { annotateRecoveryRunsResumability } = await import('../engine/recovery/recommendation_recovery.js');
 
   const books = [];
   for (const book of store.books.list()) {

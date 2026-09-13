@@ -18,7 +18,7 @@
 'use strict';
 import fs from 'node:fs';
 import * as store from '../db/store.js';
-import { applyValidatedSceneRewrite } from '../engine/polish.js';
+import { applyValidatedSceneRewrite } from '../engine/quality/polish.js';
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');

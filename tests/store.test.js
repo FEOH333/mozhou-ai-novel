@@ -4,10 +4,10 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import * as store from '../server/db/store.js';
 import { assembleMessages, budgetCheck, historyStats } from '../server/llm/cache.js';
-import { applyFacts, relevantFacts, formatFacts } from '../server/engine/factbook.js';
-import { applyForeshadowActions } from '../server/engine/foreshadow.js';
-import { ensureHistory, rebuildHistory } from '../server/engine/outline.js';
-import { runLocalRules } from '../server/engine/rules.js';
+import { applyFacts, relevantFacts, formatFacts } from '../server/engine/narrative/factbook.js';
+import { applyForeshadowActions } from '../server/engine/narrative/foreshadow.js';
+import { ensureHistory, rebuildHistory } from '../server/engine/planning/outline.js';
+import { runLocalRules } from '../server/engine/quality/rules.js';
 
 let bookId;
 before(async () => {

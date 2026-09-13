@@ -12,7 +12,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import './helper.js';
 import {
   healHistoricalCheckpointGap, historicalOutlineIssues,
-} from '../server/engine/historical_guardrails.js';
+} from '../server/engine/longform/historical_guardrails.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PHASE = '从执行者到布防者的过渡起点';
@@ -75,7 +75,7 @@ describe('V0.95.6 checkpoint 缺口本地愈合', () => {
 describe('V0.95.6 outline 接线与预算护栏', () => {
   test('generateChapterOutline 历史门内已接入 heal（源断言：写审同源单点）', async () => {
     const { readFileSync } = await import('node:fs');
-    const src = readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(
       src.includes('healHistoricalCheckpointGap(outline)'),
       '细纲校验前应先尝试 checkpoint 缺口愈合（beat 落实即放行，不再整版重掷）',

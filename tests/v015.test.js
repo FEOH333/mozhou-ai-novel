@@ -3,14 +3,14 @@ import './pipeline-helper.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as store from '../server/db/store.js';
-import { generateBookOutline, generateChapterOutline, generateBookContract } from '../server/engine/outline.js';
-import { writeScene } from '../server/engine/write.js';
-import { settleChapter } from '../server/engine/settle.js';
-import { ensureSceneRows, runChapterFlow } from '../server/engine/pipeline.js';
-import { runBookPilot } from '../server/engine/pilot.js';
-import { runPolish } from '../server/engine/polish.js';
+import { generateBookOutline, generateChapterOutline, generateBookContract } from '../server/engine/planning/outline.js';
+import { writeScene } from '../server/engine/pipeline/write.js';
+import { settleChapter } from '../server/engine/pipeline/settle.js';
+import { ensureSceneRows, runChapterFlow } from '../server/engine/pipeline/pipeline.js';
+import { runBookPilot } from '../server/engine/pipeline/pilot.js';
+import { runPolish } from '../server/engine/quality/polish.js';
 import { historyStats } from '../server/llm/cache.js';
-import { runLocalRules } from '../server/engine/rules.js';
+import { runLocalRules } from '../server/engine/quality/rules.js';
 
 function makeBookWithChapter(genre = '玄幻', platform = '通用') {
   const book = store.books.create({ title: 'V015测试', genre, platform });
@@ -56,7 +56,7 @@ test('V0.15: 滚动摘要与伏笔事件流水（结算后）', async () => {
   await writeScene(book.id, ch.id, store.scenes.list(ch.id)[0].id, {});
   const settled = await settleChapter(book.id, ch.id);
   // 滚动摘要（V0.95 两段式：content 存 JSON，统一经 rollingText 读取）
-  const { rollingText } = await import('../server/engine/rolling.js');
+  const { rollingText } = await import('../server/engine/narrative/rolling.js');
   const rolling = rollingText(book.id);
   assert.ok(rolling.includes('第1章'), `滚动摘要应含章节标记: ${rolling}`);
   // 伏笔事件流水

@@ -13,9 +13,9 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v124-finish-
 const ROOT = process.cwd();
 const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const cs = await import(pathToFileURL(path.join(ROOT, 'server/engine/chapter_status.js')));
-const polish = await import(pathToFileURL(path.join(ROOT, 'server/engine/polish.js')));
-const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/rules.js')));
+const cs = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/chapter_status.js')));
+const polish = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/polish.js')));
+const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/rules.js')));
 const textUtil = await import(pathToFileURL(path.join(ROOT, 'server/util/text.js')));
 
 function freshBook(title, genre = '玄幻') {
@@ -44,14 +44,14 @@ describe('V0.93.2 收尾审查', () => {
 
   test('状态机：所有章状态写入点均收敛（源码无直写残留）', () => {
     const sites = [
-      ['server/engine/settle.js', /chapters\.update\(chapterId, \{ status/],
-      ['server/engine/pipeline.js', /chapters\.update\(chapterId, \{ status/],
-      ['server/engine/write.js', /chapters\.update\(chapterId, \{ wordCount: estimateChineseChars\(fullText\), status/],
-      ['server/engine/outline.js', /chapters\.update\(chapterId, \{ outline, status/],
-      ['server/engine/recovery.js', /chapters\.update\(ch\.id, \{ status/],
-      ['server/engine/signing.js', /chapters\.update\(ch\.id, \{ status/],
-      ['server/engine/pilot.js', /chapters\.update\(ch\.id, \{ status/],
-      ['server/engine/polish.js', /chapters\.update\(current\.id, \{[\s\S]{0,200}?status:/],
+      ['server/engine/pipeline/settle.js', /chapters\.update\(chapterId, \{ status/],
+      ['server/engine/pipeline/pipeline.js', /chapters\.update\(chapterId, \{ status/],
+      ['server/engine/pipeline/write.js', /chapters\.update\(chapterId, \{ wordCount: estimateChineseChars\(fullText\), status/],
+      ['server/engine/planning/outline.js', /chapters\.update\(chapterId, \{ outline, status/],
+      ['server/engine/recovery/recovery.js', /chapters\.update\(ch\.id, \{ status/],
+      ['server/engine/planning/signing.js', /chapters\.update\(ch\.id, \{ status/],
+      ['server/engine/pipeline/pilot.js', /chapters\.update\(ch\.id, \{ status/],
+      ['server/engine/quality/polish.js', /chapters\.update\(current\.id, \{[\s\S]{0,200}?status:/],
     ];
     for (const [rel, pattern] of sites) {
       const src = read(rel);
@@ -115,7 +115,7 @@ describe('V0.93.2 收尾审查', () => {
   });
 
   test('smoothTransitions 不再直写场景正文（过闸）', () => {
-    const src = read('server/engine/polish.js');
+    const src = read('server/engine/quality/polish.js');
     const fn = src.slice(src.indexOf('export async function smoothTransitions'), src.indexOf('export async function midStoryReview'));
     assert.ok(fn.length > 0, '能定位 smoothTransitions 函数体');
     assert.ok(!/store\.scenes\.update/.test(fn), 'smoothTransitions 不得直写场景');
@@ -148,15 +148,15 @@ describe('V0.93.2 收尾审查', () => {
   });
 
   test('短章防线接线：pipeline 结算后确定性检查并记债', () => {
-    const src = read('server/engine/pipeline.js');
+    const src = read('server/engine/pipeline/pipeline.js');
     assert.match(src, /checkChapterLength/, 'pipeline 应接入短章检查');
   });
 
   test('历史题材开关收敛：书名正则单一定义且仅用于题材锚定', () => {
-    const hl = read('server/engine/historical_longform.js');
+    const hl = read('server/engine/longform/historical_longform.js');
  const matches = (hl.match(/\/示例历史长篇\//g) || []).length;
     assert.ok(matches <= 1, '书名正则只在一处定义');
-    const lg = read('server/engine/longform_lifecycle.js');
+    const lg = read('server/engine/longform/longform_lifecycle.js');
  assert.ok(!/\/示例历史长篇\//.test(lg), 'longform_lifecycle 不复制书名正则');
   });
 
@@ -168,7 +168,7 @@ describe('V0.93.2 收尾审查', () => {
     assert.equal(textUtil.namesMatch('阿蛮', '阿朱'), false);
     assert.equal(textUtil.hookDescriptionsMatch('识破工地细作并记入工册', '工地细作被识破并记录在册'), true, 'n-gram 语义指纹');
     assert.equal(textUtil.hookDescriptionsMatch('A', 'B'), false);
-    const lg = read('server/engine/longform_lifecycle.js');
+    const lg = read('server/engine/longform/longform_lifecycle.js');
     assert.ok(!/^function namesMatch/m.test(lg), 'longform_lifecycle 不本地定义 namesMatch');
   });
 

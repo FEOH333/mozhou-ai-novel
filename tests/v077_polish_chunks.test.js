@@ -8,7 +8,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v077-polish-chunks-'));
 process.env.NOVEL_NO_OPEN = '1';
 
-const { chunkPolishChapters } = await import('../server/engine/polish.js');
+const { chunkPolishChapters } = await import('../server/engine/quality/polish.js');
 
 test('长篇终审按完整章节分块，覆盖后段且不从章中间截断', () => {
   assert.equal(typeof chunkPolishChapters, 'function');

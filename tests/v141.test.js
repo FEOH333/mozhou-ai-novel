@@ -5,13 +5,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './helper.js';
 import * as store from '../server/db/store.js';
-import { narrativeMemoryText, applySettlementMemories, MEMORY_BUDGET } from '../server/engine/narrative_memory.js';
-import { rollingText, appendRollingRecent, setRollingPinned, parseRolling } from '../server/engine/rolling.js';
-import { ensureVolumeSummaries, VOLUME_DIGEST_LOCAL } from '../server/engine/archive.js';
+import { narrativeMemoryText, applySettlementMemories, MEMORY_BUDGET } from '../server/engine/narrative/narrative_memory.js';
+import { rollingText, appendRollingRecent, setRollingPinned, parseRolling } from '../server/engine/narrative/rolling.js';
+import { ensureVolumeSummaries, VOLUME_DIGEST_LOCAL } from '../server/engine/pipeline/archive.js';
 import { archiveInjectionText } from '../server/llm/cache.js';
-import { activeForeshadowsText } from '../server/engine/foreshadow.js';
-import { itemCardsText, touchItems } from '../server/engine/items.js';
-import { isCompletedChapter } from '../server/engine/chapter_status.js';
+import { activeForeshadowsText } from '../server/engine/narrative/foreshadow.js';
+import { itemCardsText, touchItems } from '../server/engine/narrative/items.js';
+import { isCompletedChapter } from '../server/engine/pipeline/chapter_status.js';
 
 function seedBook() {
   const b = store.books.create({ title: '记忆测试书', genre: '玄幻' });

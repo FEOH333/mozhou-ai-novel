@@ -2,7 +2,7 @@
 'use strict';
 
 import * as store from '../db/store.js';
-import { isCompletedChapter } from '../engine/chapter_status.js';
+import { isCompletedChapter } from '../engine/pipeline/chapter_status.js';
 import { archiveInjectionText } from './cache.js';
 
 function fixedPrefixMessages(bookId) {

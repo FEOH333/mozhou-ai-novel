@@ -35,8 +35,8 @@ test('V0.95.1 中期审阅预算：mid_story_review 报告型输出 ≥8000（�
 
 test('V0.95.1 卷审失败自愈闭环：failed 记录可被补审覆盖（runVolumeReview 幂等 upsert + reviewDueVolumes 出候选）', async () => {
   const store = await import('../server/db/store.js');
-  const { reviewDueVolumes } = await import('../server/engine/volumereview.js');
-  const { isCompletedChapter } = await import('../server/engine/chapter_status.js');
+  const { reviewDueVolumes } = await import('../server/engine/planning/volumereview.js');
+  const { isCompletedChapter } = await import('../server/engine/pipeline/chapter_status.js');
   const b = store.books.create({ title: '卷审自愈测试', genre: '玄幻' });
   const vol = store.volumes.create(b.id, 1, { title: '第一卷' });
   // 卷内 2 章全部完成

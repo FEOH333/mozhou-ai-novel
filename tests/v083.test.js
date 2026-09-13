@@ -16,7 +16,7 @@ describe('V0.79 纯文本 AI 味问题记债放行 + 卡章自动修复', () => 
     process.env.NOVEL_AUDIT_TEXTFAULT = '1'; // 审校持续报"语句质量"（AI 味词）
     try {
       const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-      const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+      const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
       const b = store.books.create({ title: 'AI味书', genre: '玄幻', blurb: 'x' });
       store.materials.set(b.id, 'contract', 'x');
       const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -34,7 +34,7 @@ describe('V0.79 纯文本 AI 味问题记债放行 + 卡章自动修复', () => 
     process.env.NOVEL_AUDIT_FAULT = '1'; // 审校报"事实编造"（细纲根因）
     try {
       const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-      const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+      const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
       // textOnly 只针对语句质量/文学性；细纲根因仍判定 replan
       assert.equal(hasOutlineRootIssue({ issues: [{ type: '事实编造', severity: 'high' }] }), true);
     } finally {
@@ -43,7 +43,7 @@ describe('V0.79 纯文本 AI 味问题记债放行 + 卡章自动修复', () => 
   });
 
   test('③hasOutlineRootIssue 与 textOnly 分类正交：AI 味词不进 replan', async () => {
-    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     assert.equal(hasOutlineRootIssue({ issues: [{ type: '语句质量', severity: 'medium' }] }), false, '语句质量 → 不 replan（走 textOnly 放行）');
     assert.equal(hasOutlineRootIssue({ issues: [{ type: '文学性', severity: 'medium' }] }), false, '文学性 → 不 replan');
   });

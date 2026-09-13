@@ -12,7 +12,7 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/roster.js')));
+const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/roster.js')));
 
 describe('V0.65 角色库增强', () => {
   test('①双轨净化：多字词强命中（六维补全过也清）+ 单字词弱命中（仅空卡）', () => {

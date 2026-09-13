@@ -15,10 +15,10 @@ import {
   detectChapterEndingTic, detectAphorismQuota, detectBareDialogueRuns,
   detectPronounParaDensity, detectTitleDuplication, detectTimePromiseBreak,
   runLocalRules,
-} from '../server/engine/rules.js';
+} from '../server/engine/quality/rules.js';
 import { REDLINES } from '../server/data/redlines.js';
-import { eraRedLineCheck } from '../server/engine/history.js';
-import { historicalFigureTimelineIssues } from '../server/engine/historical_guardrails.js';
+import { eraRedLineCheck } from '../server/engine/narrative/history.js';
+import { historicalFigureTimelineIssues } from '../server/engine/longform/historical_guardrails.js';
 import { HISTORICAL_FIGURES } from '../server/data/history.js';
 import { CONTINUITY_CRAFT_TEXT } from '../server/data/literary_techniques.js';
 import { writeSceneInstruction, auditInstruction, reviseInstruction } from '../server/engine/prompts.js';
@@ -287,7 +287,7 @@ test('V0.97 doctor：drafted 残章与相似名清查', async () => {
 // ---------- 15. 场景门禁：drafted 残章不适用整章目标字数下限（ch34 残章精修实证：目标 4700 现状 973 被 REWRITE_TOO_SHORT 误拦） ----------
 test('V0.97 场景门禁：残章允许同量级最小修订，完成章仍守目标字数下限', async () => {
   const store = await import('../server/db/store.js');
-  const { applyValidatedSceneRewrite } = await import('../server/engine/polish.js');
+  const { applyValidatedSceneRewrite } = await import('../server/engine/quality/polish.js');
   const book = store.books.create({ title: '残章修订书', genre: '历史', settings: {} });
   const vol = store.volumes.create(book.id, 1, { title: '卷' });
   const mk = (idx, title, status, proseSeed, tpl) => {

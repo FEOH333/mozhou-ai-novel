@@ -11,8 +11,8 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v104-reader-
 process.env.NOVEL_NO_OPEN = '1';
 const ROOT = process.cwd();
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
-const attraction = await import(pathToFileURL(path.join(ROOT, 'server/engine/attraction.js')));
+const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
+const attraction = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/attraction.js')));
 
 describe('V0.91 历史题材平台规则分流', () => {
   test('番茄历史书不再硬套暴力开场与三章打脸，改为事件变化和阅读回报', () => {

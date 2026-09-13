@@ -6,7 +6,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isRevisionStale } from '../server/engine/pipeline.js';
+import { isRevisionStale } from '../server/engine/pipeline/pipeline.js';
 
 const quoteOf = q => String(q || '').replace(/\s/g, '').slice(0, 20);
 

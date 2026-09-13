@@ -46,7 +46,7 @@ describe('V0.84 缓存命中率专项', () => {
     // 构造历史堆：system + 公共材料 + 一条正文
     store.materials.set(b.id, 'system', '你是作家');
     store.materials.set(b.id, 'world', '世界观恒定内容');
-    const { rebuildHistory } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { rebuildHistory } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     rebuildHistory(b.id);
     store.history.append(b.id, 'assistant', '场景正文第一条');
     // 添加两个归档批次
@@ -110,7 +110,7 @@ describe('V0.84 缓存命中率专项', () => {
   });
 
   test('⑥cast 落库后再 rebuild（M1）', async () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     const fnStart = src.indexOf('export async function generateBookOutline');
     const fnEnd = src.indexOf('export async function generateVolumeOutline');
     const fnBody = src.slice(fnStart, fnEnd);

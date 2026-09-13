@@ -8,7 +8,7 @@ import path from 'node:path';
 
 import { clearBookLeasesForTests } from '../server/jobs/book-lease.js';
 import { createRecoveryJobRegistry, writeJobs } from '../server/jobs/recovery-jobs.js';
-import { isImmediateReplanIssue } from '../server/engine/historical_guardrails.js';
+import { isImmediateReplanIssue } from '../server/engine/longform/historical_guardrails.js';
 
 const ROOT = process.cwd();
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
@@ -156,6 +156,6 @@ test('V0.104.0 导航与状态映射零依赖书名；清场合同本轮不碰',
  assert.doesNotMatch(workshop, /示例历史长篇/);
  assert.doesNotMatch(library, /示例历史长篇/);
   assert.equal(typeof isImmediateReplanIssue, 'function', '本轮前端改动不得改写清场合同');
-  const guard = read('server/engine/historical_guardrails.js');
+  const guard = read('server/engine/longform/historical_guardrails.js');
   assert.match(guard, /export function isImmediateReplanIssue/);
 });

@@ -14,7 +14,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v044-'));
 describe('V0.44 完本判定与自动续卷', () => {
   test('localEndingCheck：伏笔未回收→强制续卷；字数不足→续卷；达标→交 AI；超上限→停', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
     const b = store.books.create({ title: '判定书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     const c = store.chapters.create(b.id, v.id, 1, { title: 'C1', status: 'done' });
@@ -42,7 +42,7 @@ describe('V0.44 完本判定与自动续卷', () => {
 
   test('shouldContinueBook：本地规则优先；AI 评估 mock 未完本→续卷/完本→停', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
     const b = store.books.create({ title: '评估书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     const c = store.chapters.create(b.id, v.id, 1, { title: 'C1', status: 'done' });
@@ -64,7 +64,7 @@ describe('V0.44 完本判定与自动续卷', () => {
 
   test('aiEndingCheck：输入含契约/伏笔/规模，mock 完本关键词→finished', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
     const b = store.books.create({ title: '完本书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     const c = store.chapters.create(b.id, v.id, 1, { title: 'C1', status: 'done' });

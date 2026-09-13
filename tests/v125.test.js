@@ -12,8 +12,8 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v125-outline
 const ROOT = process.cwd();
 const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const write = await import(pathToFileURL(path.join(ROOT, 'server/engine/write.js')));
-const pilot = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+const write = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/write.js')));
+const pilot = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
 
 describe('V0.93.3 卡章根因修复', () => {
   test('细纲指令注入阶段任务落实硬要求（核心词连续出现 + 驳回警告）', () => {
@@ -72,10 +72,10 @@ describe('V0.93.3 卡章根因修复', () => {
   });
 
   test('细纲硬防线失败时错误携带 OUTLINE_GUARD_FAILED 代码', () => {
-    const src = read('server/engine/outline.js');
+    const src = read('server/engine/planning/outline.js');
     assert.match(src, /OUTLINE_GUARD_FAILED/, 'outline.js 抛错应带代码');
     // pilot 失败路径把错误码与信息写入健康快照 notes
-    const psrc = read('server/engine/pilot.js');
+    const psrc = read('server/engine/pipeline/pilot.js');
     assert.match(psrc, /失败代码/, 'pilot 失败路径应记录失败代码到健康快照');
   });
 });

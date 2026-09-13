@@ -15,7 +15,7 @@ describe('V0.36 跨卷章节 idx 全局连续', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'v036-'));
     process.env.NOVEL_DATA_DIR = tmp;
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: '测试书', genre: '玄幻', blurb: 'x' });
     await outline.generateBookOutline(b.id, { volumeCount: 2 });
     const vols = store.volumes.list(b.id);

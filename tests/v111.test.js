@@ -11,10 +11,10 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v111-lifecyc
 const ROOT = process.cwd();
 
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform_lifecycle.js')));
+const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/longform_lifecycle.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
-const outlineEngine = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
+const outlineEngine = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
 
 describe('V0.92 全书生命周期阶段', () => {
  test('《示例历史长篇》十五卷按通用位置映射推进，终卷只在第十五卷', () => {

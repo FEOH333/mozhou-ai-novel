@@ -19,8 +19,8 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const historyEngine = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
-const guardrails = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_guardrails.js')));
+const historyEngine = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
+const guardrails = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_guardrails.js')));
 
 describe('V0.105.7 时代器物双闸 + 词表扩容 + beat 覆盖 + 年号锚点', () => {
   test('①eraRedLineCheck 命中辣椒油/辣子/旱烟/眼镜/白银（词表完整性）', () => {
@@ -32,7 +32,7 @@ describe('V0.105.7 时代器物双闸 + 词表扩容 + beat 覆盖 + 年号锚�
   });
 
   test('②写侧定向重写：healEraAnachronism 命中后替换并复检归零', async () => {
-    const { healEraAnachronism } = await import(pathToFileURL(path.join(ROOT, 'server/engine/write.js')));
+    const { healEraAnachronism } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/write.js')));
     const b = store.books.create({ title: '辣椒书', genre: '历史', blurb: 'x' });
     const ch = store.chapters.create(b.id, null, 1, { title: 'C1', status: 'planned' });
  const r = await healEraAnachronism(b.id, ch.id, '张老实的面馆里，主角吃下一碗浇了辣椒油的面，又抽了口旱烟。'.repeat(3), {});
@@ -41,7 +41,7 @@ describe('V0.105.7 时代器物双闸 + 词表扩容 + beat 覆盖 + 年号锚�
   });
 
   test('③审侧接线：eraRedLineCheck 与 sceneBeatCoverageIssues 均进 localIssues（源码断言）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(src.includes('eraRedLineCheck(chapterText).map'), 'audit localIssues 应接入 eraRedLineCheck');
     assert.ok(src.includes('...sceneBeatCoverageIssues(store.scenes.list(chapterId))'), 'audit localIssues 应接入 beat 覆盖检测');
     const { isImmediateReplanIssue } = guardrails;
@@ -49,7 +49,7 @@ describe('V0.105.7 时代器物双闸 + 词表扩容 + beat 覆盖 + 年号锚�
   });
 
   test('④场景 beat 覆盖：正文完全偏离 beat 时报大纲偏离（proseFix），同义词根在场不误报', async () => {
-    const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+    const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
     const bad = audit.sceneBeatCoverageIssues([
  { idx: 4, beat: '权臣被软禁在府衙偏院。主角回到王坚病榻前，从他紧握的手中掰开一张算筹。', content: '权臣再次登门，与主角对峙良久，言辞交锋互不相让。主角决定伪造一份捷报，与文书吏连夜誊录文书，又筹划了一套完整的反制之策，逐条写进密档，天将破晓才吹熄烛火，各归其位。' },
     ]);

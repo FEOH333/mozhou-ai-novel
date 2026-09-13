@@ -33,7 +33,7 @@ test('V0.108: CHARACTER_VITALITY_TEXT 三要素齐全且与既有纪律互斥声
 
 test('V0.108: characterCardsText 注入 backstory/motive_root/web 与对手三件', async () => {
   const store = await load('server/db/store.js');
-  const { characterCardsText } = await load('server/engine/characters.js');
+  const { characterCardsText } = await load('server/engine/narrative/characters.js');
   const b = store.books.create({ title: 'T108', genre: '玄幻', blurb: 'x' });
   store.characters.create(b.id, {
     name: '沈锐', personality: '谨慎多疑', goal: '收回财权',
@@ -59,7 +59,7 @@ test('V0.108: characterCardsText 注入 backstory/motive_root/web 与对手三�
 
 test('V0.108: rivalCharactersInScene 按 rival 标记 + 场景命中检测', async () => {
   const store = await load('server/db/store.js');
-  const { rivalCharactersInScene } = await load('server/engine/characters.js');
+  const { rivalCharactersInScene } = await load('server/engine/narrative/characters.js');
   const b = store.books.create({ title: 'T108b', genre: '玄幻', blurb: 'x' });
   store.characters.create(b.id, { name: '赵霸', card: { rival: true } });
   store.characters.create(b.id, { name: '张三', card: {} });
@@ -82,7 +82,7 @@ test('V0.108: writeSceneInstruction 生活体感恒注入 + 对手在场追加�
 });
 
 test('V0.108: write.js 传 rivalNames（源码接线断言）', () => {
-  const src = read('server/engine/write.js');
+  const src = read('server/engine/pipeline/write.js');
   assert.ok(src.includes('const rivalNames = rivalCharactersInScene('), 'writeScene 应检测对手出场');
   assert.ok(src.includes('rivalNames, // V0.108'), '检测结果应传入指令');
 });
@@ -90,7 +90,7 @@ test('V0.108: write.js 传 rivalNames（源码接线断言）', () => {
 // ---------- ⑤ 生成指令含新字段 ----------
 
 test('V0.108: 三处生成指令含人物活性新字段', async () => {
-  const settingsSrc = read('server/engine/settings.js');
+  const settingsSrc = read('server/engine/planning/settings.js');
   assert.ok(settingsSrc.includes('"backstory"') && settingsSrc.includes('"motive_root"'), '设定指令 characters 字段含新键');
   assert.ok(settingsSrc.includes('"agenda"') && settingsSrc.includes('"no_retreat"') && settingsSrc.includes('"stance"'), '设定指令含对手三件');
   assert.ok(settingsSrc.includes('rival: c.rival === true'), '建卡处写入 rival 标记');
@@ -105,7 +105,7 @@ test('V0.108: 三处生成指令含人物活性新字段', async () => {
 // ---------- ⑥ 密度检测（写审同源阈值） ----------
 
 test('V0.108: newCharacterDensityIssues 开篇期 medium/常规 low/正常零报', async () => {
-  const { newCharacterDensityIssues } = await load('server/engine/rules.js');
+  const { newCharacterDensityIssues } = await load('server/engine/quality/rules.js');
   assert.equal(newCharacterDensityIssues({ newEntityCount: 2, chapterIdx: 5 }).length, 0, '开篇期 2 个零报（指令 ≤2）');
   const mid = newCharacterDensityIssues({ newEntityCount: 3, chapterIdx: 5 });
   assert.equal(mid.length, 1);
@@ -117,7 +117,7 @@ test('V0.108: newCharacterDensityIssues 开篇期 medium/常规 low/正常零报
 });
 
 test('V0.108: audit.js 挂载密度检测（数据源 pendingEntities 按章计数）', () => {
-  const src = read('server/engine/audit.js');
+  const src = read('server/engine/pipeline/audit.js');
   assert.ok(src.includes('newCharacterDensityIssues'), 'localIssues 应挂载密度检测');
   assert.ok(src.includes('source_chapter) === Number(chapter.idx)'), '按当章计数');
 });
@@ -156,7 +156,7 @@ test('V0.108: 回填脚本默认 dry-run + --apply + 只填空（源码断言）
 test('V0.108: 人物活性全链无题材门控（通用能力）', async () => {
   const { CHARACTER_VITALITY_TEXT } = await load('server/data/literary_techniques.js');
   assert.ok(!CHARACTER_VITALITY_TEXT.includes('南宋') && !CHARACTER_VITALITY_TEXT.includes('蒙古'), '纪律文本无历史专属词');
-  const { newCharacterDensityIssues } = await load('server/engine/rules.js');
+  const { newCharacterDensityIssues } = await load('server/engine/quality/rules.js');
   assert.equal(newCharacterDensityIssues({ newEntityCount: 3, chapterIdx: 5, openingChapters: 20 })[0].severity, 'medium', '密度检测全题材同尺');
 });
 

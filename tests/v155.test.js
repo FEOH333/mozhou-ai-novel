@@ -10,7 +10,7 @@ import path from 'node:path';
 import './helper.js';
 import * as store from '../server/db/store.js';
 import { diffParagraphs } from '../server/util/diff.js';
-import { snapshotDiffOverview, snapshotChapterDiff } from '../server/engine/data_safety.js';
+import { snapshotDiffOverview, snapshotChapterDiff } from '../server/engine/pipeline/data_safety.js';
 
 const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');

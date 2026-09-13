@@ -22,7 +22,7 @@ test('V0.107: TITLE_CRAFT_TEXT / VOLUME_TITLE_CRAFT_TEXT 单一真源与防漂�
 });
 
 test('V0.107: titleShapeOf 句式族分类', async () => {
-  const rules = await import('../server/engine/rules.js');
+  const rules = await import('../server/engine/quality/rules.js');
   assert.equal(rules.titleShapeOf('军报'), 'terse', '2-3 字为极简名词族');
   assert.equal(rules.titleShapeOf('十人一绳'), 'four', '4 字为四字格族');
   assert.equal(rules.titleShapeOf('第一次选择'), 'mid', '5-6 字为中长族');
@@ -32,7 +32,7 @@ test('V0.107: titleShapeOf 句式族分类', async () => {
 });
 
 test('V0.107: titleShapeStreakIssues 连排与占比检测', async () => {
-  const rules = await import('../server/engine/rules.js');
+  const rules = await import('../server/engine/quality/rules.js');
   // 连排 3 报（soft）、连排 4 硬拦
   const soft = rules.titleShapeStreakIssues(['军报', '夜哨', '斥候']);
   assert.equal(soft.length, 1, '3 连排应报 1 条');
@@ -52,7 +52,7 @@ test('V0.107: titleShapeStreakIssues 连排与占比检测', async () => {
 });
 
 test('V0.107: titleRootRepeatIssues 近词根查重', async () => {
-  const rules = await import('../server/engine/rules.js');
+  const rules = await import('../server/engine/quality/rules.js');
   const issues = rules.titleRootRepeatIssues(['北渡', '鸡爪滩旧图', '北渡口', '灰烟深处']);
   assert.equal(issues.length, 1, '北渡/北渡口 同 2 字词根应报');
   assert.equal(issues[0].root, '北渡');
@@ -62,7 +62,7 @@ test('V0.107: titleRootRepeatIssues 近词根查重', async () => {
 });
 
 test('V0.107: chapterTitleDeliveryIssues 三层核对（事件 high/具象 medium/意象豁免）', async () => {
-  const rules = await import('../server/engine/rules.js');
+  const rules = await import('../server/engine/quality/rules.js');
   // ch52 事故正面拦截：帝星陨落 + 正文零死亡词 → high + proseFix
  const ch52 = rules.chapterTitleDeliveryIssues('帝星陨落', '钓鱼城的清晨，砲声停了。主角数着垛口的箭，一夜没合眼。');
   assert.equal(ch52.length, 1);
@@ -89,7 +89,7 @@ test('V0.107: chapterTitleDeliveryIssues 三层核对（事件 high/具象 mediu
 });
 
 test('V0.107: volumeChapterCount 新档位 8/12/14', async () => {
-  const outline = await import('../server/engine/outline.js');
+  const outline = await import('../server/engine/planning/outline.js');
   const book = { genre: '历史' }; // 历史档 3500 → 常规 12
   assert.equal(outline.volumeChapterCount(book, {}), 12, '常规卷 12 章');
   assert.equal(outline.volumeChapterCount(book, { isFirst: true }), 8, '首卷 8 章');
@@ -105,7 +105,7 @@ test('V0.107: TITLE_EVENT_LEXICON 写审同源（redlines 单一真源）', asyn
 
 test('V0.107: adjustChapterTitle 同步 outline_json.title（ch52 错位根治）+ 已发布保护', async () => {
   const store = await import('../server/db/store.js');
-  const align = await import('../server/engine/alignment.js');
+  const align = await import('../server/engine/longform/alignment.js');
   const b = store.books.create({ title: 'T107', genre: '玄幻', blurb: 'x' });
   const vol = store.volumes.create(b.id, 1, { title: '第一卷' });
   const ch = store.chapters.create(b.id, vol.id, 1, { title: '旧章名', outline: { beat: 'x', title: '旧章名' } });
@@ -123,7 +123,7 @@ test('V0.107: adjustChapterTitle 同步 outline_json.title（ch52 错位根治�
 
 test('V0.107: checkChapterAlignment 事件承诺零在场 → autoFix 改名候选', async () => {
   const store = await import('../server/db/store.js');
-  const align = await import('../server/engine/alignment.js');
+  const align = await import('../server/engine/longform/alignment.js');
   const b = store.books.create({ title: 'T108', genre: '玄幻', blurb: 'x' });
   const vol = store.volumes.create(b.id, 1, { title: '第一卷' });
   const ch = store.chapters.create(b.id, vol.id, 1, { title: '帝星陨落', outline: { beat: 'x' } });
@@ -139,7 +139,7 @@ test('V0.107: checkChapterAlignment 事件承诺零在场 → autoFix 改名候�
 });
 
 test('V0.107: audit localIssues 挂载 chapterTitleDeliveryIssues（源码接线断言）', async () => {
-  const auditSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/audit.js'), 'utf8');
+  const auditSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/audit.js'), 'utf8');
   assert.ok(auditSrc.includes('chapterTitleDeliveryIssues'), 'audit.js 须挂载章名核对闸');
   const promptsSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/prompts.js'), 'utf8');
   assert.ok(promptsSrc.includes('事件承诺型章名'), '审校 3.11 须含事件承诺判定（写审同源）');
@@ -148,13 +148,13 @@ test('V0.107: audit localIssues 挂载 chapterTitleDeliveryIssues（源码接线
 
 test('V0.107: 卷纲生成——章数承诺生效（mock 按请求数返回）+ 句式多样', async () => {
   const store = await import('../server/db/store.js');
-  const outline = await import('../server/engine/outline.js');
+  const outline = await import('../server/engine/planning/outline.js');
   const b = store.books.create({ title: 'T109', genre: '玄幻', blurb: 'x' });
   const vol = store.volumes.create(b.id, 1, { title: '第一卷' });
   await outline.generateVolumeOutline(b.id, vol.id, { chapterCount: 12 });
   const chs = store.chapters.listByVolume(vol.id);
   assert.equal(chs.length, 12, '12 章承诺应真实建 12 章');
-  const rules = await import('../server/engine/rules.js');
+  const rules = await import('../server/engine/quality/rules.js');
   assert.equal(rules.titleShapeStreakIssues(chs.map(c => c.title)).filter(s => s.hard).length, 0, 'mock 标题不得触发硬拦');
 });
 
@@ -162,7 +162,7 @@ test('V0.107: 书纲/续卷章数口径同步（源码断言）', async () => {
   const promptsSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/prompts.js'), 'utf8');
   assert.ok(promptsSrc.includes('每卷 10-16 章'), '书纲口径应为 10-16 章');
   assert.ok(!promptsSrc.includes('每卷 8-15 章'), '旧口径应清除');
-  const contSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/continuation.js'), 'utf8');
+  const contSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/continuation.js'), 'utf8');
   assert.ok(contSrc.includes('|| 12'), '续卷默认 12 章');
 });
 

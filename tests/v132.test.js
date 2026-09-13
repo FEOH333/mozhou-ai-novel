@@ -11,8 +11,8 @@ import { pathToFileURL } from 'node:url';
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v132-extend-'));
 const ROOT = process.cwd();
-const hl = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_longform.js')));
-const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+const hl = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_longform.js')));
+const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
 
 const sample = { title: '示例历史长篇', genre: '历史', blurb: '淳祐元年蒙古铁骑再入蜀地，钓鱼城四十年' };

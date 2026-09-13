@@ -16,7 +16,7 @@ const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')))
 describe('V0.74 选择章节导出', () => {
   test('①后端 export 支持 chapterIds 过滤 + 返回 chapterList', () => {
     const idx = fs.readFileSync(path.join(ROOT, 'server/index.js'), 'utf8');
-    const exporter = fs.readFileSync(path.join(ROOT, 'server/engine/export.js'), 'utf8');
+    const exporter = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/export.js'), 'utf8');
     assert.ok(idx.includes("searchParams.get('chapterIds')"), '应支持 chapterIds 参数');
     assert.ok(exporter.includes('chapterList'), '应返回章节清单');
     assert.ok(exporter.includes('selected.has(chapter.id)'), '应按 id 过滤');

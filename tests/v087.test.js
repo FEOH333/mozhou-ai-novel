@@ -14,7 +14,7 @@ const ROOT = process.cwd();
 describe('V0.80 契约承诺兑现校验', () => {
   test('①syncContractPromises：只登记有绝对期限的"前N章"承诺，周期节奏不伪装成第10章债务', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { syncContractPromises } = await import(pathToFileURL(path.join(ROOT, 'server/engine/promise.js')));
+    const { syncContractPromises } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/promise.js')));
     const b = store.books.create({ title: '承诺书', genre: '玄幻', blurb: 'x' });
     const synced = syncContractPromises(b.id, {
       promises: ['前3章必有打脸', '前5章内获得功法', '每10章一次突破', '每卷末以阶段高潮收束'],
@@ -32,7 +32,7 @@ describe('V0.80 契约承诺兑现校验', () => {
 
   test('②generateBookContract 自动落库契约承诺 + settings.contractStructured', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateBookContract } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { generateBookContract } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: '契约书', genre: '玄幻', blurb: '被废剑宗弟子捡玉佩' });
     await generateBookContract(b.id, {});
     const promises = store.contractPromises.list(b.id);
@@ -43,7 +43,7 @@ describe('V0.80 契约承诺兑现校验', () => {
 
   test('③checkPromiseFulfillment：到期已兑现（mock met:true）→ status=met', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { syncContractPromises, checkPromiseFulfillment } = await import(pathToFileURL(path.join(ROOT, 'server/engine/promise.js')));
+    const { syncContractPromises, checkPromiseFulfillment } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/promise.js')));
     const b = store.books.create({ title: '核对书', genre: '玄幻', blurb: 'x' });
     syncContractPromises(b.id, { promises: ['前3章必有打脸'] });
     // 建 3 章并标记 done
@@ -60,7 +60,7 @@ describe('V0.80 契约承诺兑现校验', () => {
     process.env.NOVEL_PROMISE_FAULT = '1'; // mock 返回 met:false
     try {
       const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-      const { syncContractPromises, checkPromiseFulfillment } = await import(pathToFileURL(path.join(ROOT, 'server/engine/promise.js')));
+      const { syncContractPromises, checkPromiseFulfillment } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/promise.js')));
       const b = store.books.create({ title: '未兑现书', genre: '玄幻', blurb: 'x' });
       syncContractPromises(b.id, { promises: ['前3章必有打脸'] });
       const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });

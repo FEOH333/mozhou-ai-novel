@@ -13,8 +13,8 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const polish = await import(pathToFileURL(path.join(ROOT, 'server/engine/polish.js')));
-const volumeReview = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
+const polish = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/polish.js')));
+const volumeReview = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
 
 function prose(label, paragraphs = 45) {
   return Array.from({ length: paragraphs }, (_, i) =>

@@ -32,7 +32,7 @@ test('V0.30: pendingEntities 自动确认——同名二次出现自动建角色
   assert.ok(dup.context.includes('自称姓萧'), '上下文应合并');
   assert.equal(store.characters.list(b.id).length, 0, 'tidy 前不建卡');
   // tidy 自动整理 → 推断为角色并建卡
-  const { tidyPendingEntities } = await import('../server/engine/pending.js');
+  const { tidyPendingEntities } = await import('../server/engine/narrative/pending.js');
   const stats = tidyPendingEntities(b.id, { currentChapter: 5 });
   assert.equal(stats.confirmed, 1, '应自动建卡 1 项');
   assert.equal(store.pendingEntities.list(b.id).length, 0, '建卡后不再待登记');
@@ -43,7 +43,7 @@ test('V0.30: pendingEntities 自动确认——同名二次出现自动建角色
 });
 
 test('V0.30: smoothTransitions 已接线到 pilot 打磨流程（静态断言）', () => {
-  const src = fs.readFileSync(path.join(process.cwd(), 'server/engine/pilot.js'), 'utf8');
+  const src = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/pilot.js'), 'utf8');
   assert.ok(src.includes('smoothTransitions'), 'pilot 应导入 smoothTransitions');
   assert.ok(src.includes('衔接优化：重写'), '打磨后应执行衔接检查');
 });

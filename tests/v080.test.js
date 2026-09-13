@@ -22,7 +22,7 @@ describe('V0.78 细纲新角色登记 + replan 注入', () => {
 
   test('②generateChapterOutline 支持 replanReason 注入', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateChapterOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { generateChapterOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: '重规划书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     store.materials.set(b.id, 'outline', JSON.stringify({ title: '重规划书', volumes: [{ idx: 1 }] }));
@@ -41,7 +41,7 @@ describe('V0.78 细纲新角色登记 + replan 注入', () => {
 
   test('③pipeline replan 分支传 replanReason（不抛错）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const b = store.books.create({ title: '流程书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });

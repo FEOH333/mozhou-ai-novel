@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runLocalRules } from '../server/engine/rules.js';
+import { runLocalRules } from '../server/engine/quality/rules.js';
 
 test('规则: AI 高频词', () => {
   const issues = runLocalRules('他微微一笑，不禁感叹。她微微点头，仿佛懂了。他微微皱眉，顿时沉默。');

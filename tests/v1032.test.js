@@ -6,8 +6,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
-import { auditIssueRepairMode, auditVerdictAfterBudget, hasOutlineRootIssue } from '../server/engine/pipeline.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
+import { auditIssueRepairMode, auditVerdictAfterBudget, hasOutlineRootIssue } from '../server/engine/pipeline/pipeline.js';
 
 test('V0.102.12 开庆元年被标成史实错误是措辞问题，走 revise 且预算后放行', () => {
   const issues = stampOpeningTimelineProseFix([{

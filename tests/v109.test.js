@@ -13,13 +13,13 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_longform.js')));
-const historicalState = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_state.js'))).catch(() => ({}));
-const volumeReview = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
-const { settleChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/settle.js')));
-const pipeline = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
-const characters = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
-const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_longform.js')));
+const historicalState = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_state.js'))).catch(() => ({}));
+const volumeReview = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
+const { settleChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/settle.js')));
+const pipeline = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
+const characters = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
+const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
 
 function historicalBook() {
   const book = store.books.create({

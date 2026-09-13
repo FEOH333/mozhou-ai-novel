@@ -6,8 +6,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
-import { auditIssueRepairMode, hasOutlineRootIssue } from '../server/engine/pipeline.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
+import { auditIssueRepairMode, hasOutlineRootIssue } from '../server/engine/pipeline/pipeline.js';
 
 test('V0.102.10 怀里与腰间短刀跳变走 revise，不得首次审校 replan', () => {
   const issues = stampOpeningTimelineProseFix([{

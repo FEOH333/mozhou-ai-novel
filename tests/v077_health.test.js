@@ -10,7 +10,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v077-health-
 process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
-const { recordChapterHealth, detectDrift } = await import('../server/engine/recovery.js');
+const { recordChapterHealth, detectDrift } = await import('../server/engine/recovery/recovery.js');
 
 test('同一章节的健康记录应更新原行并保存 note', () => {
   const book = store.books.create({ title: '健康幂等', genre: '玄幻' });

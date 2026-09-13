@@ -11,7 +11,7 @@ process.env.NOVEL_NO_OPEN = '1';
 process.env.NOVEL_FAULT = '';
 
 const store = await import('../server/db/store.js');
-const { runBookPilot } = await import('../server/engine/pilot.js');
+const { runBookPilot } = await import('../server/engine/pipeline/pilot.js');
 
 test('空书 targetChapters=1 的 done/返回值显示 1/1，而不是 0/骨架章数', async () => {
   const book = store.books.create({ title: '未命名', genre: '玄幻', blurb: '测试一键创作' });

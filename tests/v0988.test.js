@@ -18,7 +18,7 @@ const promiseData = {
 let book;
 beforeEach(async () => {
   ({ book } = createOpeningFixture(store));
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: promiseData });
 });
 
@@ -34,7 +34,7 @@ test('V0.98.8 瞬时空响应（finish=stop、无思考）→ 路由层降档重
 test('V0.98.8 候选 JSON 解析失败静默重试：首次纯散文 → 第二次正常 → compose 成功落库', async () => {
   process.env.NOVEL_MOCK_LLM = '1';
   process.env.NOVEL_PROSE_ONCE = '1';
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const events = [];
   const result = await composeOpeningCandidates(book.id, { mode: 'repair', onEvent: event => events.push(event) });
   const cold = result.candidates.find(item => item.kind === 'chapter1_cold_open');

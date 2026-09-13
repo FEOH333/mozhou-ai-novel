@@ -6,8 +6,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isPlanningMetaPhase, sanitizeReconcileSeed } from '../server/engine/historical_guardrails.js';
-import { futureOutlineBase } from '../server/engine/narrative_state.js';
+import { isPlanningMetaPhase, sanitizeReconcileSeed } from '../server/engine/longform/historical_guardrails.js';
+import { futureOutlineBase } from '../server/engine/narrative/narrative_state.js';
 
 test('V0.102.17 布局/成长补救/卷级转折是规划套话，临战收网不是', () => {
   assert.equal(isPlanningMetaPhase('布局：利用敌方情报链反制'), true);

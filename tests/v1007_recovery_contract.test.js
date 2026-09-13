@@ -13,7 +13,7 @@ import {
   recoveryFailureLedgerKey,
   recoveryWorkOrderFingerprint,
   resolveRecoveryPolicy,
-} from '../server/engine/recovery_contract.js';
+} from '../server/engine/recovery/recovery_contract.js';
 
 const store = await import('../server/db/store.js');
 const {
@@ -22,9 +22,9 @@ const {
   validateRecoverySynthesis,
   executeRecommendationRecovery,
   validateRecoveryProseImprovement,
-} = await import('../server/engine/recommendation_recovery.js');
-const { publicationDashboard } = await import('../server/engine/publication_feedback.js');
-const { validateChapterRewrite } = await import('../server/engine/polish.js');
+} = await import('../server/engine/recovery/recommendation_recovery.js');
+const { publicationDashboard } = await import('../server/engine/quality/publication_feedback.js');
+const { validateChapterRewrite } = await import('../server/engine/quality/polish.js');
 
 function recoveryFixtureText() {
   return [

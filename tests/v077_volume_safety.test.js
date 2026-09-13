@@ -12,10 +12,10 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
 const { getGlobal, saveGlobal } = await import('../server/config.js');
-const outlineEngine = await import('../server/engine/outline.js');
-const growthEngine = await import('../server/engine/growth.js');
-const worldEngine = await import('../server/engine/world_expansion.js');
-const continuation = await import('../server/engine/continuation.js');
+const outlineEngine = await import('../server/engine/planning/outline.js');
+const growthEngine = await import('../server/engine/planning/growth.js');
+const worldEngine = await import('../server/engine/planning/world_expansion.js');
+const continuation = await import('../server/engine/pipeline/continuation.js');
 
 const originalFetch = globalThis.fetch;
 let savedConfig;

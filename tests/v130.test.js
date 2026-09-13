@@ -14,9 +14,9 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v130-hooks-'));
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
-const pending = await import(pathToFileURL(path.join(ROOT, 'server/engine/pending.js')));
-const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/roster.js')));
+const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
+const pending = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/pending.js')));
+const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/roster.js')));
 
 describe('V0.93.8 快感审计还债优先级与占位名防护', () => {
   test('审计输入：超期欠债最优先、其次最近埋设，限流 12 条', () => {

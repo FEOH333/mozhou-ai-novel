@@ -90,7 +90,7 @@ describe('V0.88 朝堂权谋专项', () => {
 
   test('⑤细纲注入：朝堂章细纲带纪律（局部变量定义）', async () => {
     const { chapterOutlineInstruction } = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes('const courtText = isCourtIntrigueText'), '细纲局部变量定义');
     assert.ok(src.includes('courtText,'), '细纲注入槽位传参');
     const c = chapterOutlineInstruction({ bookTitle: 'X', chapterIdx: 5, volumeGoal: '北伐之议', recentSummaries: [], rollingSummary: '', activeForeshadows: [], forgottenForeshadows: [], approachingForeshadows: [], retrieved: [], prevChapterTail: '', futureChapters: [], courtText: '【朝堂权谋纪律】（V0.88 硬要求）\n【本时代朝堂考据锚点】\n【南宋末年朝堂考据锚点】' });
@@ -100,7 +100,7 @@ describe('V0.88 朝堂权谋专项', () => {
 
   test('⑥卷纲注入：权谋卷按朝堂纪律设计章节', async () => {
     const { volumeOutlineInstruction } = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes("courtText: isCourtIntrigueText(vol.title, vol.goal, vol.outline_json)"), '卷纲权谋检测');
     const v = volumeOutlineInstruction({ bookTitle: 'X', volumeIdx: 4, volumeTitle: '临安风云', bookOutline: {}, chapterCount: 8, courtText: '【朝堂权谋纪律】（V0.88 硬要求）\n【本时代朝堂考据锚点】\n【南宋末年朝堂考据锚点】' });
     assert.ok(v.includes('朝堂权谋纪律'), '权谋卷卷纲注入纪律');
@@ -124,7 +124,7 @@ describe('V0.88 朝堂权谋专项', () => {
     assert.ok(!normal.includes('|权谋逻辑'), '非朝堂章类型枚举无权谋逻辑');
     assert.ok(!normal.includes('皇帝/权臣降智'), '非朝堂章无权谋判据');
     // audit.js：计算 + 记债路由
-    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const auditSrc = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(auditSrc.includes('courtCheck = isCourtIntrigueText'), 'audit.js 计算 courtCheck');
     // V0.109.3：记债语义迁入 issue_types 注册表（audit 只查 needsRoundup）
     const { needsRoundup } = await import(pathToFileURL(path.join(ROOT, 'server/data/issue_types.js')));
@@ -133,7 +133,7 @@ describe('V0.88 朝堂权谋专项', () => {
 
   test('⑧端到端：朝堂章 auditChapter 计算 courtCheck 并注入审校指令', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { auditChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+    const { auditChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
  const b = store.books.create({ title: '示例历史长篇', genre: '历史', blurb: '北伐与朝堂', platform: '番茄' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     const ch = store.chapters.create(b.id, v.id, 1, { title: '廷议北伐', status: 'done', outline: { scenes: [{ pov: '文天祥', location: '临安', beat: '百官廷议，贾似道反对北伐' }], checkpoints: [] } });

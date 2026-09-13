@@ -8,8 +8,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stampOpeningTimelineProseFix, crossYearOpeningIssue } from '../server/engine/historical_guardrails.js';
-import { hasOutlineRootIssue, auditIssueRepairMode, normalizeAuditForRepair } from '../server/engine/pipeline.js';
+import { stampOpeningTimelineProseFix, crossYearOpeningIssue } from '../server/engine/longform/historical_guardrails.js';
+import { hasOutlineRootIssue, auditIssueRepairMode, normalizeAuditForRepair } from '../server/engine/pipeline/pipeline.js';
 
 test('V0.102.5 开庆元年开篇是合格跨年标记，不得再报缺过渡', () => {
  const opening = '开庆元年的风还没吹透北崖墙根的冻土，寨门外泥地里已陷进几百双脚。主角站在门内阴影处，手里攥着保甲名册。';
@@ -60,7 +60,7 @@ test('V0.102.5 回忆不是携带遗体；角色伤势出场是改这一处', ()
 });
 
 test('V0.102.5 回忆弟弟手指不得判携带遗体', async () => {
-  const { historicalContinuityIssues } = await import('../server/engine/historical_guardrails.js');
+  const { historicalContinuityIssues } = await import('../server/engine/longform/historical_guardrails.js');
  const text = '开春的风灌进寨门。主角站在门槛边，瞬间想起九岁那年跪在马前的场景，想起弟弟冰冷的手指。那时候，没有人给他这样的遮挡。';
   const issues = historicalContinuityIssues({ genre: '历史', year: 1259, previousYear: 1258, chapterText: text });
   assert.equal(issues.filter(i => /遗体/.test(i.issue || '')).length, 0);

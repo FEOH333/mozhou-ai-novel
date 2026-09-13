@@ -5,9 +5,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './helper.js';
 import * as store from '../server/db/store.js';
-import { schedulerCheck, hookTypeStreakCheck } from '../server/engine/pleasure.js';
-import { batchQualityScan } from '../server/engine/batch_scan.js';
-import { detectDrift } from '../server/engine/recovery.js';
+import { schedulerCheck, hookTypeStreakCheck } from '../server/engine/quality/pleasure.js';
+import { batchQualityScan } from '../server/engine/quality/batch_scan.js';
+import { detectDrift } from '../server/engine/recovery/recovery.js';
 
 function seedBook() {
   const b = store.books.create({ title: '节奏测试书', genre: '玄幻' });

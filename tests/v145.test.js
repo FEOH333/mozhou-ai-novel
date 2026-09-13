@@ -37,7 +37,7 @@ test('V0.95.3 审校与判定门思考策略：五门全部 disabled+low（端�
 });
 
 test('V0.95.2 audit.js 硬编码覆盖同步开思考（此前强制 disabled+low 白名单形同虚设）', () => {
-  const src = read('server/engine/audit.js');
+  const src = read('server/engine/pipeline/audit.js');
   assert.ok(!src.includes("routeOverride: { maxTokens: 6000, thinking: 'disabled', reasoningEffort: 'low' }"), '旧强制低推理覆盖必须移除');
 });
 

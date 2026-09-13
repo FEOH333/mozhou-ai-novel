@@ -20,8 +20,8 @@ before(async () => {
   client = await import('../server/llm/client.js');
   resilience = await import('../server/llm/resilience.js');
   store = await import('../server/db/store.js');
-  pipeline = await import('../server/engine/pipeline.js');
-  write = await import('../server/engine/write.js');
+  pipeline = await import('../server/engine/pipeline/pipeline.js');
+  write = await import('../server/engine/pipeline/write.js');
   bookId = store.books.create({ title: '韧性测试', genre: '玄幻', blurb: 'x' }).id;
   chapterId = store.chapters.create(bookId, null, 1, { title: '第一章' }).id;
 });

@@ -37,7 +37,7 @@ describe('V0.78 审校不收敛修复', () => {
   });
 
   test('③isRevisionStale：同类型 high 问题连续 2 轮出现 → 判定修订失效', async () => {
-    const { isRevisionStale } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { isRevisionStale } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const quoteOf = q => String(q || '').replace(/\s/g, '').slice(0, 20);
     // scene 内容包含两种措辞的完整 quote
     const sceneContent = '那道人影是负责书库杂务的老幺。林月指着那人影说是老幺。';
@@ -63,7 +63,7 @@ describe('V0.78 审校不收敛修复', () => {
   });
 
   test('④isRevisionStale：quote 级匹配仍生效（同一 quote 重复）', async () => {
-    const { isRevisionStale } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { isRevisionStale } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const quoteOf = q => String(q || '').replace(/\s/g, '').slice(0, 20);
     const lf = new Set([quoteOf('井底叩击又起')]);
     const r = isRevisionStale({
@@ -75,7 +75,7 @@ describe('V0.78 审校不收敛修复', () => {
 
   test('⑤runChapterFlow 细纲根因问题不卡死（mock：修订后同一问题仍报→升级 replan）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const b = store.books.create({ title: '收敛书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });

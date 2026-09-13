@@ -27,7 +27,7 @@ beforeEach(async () => {
 
 // 创作宪章的 source_fingerprint 包含角色卡——必须先建主角卡、再建立宪章，否则判为 stale
 async function buildPromise(bookId = book.id) {
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(bookId, { data: promiseData });
 }
 
@@ -43,7 +43,7 @@ const planFields = ({ kind, family, signature, content = '' }) => ({
 });
 
 function composeCold(storeRef, bookId, volumeId, content) {
-  return import('../server/engine/opening_intervention.js').then(({ composeOpeningCandidates }) =>
+  return import('../server/engine/planning/opening_intervention.js').then(({ composeOpeningCandidates }) =>
     composeOpeningCandidates(bookId, {
       mode: 'repair',
       data: {
@@ -61,7 +61,7 @@ const documentaryColdOpen = `开庆元年七月，钓鱼城头。砲石一发接
 test('V0.98.12 楔子第一屏主角姓名缺席 → high 判废（纪录片念稿防线：主角不在场直接禁止采用）', async () => {
   addProtagonist();
   await buildPromise();
-  const { selectOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { selectOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const composed = await composeCold(store, book.id, volume.id, documentaryColdOpen);
   const cold = composed.candidates.find(item => item.kind === 'chapter1_cold_open');
   const audit = JSON.parse(store.openingAssets.get(cold.asset_id).audit_json);
@@ -99,7 +99,7 @@ test('V0.98.12 契约上下文携带主角名，写作/审校/压缩三处注入
   assert.ok(COLD_OPEN_CRAFT_TEXT.includes('正例'), '禁令必须结对正例');
   assert.ok(/[0-9]{4}年/.test(COLD_OPEN_CRAFT_TEXT), '正例必须至少一个带真实年份的具体场景');
 
-  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const { openingCandidateInstruction, openingCandidateAuditInstruction, openingCandidateLengthRepairInstruction } = await import('../server/engine/prompts.js');
   const contractEvent = openingContractEventContext(book.id, inferOpeningContractTarget(book.id));
  assert.ok(contractEvent.protagonist_names.includes('主角'), '契约上下文必须携带主角名供模型点名');
@@ -156,7 +156,7 @@ test('V0.98.12 已应用（applied）方案禁止直接删除，防止在线/本
 });
 
 test('V0.98.12 engine removeOpeningAsset：校验归属、拒绝 applied、删除后列表消失', async () => {
-  const { removeOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { removeOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const audited = createChain('chapter1_cold_open');
   store.openingAssets.transition(audited.id, 'audited');
   const removed = removeOpeningAsset(book.id, audited.id);
@@ -173,7 +173,7 @@ test('V0.98.12 engine removeOpeningAsset：校验归属、拒绝 applied、删�
 });
 
 test('V0.98.12 removeOpeningAsset 可删 selected（未应用的选中方案）', async () => {
-  const { removeOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { removeOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const selected = createChain('head_rewrite');
   store.openingAssets.transition(selected.id, 'audited');
   store.openingAssets.transition(selected.id, 'selected');

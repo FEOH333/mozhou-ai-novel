@@ -7,22 +7,22 @@ import path from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as store from '../server/db/store.js';
-import * as rules from '../server/engine/rules.js';
-import * as audit from '../server/engine/audit.js';
-import * as characters from '../server/engine/characters.js';
-import * as foreshadow from '../server/engine/foreshadow.js';
-import * as items from '../server/engine/items.js';
-import { transitionChapterStatus } from '../server/engine/chapter_status.js';
-import { applyValidatedSceneRewrite } from '../server/engine/polish.js';
+import * as rules from '../server/engine/quality/rules.js';
+import * as audit from '../server/engine/pipeline/audit.js';
+import * as characters from '../server/engine/narrative/characters.js';
+import * as foreshadow from '../server/engine/narrative/foreshadow.js';
+import * as items from '../server/engine/narrative/items.js';
+import { transitionChapterStatus } from '../server/engine/pipeline/chapter_status.js';
+import { applyValidatedSceneRewrite } from '../server/engine/quality/polish.js';
 import {
   lifecycleStageIdForPosition,
   plannedVolumeCount,
   resolveBookStage,
-} from '../server/engine/longform_lifecycle.js';
+} from '../server/engine/longform/longform_lifecycle.js';
 import {
   historicalLongformPhases,
   normalizeHistoricalBookOutline,
-} from '../server/engine/historical_longform.js';
+} from '../server/engine/longform/historical_longform.js';
 
 test('V0.97.2 约束必须按章节作用域生效，旧 recovery 不得永久污染正文上下文', () => {
   const book = store.books.create({ title: '约束作用域测试' });

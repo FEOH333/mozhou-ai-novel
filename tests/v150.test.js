@@ -15,9 +15,9 @@ import fs from 'node:fs';
 import './helper.js';
 import {
   crossYearOpeningIssue, historicalContinuityIssues,
-} from '../server/engine/historical_guardrails.js';
-import { detectSceneTailDuplication } from '../server/engine/rules.js';
-import { hasOutlineRootIssue, auditIssueRepairMode } from '../server/engine/pipeline.js';
+} from '../server/engine/longform/historical_guardrails.js';
+import { detectSceneTailDuplication } from '../server/engine/quality/rules.js';
+import { hasOutlineRootIssue, auditIssueRepairMode } from '../server/engine/pipeline/pipeline.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // ch27 实证开头（氛围铺陈，无跨年标记）
@@ -84,7 +84,7 @@ describe('V0.95.7 修订路由：proseFix 走 revise 不走 replan', () => {
 
 describe('V0.95.7 写侧硬闸接线（源断言：写审同源）', () => {
   test('write.js 场景1跨年门：醒目指令块 + 写后核查定向重写', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(src.includes('crossYearOpeningIssue(outlineYear, prevYear, content)'),
       '场景1写完后应用与审校同一把尺子核查跨年开篇');
     assert.ok(src.includes('跨年开篇标记缺失，定向重写场景开头'),
@@ -100,7 +100,7 @@ describe('V0.95.7 写侧硬闸接线（源断言：写审同源）', () => {
   });
 
   test('pipeline.js locallyRepairable 尊重 proseFix（源断言）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pipeline.js'), 'utf8');
     assert.ok(src.includes('i.proseFix'), 'fix 分支的可修过滤应放行 proseFix 形态问题');
   });
 });

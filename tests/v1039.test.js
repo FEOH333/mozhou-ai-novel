@@ -11,16 +11,16 @@ import path from 'node:path';
 import * as store from '../server/db/store.js';
 import {
   compileDiversityContract, diversityContractIssues, diversityFeatures, diversityRegression,
-} from '../server/engine/chapter_diversity.js';
-import { narrativePatternFeatures } from '../server/engine/narrative_patterns.js';
-import { evaluateOutlineQuestions, chapterOutlineQualityIssues } from '../server/engine/outline.js';
+} from '../server/engine/quality/chapter_diversity.js';
+import { narrativePatternFeatures } from '../server/engine/quality/narrative_patterns.js';
+import { evaluateOutlineQuestions, chapterOutlineQualityIssues } from '../server/engine/planning/outline.js';
 import { reviseInstruction } from '../server/engine/prompts.js';
-import { chapterFailurePolicy } from '../server/engine/pilot.js';
-import { settleChapter } from '../server/engine/settle.js';
-import { shouldImmediateReplanWipe } from '../server/engine/pipeline.js';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
-import { schedulerCheck } from '../server/engine/pleasure.js';
-import { transitionChapterStatus } from '../server/engine/chapter_status.js';
+import { chapterFailurePolicy } from '../server/engine/pipeline/pilot.js';
+import { settleChapter } from '../server/engine/pipeline/settle.js';
+import { shouldImmediateReplanWipe } from '../server/engine/pipeline/pipeline.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
+import { schedulerCheck } from '../server/engine/quality/pleasure.js';
+import { transitionChapterStatus } from '../server/engine/pipeline/chapter_status.js';
 
 function scenes(beats, extra = {}) {
   return beats.map((beat, i) => ({
@@ -50,7 +50,7 @@ function feat(partial = {}) {
 }
 
 test('V0.103.1 质量门 hard 与字数门均归 OUTLINE_GUARD_FAILED / quality_blocked', () => {
-  const outlineSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/outline.js'), 'utf8');
+  const outlineSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/planning/outline.js'), 'utf8');
   const gateThrow = outlineSrc.slice(
     outlineSrc.indexOf('细纲质量门未通过'),
     outlineSrc.indexOf('细纲质量门未通过') + 280,
@@ -70,7 +70,7 @@ test('V0.103.1 质量门 hard 与字数门均归 OUTLINE_GUARD_FAILED / quality_
 });
 
 test('V0.103.1 partial 再启动走 autoFixBlocked，不在 while 头直接 need_human', () => {
-  const src = fs.readFileSync(path.join(process.cwd(), 'server/engine/pilot.js'), 'utf8');
+  const src = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/pilot.js'), 'utf8');
   const autoFix = src.slice(src.indexOf('async function autoFixBlocked'), src.indexOf('export function qualityAutoRetryLimit'));
   assert.match(autoFix, /quality_blocked['"]?\s*(?:,|\s*\|\||\s*\))/, 'autoFixBlocked 必须扫 quality_blocked');
   assert.match(
@@ -338,7 +338,7 @@ test('V0.103.1 快感调度不再点名 3 级危机钩；细纲合同只编译�
     assert.match(rules, /reader_pull|已有因果|余力/);
   }
 
-  const outlineSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/outline.js'), 'utf8');
+  const outlineSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/planning/outline.js'), 'utf8');
   const fn = outlineSrc.slice(
     outlineSrc.indexOf('export async function generateChapterOutline'),
     outlineSrc.indexOf('export async function fiveQuestionsCheck'),

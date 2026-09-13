@@ -11,7 +11,7 @@ process.env.NOVEL_MOCK_LLM = '0';
 
 const store = await import('../server/db/store.js');
 const { getGlobal, saveGlobal } = await import('../server/config.js');
-const { runArchive } = await import('../server/engine/archive.js');
+const { runArchive } = await import('../server/engine/pipeline/archive.js');
 
 const originalFetch = globalThis.fetch;
 let savedConfig;

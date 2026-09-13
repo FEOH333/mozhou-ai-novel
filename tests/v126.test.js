@@ -12,7 +12,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v126-feedbac
 const ROOT = process.cwd();
 const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/rules.js')));
+const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/rules.js')));
 const packs = await import(pathToFileURL(path.join(ROOT, 'server/data/creative_packs.js')));
 
 describe('V0.93.4 新章反馈修复', () => {
@@ -56,7 +56,7 @@ describe('V0.93.4 新章反馈修复', () => {
   });
 
   test('ABORTED 静默退出：不弹 need_human、健康记 aborted 非 error', () => {
-    const src = read('server/engine/pilot.js');
+    const src = read('server/engine/pipeline/pilot.js');
     assert.match(src, /ABORTED/, 'pilot 应识别 ABORTED');
     assert.match(src, /'aborted'/, '健康快照用 aborted 状态');
     const abortBranch = src.slice(src.indexOf("e.code === 'ABORTED'"), src.indexOf("e.code === 'ABORTED'") + 400);

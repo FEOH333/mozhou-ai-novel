@@ -92,14 +92,14 @@ test('V0.25: 契约/书纲指令将作者灵感核心设定标为硬约束', asy
 });
 
 test('V0.25: 提级返回作者锚点（mock）', async () => {
-  const idea = await import('../server/engine/idea.js');
+  const idea = await import('../server/engine/planning/idea.js');
   const r = await idea.amplifyIdea(null, { idea: '主角穿越成玄幻世界的杂役弟子', genre: '玄幻', platform: '番茄' });
   assert.ok(r.ok);
   assert.ok(Array.isArray(r.keptElements), '应返回 keptElements 数组');
 });
 
 test('V0.25: 书纲生成后作者灵感不被 logline 覆盖', async () => {
-  const { generateBookOutline } = await import('../server/engine/outline.js');
+  const { generateBookOutline } = await import('../server/engine/planning/outline.js');
   const src = '主角穿越成玄幻世界的杂役弟子，扫地砍柴皆是上古传承';
   const bid = store.books.create({ title: '灵感保真', genre: '玄幻', blurb: src }).id;
   await generateBookOutline(bid, { volumeCount: 2 });

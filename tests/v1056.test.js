@@ -9,7 +9,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 const ROOT = process.cwd();
-const g = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_guardrails.js')));
+const g = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_guardrails.js')));
 
 const PHASE = '北崖善后与粮道破局';
 
@@ -56,7 +56,7 @@ describe('V0.105.6 复合短语动作核匹配', () => {
   });
 
   test('⑤源码断言：切分概念窗匹配与零交集拦截分工', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/historical_guardrails.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/longform/historical_guardrails.js'), 'utf8');
     assert.ok(src.includes('function slidingWindowMatcher'), '切分短语应有 2 字滑窗域内匹配器');
     assert.ok(src.includes('function literalMatcher'), '过渡式/单概念应保持字面匹配器');
     assert.ok(src.includes("mode === 'cut'"), '词表/过渡式/切分概念应分流命中要求');

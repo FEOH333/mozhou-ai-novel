@@ -44,7 +44,7 @@ describe('V0.90 叙事视角专项', () => {
   });
 
   test('④rules.js 本地扫描：他不知道的是/命运的齿轮 命中，正常文本不命中', async () => {
-    const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/rules.js')));
+    const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/rules.js')));
     const hits = rules.detectClichés('他不知道的是，此时千里之外的临安，一场风暴正在酝酿。命运的齿轮缓缓转动。');
     assert.ok(hits.some(h => h.issue.includes('他不知道的是') || h.issue.includes('命运的齿轮')), '全知旁白词命中');
     assert.equal(rules.detectClichés('陆沉把断箭扔进火里，第一次觉得蒙古人也没什么了不起。').length, 0, '正常限知文本不命中');
@@ -52,7 +52,7 @@ describe('V0.90 叙事视角专项', () => {
 
   test('⑤端到端：mock 写正文（限知纪律注入不破坏流程）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { writeScene } = await import(pathToFileURL(path.join(ROOT, 'server/engine/write.js')));
+    const { writeScene } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/write.js')));
  const b = store.books.create({ title: '示例历史长篇', genre: '历史', blurb: 'x', platform: '番茄' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     const ch = store.chapters.create(b.id, v.id, 1, { title: 'C1', status: 'outlined', outline: { goal: 'g', conflict: 'c', scenes: [{ idx: 1, pov: '陆沉', location: 'L', beat: '逃出火海', target_words: 200, scene_type: 'fight' }] } });

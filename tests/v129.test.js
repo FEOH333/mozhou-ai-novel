@@ -12,8 +12,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v129-write-audit-'));
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/rules.js')));
-const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/rules.js')));
+const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
 
 describe('V0.93.7 写审同源闭环', () => {
   test('破折号超限升 medium：>20 触发审校 verdict（此前 low 不参与）', () => {

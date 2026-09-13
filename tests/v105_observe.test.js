@@ -62,7 +62,7 @@ test('V0.105 顶栏作业花片从 lastEvent 文案提取章号', () => {
 });
 
 test('V0.105 卷审事件必须发给作业对象而不是字符串名', async () => {
-  const { emitVolumeReviewEvent } = await import('../server/engine/volumereview.js');
+  const { emitVolumeReviewEvent } = await import('../server/engine/planning/volumereview.js');
   const seen = [];
   emitVolumeReviewEvent((ev) => seen.push(ev), 'volume_review_start', { volumeIdx: 5, title: '天倾石坠' });
   assert.equal(seen[0].type, 'volume_review_start');
@@ -74,12 +74,12 @@ test('V0.105 卷审事件必须发给作业对象而不是字符串名', async (
 });
 
 test('V0.105 卷大纲重试可见、限流等待可取消', () => {
-  const outline = read('server/engine/outline.js');
+  const outline = read('server/engine/planning/outline.js');
   const gen = outline.slice(outline.indexOf('export async function generateVolumeOutline'));
   assert.match(gen, /卷大纲第 \$\{attempt \+ 1\}\/3 次生成/);
   assert.match(gen, /onRetry/);
   assert.match(gen, /type: 'api_retry'/);
-  const cont = read('server/engine/continuation.js');
+  const cont = read('server/engine/pipeline/continuation.js');
   assert.match(cont, /generateVolumeOutline\([\s\S]*onEvent, signal/);
   assert.doesNotMatch(cont, /onEvent: \(ev\) => emit\(ev\.stage \|\| 'setup'/);
   const client = read('server/llm/client.js');
@@ -93,9 +93,9 @@ test('V0.105 卷大纲重试可见、限流等待可取消', () => {
 });
 
 test('V0.105 懒加载下一卷：安全闸拦截不得再烧一遍缝前体检', () => {
-  const vr = read('server/engine/volumereview.js');
+  const vr = read('server/engine/planning/volumereview.js');
   assert.match(vr, /export function shouldReviewVolumeBeforeLazyOutline/);
-  const pilot = read('server/engine/pilot.js');
+  const pilot = read('server/engine/pipeline/pilot.js');
   assert.match(pilot, /\.filter\(shouldReviewVolumeBeforeLazyOutline\)/);
   assert.match(pilot, /卷缝前体检/);
   const auto = vr.slice(vr.indexOf('export async function autoReviewVolumes'), vr.indexOf('export function volumeReviewDisplayEvent'));
@@ -115,8 +115,8 @@ test('V0.105 卷审修订过程要进标题和事件流，不能停在宪章完�
 test('V0.105 完结卷配角弧光补全必须进事件流，不能停在恢复完成像卡死', () => {
   // V0.105.4：cast 设计改为 roster.sweepVolumeCastDesign（持久化幂等），事件流文案随迁；
   // 断言改为 sweep 内的进度文案 + pilot 调用点。
-  const pilot = read('server/engine/pilot.js');
-  const rosterSrc = read('server/engine/roster.js');
+  const pilot = read('server/engine/pipeline/pilot.js');
+  const rosterSrc = read('server/engine/narrative/roster.js');
   assert.match(rosterSrc, /配角弧光补全/);
   assert.match(rosterSrc, /await runCastDesign/);
   assert.match(pilot, /sweepVolumeCastDesign/);

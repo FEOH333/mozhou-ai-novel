@@ -6,7 +6,7 @@
 // 用法：node server/maintenance/repair-scene-paragraphs-v10016.js --run <runId> [--apply|--verify]
 'use strict';
 import * as store from '../db/store.js';
-import { restoreSceneParagraphBreaks } from '../engine/polish.js';
+import { restoreSceneParagraphBreaks } from '../engine/quality/polish.js';
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');

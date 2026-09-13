@@ -14,8 +14,8 @@ let bookId, chapterId;
 
 before(async () => {
   store = await import('../server/db/store.js');
-  pleasure = await import('../server/engine/pleasure.js');
-  pipeline = await import('../server/engine/pipeline.js');
+  pleasure = await import('../server/engine/quality/pleasure.js');
+  pipeline = await import('../server/engine/pipeline/pipeline.js');
   bookId = store.books.create({ title: '快感测试', genre: '玄幻' }).id;
   const ch = store.chapters.create(bookId, null, 1, { title: '第一章' });
   chapterId = ch.id;

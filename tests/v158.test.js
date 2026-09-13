@@ -16,7 +16,7 @@ const han = n => '汉'.repeat(n);
 // ---------- ① sceneWordBudget 纯函数 ----------
 
 test('V0.105.2 sceneWordBudget：余量充足时不收紧（保持 1.7× 既有行为）', async () => {
-  const { sceneWordBudget } = await load('server/engine/write.js');
+  const { sceneWordBudget } = await load('server/engine/pipeline/write.js');
   const b = sceneWordBudget({
     lengthProfile: 5000,
     scenesBefore: [],
@@ -30,7 +30,7 @@ test('V0.105.2 sceneWordBudget：余量充足时不收紧（保持 1.7× 既有�
 });
 
 test('V0.105.2 sceneWordBudget：章超支趋势时收紧上限并给出强提示（ch48 复盘）', async () => {
-  const { sceneWordBudget } = await load('server/engine/write.js');
+  const { sceneWordBudget } = await load('server/engine/pipeline/write.js');
   // ch48 实测：4 场已写约 5900（s1-s4 = 1812+2186+1693+1733 raw 中汉字估），末场 target 1000
   const b = sceneWordBudget({
     lengthProfile: 5000,
@@ -49,7 +49,7 @@ test('V0.105.2 sceneWordBudget：章超支趋势时收紧上限并给出强提�
 });
 
 test('V0.105.2 sceneWordBudget：中间场景为后续留最低需求（不为守预算饿死后面场景）', async () => {
-  const { sceneWordBudget } = await load('server/engine/write.js');
+  const { sceneWordBudget } = await load('server/engine/pipeline/write.js');
   const b = sceneWordBudget({
     lengthProfile: 5000,
     scenesBefore: [{ content: han(2000) }],
@@ -77,7 +77,7 @@ test('V0.105.2 writeSceneInstruction：sceneMaxWords 收紧字数硬约束、cha
 });
 
 test('V0.105.2 writeScene 调用链透传预算（write.js 源码断言）', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
   assert.ok(src.includes('const wordBudget = sceneWordBudget({'), 'writeScene 应计算章级预算');
   assert.ok(src.includes('sceneMaxWords: wordBudget.maxWords'), '预算上限应传入指令（与自愈同源）');
   assert.ok(src.includes('maxWordsOverride: wordBudget.maxWords'), '预算上限应传入长度自愈');
@@ -94,7 +94,7 @@ test('V0.105.2 lengthRequirementText：场景 target 之和含 90%-110% 区间',
 });
 
 test('V0.105.2 healOutlineWordTargets：Σtarget 超 110% 等比回收；正常区间不动；低于 90% 补足', async () => {
-  const { healOutlineWordTargets } = await load('server/engine/outline.js');
+  const { healOutlineWordTargets } = await load('server/engine/planning/outline.js');
   // ch48 复盘：Σtarget=5500 恰在 110% 边界内不动；5700 超线回收
   const edge = { scenes: [{ target_words: 1100 }, { target_words: 1200 }, { target_words: 1100 }, { target_words: 1100 }, { target_words: 1000 }] };
   assert.equal(healOutlineWordTargets(edge, 5000), false, '5500 = 110% 边界值不应触发回收');
@@ -120,6 +120,6 @@ test('V0.105.2 无预算参数时指令与自愈行为不变（兼容存量调�
   });
   assert.ok(s.includes('1020-2040'), 'target 1200 默认区间 1020-2040（1.7× 行为不变）');
   assert.ok(!s.includes('【章字数预算】'), '未传预算时不得注入预算行');
-  const src = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
   assert.ok(src.includes('const maxWords = maxWordsOverride > 0'), '自愈 maxWordsOverride 默认 0 时回落静态 1.7×');
 });

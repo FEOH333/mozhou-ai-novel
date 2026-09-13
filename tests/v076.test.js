@@ -45,7 +45,7 @@ describe('V0.76 世界观阶梯展开', () => {
 
   test('②worldExpansionStatus：层级检测（低层级停滞→severe；高层级已展开→不停滞）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { worldExpansionStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/world_expansion.js')));
+    const { worldExpansionStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/world_expansion.js')));
     // 117 章 + 青阳镇(level0) + 青云宗(level1, 首现) → 停滞 severe
     const b1 = makeBook(store, { chapters: 117, locations: [{ name: '青阳镇', firstChapter: 1 }, { name: '青云宗', firstChapter: 2 }] });
     const s1 = worldExpansionStatus(b1.id);
@@ -68,7 +68,7 @@ describe('V0.76 世界观阶梯展开', () => {
 
   test('③worldExpansionStatus：题材感知（都市/言情不出现修仙词）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { worldExpansionStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/world_expansion.js')));
+    const { worldExpansionStatus } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/world_expansion.js')));
     const b = makeBook(store, { genre: '都市', chapters: 60, locations: [{ name: '海州市', firstChapter: 1 }, { name: '云顶集团', firstChapter: 40 }] });
     const s = worldExpansionStatus(b.id);
     assert.equal(s.dimension, '世界版图');
@@ -91,7 +91,7 @@ describe('V0.76 世界观阶梯展开', () => {
 
   test('⑤detectWorldStagnation：<30 章不判；117 章停滞→true', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { detectWorldStagnation } = await import(pathToFileURL(path.join(ROOT, 'server/engine/world_expansion.js')));
+    const { detectWorldStagnation } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/world_expansion.js')));
     const nb = makeBook(store, { chapters: 20 });
     assert.equal(detectWorldStagnation(nb.id).stagnant, false, '20章不判停滞');
     const b = makeBook(store, { chapters: 117, locations: [{ name: '青阳镇', firstChapter: 1 }, { name: '青云宗', firstChapter: 2 }] });
@@ -100,7 +100,7 @@ describe('V0.76 世界观阶梯展开', () => {
 
   test('⑥planWorldExpansion：mock 生成补救并落库，幂等', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { planWorldExpansion, worldProgressText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/world_expansion.js')));
+    const { planWorldExpansion, worldProgressText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/world_expansion.js')));
     const b = makeBook(store, { chapters: 117, locations: [{ name: '青阳镇', firstChapter: 1 }, { name: '青云宗', firstChapter: 2 }] });
     const rp = await planWorldExpansion(b.id, {});
     assert.equal(rp.planned, 1, '应生成补救');
@@ -114,7 +114,7 @@ describe('V0.76 世界观阶梯展开', () => {
 
   test('⑦generateNextVolume：117章停滞→触发 world_progress + 注入补救', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateNextVolume } = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+    const { generateNextVolume } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
     const { volumeOutlineInstruction } = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
     const b = makeBook(store, { chapters: 117, locations: [{ name: '青阳镇', firstChapter: 1 }, { name: '青云宗', firstChapter: 2 }] });
     const events = [];
@@ -127,7 +127,7 @@ describe('V0.76 世界观阶梯展开', () => {
 
   test('⑧settle touchEntities：记录地点/势力登场章节', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { settleChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/settle.js')));
+    const { settleChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/settle.js')));
     const b = store.books.create({ title: '结算书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -144,7 +144,7 @@ describe('V0.76 世界观阶梯展开', () => {
 
   test('⑨ensureEntityChaptersBackfilled：存量书回填 first_chapter，幂等', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { ensureEntityChaptersBackfilled } = await import(pathToFileURL(path.join(ROOT, 'server/engine/world_expansion.js')));
+    const { ensureEntityChaptersBackfilled } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/world_expansion.js')));
     const b = store.books.create({ title: '存量书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     const ch1 = store.chapters.create(b.id, v.id, 1, { title: '第1章', status: 'done' });

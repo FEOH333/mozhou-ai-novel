@@ -60,7 +60,7 @@ describe('V0.43 文学技巧引擎', () => {
     assert.ok(inst.includes('【文学技法（打斗对抗场景）】'));
     assert.ok(inst.includes('【动态文风】'));
     // write.js 接线
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(w.includes('guessSceneType'), 'write.js 应组装场景类型');
     assert.ok(w.includes('techniqueText'), 'write.js 应传技法');
   });

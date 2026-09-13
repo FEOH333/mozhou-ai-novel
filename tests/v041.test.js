@@ -29,7 +29,7 @@ describe('V0.41 卷级整体审阅', () => {
     store.summaries.set(c2.id, b.id, '主角立威');
     store.scenes.create(c1.id, 1, { content: '第一章正文', status: 'done' });
     store.scenes.create(c2.id, 1, { content: '第二章正文', status: 'done' });
-    const { runVolumeReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
+    const { runVolumeReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
     const r = await runVolumeReview(b.id, v.id, {});
     assert.equal(r.grade, 'B', 'mock 应返回 B 级');
     assert.equal(r.issues.length, 1, 'mock 应带 1 条 P1 工单');
@@ -54,7 +54,7 @@ describe('V0.41 卷级整体审阅', () => {
     store.summaries.set(c3.id, b.id, '第二卷第一章');
     store.scenes.create(c3.id, 1, { content: '正文2', status: 'done' });
     const c4 = store.chapters.create(b.id, v2.id, 3, { title: '第三章', status: 'planned' }); // 未完成
-    const { autoReviewVolumes } = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
+    const { autoReviewVolumes } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
     const results = await autoReviewVolumes(b.id, {});
     assert.equal(results.length, 1, '只审完成的卷1');
     assert.equal(results[0].volumeIdx, 1);
@@ -81,7 +81,7 @@ describe('V0.41 卷级整体审阅', () => {
     store.summaries.set(c2.id, b.id, '主角入城');
     store.scenes.create(c2.id, 1, { content: '第二章正文', status: 'done' });
     store.foreshadows.create(b.id, { desc: '玉佩的秘密', plantedChapter: 2 });
-    const { buildVolumeReviewContext } = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
+    const { buildVolumeReviewContext } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
     const ctx = buildVolumeReviewContext(b.id, v2);
     assert.ok(ctx.chapterLines.includes('第2章《入城》'), '应含本卷章节摘要');
     assert.ok(ctx.foreshadowLines.includes('玉佩的秘密'), '应含本卷伏笔');
@@ -90,7 +90,7 @@ describe('V0.41 卷级整体审阅', () => {
   });
 
   test('pilot 接线静态断言（补审 + 卷末自动审阅）', () => {
-    const p = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const p = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     const idx = fs.readFileSync(path.join(ROOT, 'server/index.js'), 'utf8');
     const ol = fs.readFileSync(path.join(ROOT, 'web/js/views/outline.js'), 'utf8');
     assert.ok(p.includes('autoReviewVolumes'), 'pilot 应导入补审');

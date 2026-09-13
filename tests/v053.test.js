@@ -12,7 +12,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v053-'));
 
 describe('V0.53 角色库整理修复', () => {
   test('castMatched 兼容无 "- " 前缀的 cast 行（阿福｜...）', async () => {
-    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/roster.js')));
+    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/roster.js')));
     const cast = '【主角弧光】\n李尘｜起点缺陷：懒\n\n【配角库】\n阿福｜小乞丐｜乐观｜目标是吃饱｜秘密：孤儿｜命运线：牺牲｜与李尘兄弟\n- 赵铁柱｜恶霸｜凶悍';
     assert.equal(roster.castMatched(cast, '阿福'), true, '无前缀行应匹配');
     assert.equal(roster.castMatched(cast, '赵铁柱'), true, '带 - 前缀行应匹配');
@@ -20,7 +20,7 @@ describe('V0.53 角色库整理修复', () => {
   });
 
   test('localTier：cast 主角→protagonist/配角→major/未匹配→minor（不再默认 extra）', async () => {
-    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/roster.js')));
+    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/roster.js')));
     const cast = '【主角弧光】\n李尘｜起点缺陷：懒\n\n【配角库】\n阿福｜小乞丐｜乐观｜目标是吃饱';
     const mk = (name, tier) => ({ name, tier, personality: '', goal: '', secret: '', arc: '' });
     assert.equal(roster.localTier('x', cast, mk('李尘', 'extra')), 'protagonist', '主角应升 protagonist');
@@ -32,7 +32,7 @@ describe('V0.53 角色库整理修复', () => {
 
   test('purgeMisplacedCharacterCards：道具迁移 items/生物与 cast 点名保留', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/roster.js')));
+    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/roster.js')));
     const b = store.books.create({ title: 'T', genre: '玄幻', blurb: 'x' });
     const cast = '【配角库】\n阿福｜小乞丐｜乐观｜目标是吃饱';
     store.characters.create(b.id, { name: '阿福', tier: 'minor' });
@@ -49,7 +49,7 @@ describe('V0.53 角色库整理修复', () => {
 
   test('tidyRoster 端到端：分级+净化+AI 补全（mock）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/roster.js')));
+    const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/roster.js')));
     const b = store.books.create({ title: 'T2', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'cast', '【主角弧光】\n李尘｜懒\n\n【配角库】\n阿福｜小乞丐｜乐观｜目标是吃饱｜秘密：孤儿');
     store.characters.create(b.id, { name: '李尘', tier: 'extra' });

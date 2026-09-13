@@ -13,7 +13,7 @@ const ROOT = process.cwd();
 
 describe('V0.80 逐章吸引力质量门', () => {
   test('①attractionLocalRules：词表缺席不下语义结论，客观排版异常仍可报告', async () => {
-    const { attractionLocalRules } = await import(pathToFileURL(path.join(ROOT, 'server/engine/attraction.js')));
+    const { attractionLocalRules } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/attraction.js')));
     const flat = attractionLocalRules('清晨的阳光透过窗棂洒进来，他慢慢睁开眼睛，想着今天该做些什么。他叹了口气，洗漱，吃早饭，出门散步。');
     assert.ok(!flat.some(i => i.type === '平淡开场'), '词表未命中不能推出平淡');
     assert.ok(!flat.some(i => i.type === '无章末钩子'), '词表未命中不能推出无钩子');
@@ -23,7 +23,7 @@ describe('V0.80 逐章吸引力质量门', () => {
   });
 
   test('②parseAttractionResult：坏 JSON/未知判定显式 unreviewed，无 serious 问题才 pass', async () => {
-    const { parseAttractionResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/attraction.js')));
+    const { parseAttractionResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/attraction.js')));
     assert.equal(parseAttractionResult('not json').verdict, 'unreviewed', '坏 JSON 不能伪装成通过');
     assert.equal(parseAttractionResult('{"verdict":"maybe","issues":[]}').verdict, 'unreviewed', '未知判定不能伪装成通过');
     assert.equal(parseAttractionResult('{"verdict":"fix","issues":[]}').verdict, 'pass', '无 issue 应 pass');
@@ -35,7 +35,7 @@ describe('V0.80 逐章吸引力质量门', () => {
     process.env.NOVEL_ATTRACTION_FAULT = '1';
     try {
       const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-      const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+      const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
       const b = store.books.create({ title: '番茄书', genre: '玄幻', blurb: 'x', platform: '番茄' });
       store.materials.set(b.id, 'contract', 'x');
       const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -56,7 +56,7 @@ describe('V0.80 逐章吸引力质量门', () => {
 
   test('④普通平台（soft）：mock 返回 pass 时正常完成，不额外卡章', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const b = store.books.create({ title: '通用书', genre: '玄幻', blurb: 'x', platform: '通用' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -70,7 +70,7 @@ describe('V0.80 逐章吸引力质量门', () => {
     process.env.NOVEL_ATTRACTION_PARSEFAULT = '1';
     try {
       const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-      const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+      const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
       const b = store.books.create({ title: '未审书', genre: '历史', blurb: 'x', platform: '番茄' });
       store.materials.set(b.id, 'contract', 'x');
       const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });

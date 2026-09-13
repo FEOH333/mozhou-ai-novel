@@ -6,11 +6,11 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
 import {
   auditIssueRepairMode, auditVerdictAfterBudget, hasOutlineRootIssue,
   isRevisionStale, shouldImmediateReplanWipe,
-} from '../server/engine/pipeline.js';
+} from '../server/engine/pipeline/pipeline.js';
 
 const SPACE = {
   type: '事实矛盾', severity: 'high',

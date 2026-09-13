@@ -13,7 +13,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v044b-'));
 describe('V0.44 自动续卷', () => {
   test('generateNextVolume：建新卷+全局 idx 连续+承接上下文', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
+    const cont = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
     const b = store.books.create({ title: '续卷书', genre: '玄幻', blurb: 'x' });
     const v1 = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g', status: 'outlined' });
     const c1 = store.chapters.create(b.id, v1.id, 1, { title: '第1章', status: 'done' });
@@ -41,7 +41,7 @@ describe('V0.44 自动续卷', () => {
 
   test('pilot 自动续卷集成：写完规划→判定未完→续卷→继续写直到目标章数', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: 'pilot续卷书', genre: '玄幻', blurb: 'x' });
     const v1 = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g', status: 'outlined' });
     const c1 = store.chapters.create(b.id, v1.id, 1, { title: '第1章', status: 'planned', outline: { beat: 'x' } });
@@ -81,7 +81,7 @@ describe('V0.44 自动续卷', () => {
 
   test('pilot 完本路径：AI 判定完本→不续卷', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: '完本pilot书', genre: '玄幻', blurb: 'x' });
     const v1 = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g', status: 'outlined' });
     const c1 = store.chapters.create(b.id, v1.id, 1, { title: '第1章', status: 'done' });

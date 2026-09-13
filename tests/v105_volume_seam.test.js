@@ -13,7 +13,7 @@ const {
   shouldReviewVolumeBeforeLazyOutline,
   reviewDueVolumes,
   autoReviewVolumes,
-} = await import('../server/engine/volumereview.js');
+} = await import('../server/engine/planning/volumereview.js');
 
 function completeVolume(bookId, volumeId, idx) {
   const ch = store.chapters.create(bookId, volumeId, idx, { title: `第${idx}章`, status: 'done' });
@@ -45,7 +45,7 @@ test('V0.105 安全闸拦截只记债，缝前体检与启动补审都不再重�
 });
 
 test('V0.105 卷缝出口年早于规划起点时，承接年不得判 YEAR_OUTSIDE_PHASE', async () => {
-  const longform = await import('../server/engine/historical_longform.js');
+  const longform = await import('../server/engine/longform/historical_longform.js');
   const phase = { startYear: 1261, endYear: 1264, startAge: 29, endAge: 32, anchor: '蒙古汗位之争' };
   const bridging = {
     chapters: [
@@ -67,6 +67,6 @@ test('V0.105 卷缝出口年早于规划起点时，承接年不得判 YEAR_OUTS
   }, phase, { previousExitYear: 1259 });
   assert.ok(tooEarly.issues.some(i => i.code === 'YEAR_OUTSIDE_PHASE'));
 
-  const outlineSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/outline.js'), 'utf8');
+  const outlineSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/planning/outline.js'), 'utf8');
   assert.match(outlineSrc, /previousExitYear/);
 });

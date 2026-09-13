@@ -10,7 +10,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v077-settle-
 process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
-const { settleChapter } = await import('../server/engine/settle.js');
+const { settleChapter } = await import('../server/engine/pipeline/settle.js');
 
 function makeChapter(title = '结算测试') {
   const book = store.books.create({ title, genre: '玄幻' });

@@ -5,8 +5,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
-import { entityNamePlausible } from '../engine/names.js'; // V0.93.11：实体类型名检测与 settle 建卡门同源
-import { STALE_MATERIAL_AFTER_CHAPTERS } from '../engine/continuation.js'; // V0.93.11：时效阈值与续卷注入侧同源
+import { entityNamePlausible } from '../engine/narrative/names.js'; // V0.93.11：实体类型名检测与 settle 建卡门同源
+import { STALE_MATERIAL_AFTER_CHAPTERS } from '../engine/pipeline/continuation.js'; // V0.93.11：时效阈值与续卷注入侧同源
 import {
   detectSceneBoundaryFragments,
   detectEvidenceCertaintyStack,
@@ -21,11 +21,11 @@ import {
   titleShapeOf,
   titleShapeStreakIssues,
   titleRootRepeatIssues,
-} from '../engine/rules.js'; // V0.97.1：推流前结构级正文与风格体检 // V0.107：章名句式族观察面（与卷纲期校验同源）
-import { lifecycleStructureIssues } from '../engine/longform_lifecycle.js';
-import { detectGrowthPlanDrift, detectLongRunningStateDebts } from '../engine/characters.js';
-import { openingFingerprint } from '../engine/opening_diagnosis.js';
-import { platformFrontMatterCompatibility } from '../engine/opening_intervention.js';
+} from '../engine/quality/rules.js'; // V0.97.1：推流前结构级正文与风格体检 // V0.107：章名句式族观察面（与卷纲期校验同源）
+import { lifecycleStructureIssues } from '../engine/longform/longform_lifecycle.js';
+import { detectGrowthPlanDrift, detectLongRunningStateDebts } from '../engine/narrative/characters.js';
+import { openingFingerprint } from '../engine/planning/opening_diagnosis.js';
+import { platformFrontMatterCompatibility } from '../engine/planning/opening_intervention.js';
 import { historicalEventTargetsFromOutline } from '../data/history.js';
 
 const THIS_FILE = fileURLToPath(import.meta.url);
@@ -42,7 +42,7 @@ export const DEFAULTS = Object.freeze({
   similarityNgram: 8,
   similarityThreshold: 0.35,
   exactSentenceMinChars: 20,
-  // V0.93.11：与 server/engine/continuation.js filterStaleMaterials 的时效阈值同源（15 章）——
+  // V0.93.11：与 server/engine/pipeline/continuation.js filterStaleMaterials 的时效阈值同源（15 章）——
   // 此前 doctor 用 12 报"过期"，而注入侧 15 章内仍注入，写审两把尺子打架。
   staleMaterialAfterChapters: STALE_MATERIAL_AFTER_CHAPTERS,
   recoveryMinExtraChars: 200,
@@ -560,7 +560,7 @@ function checkSimilarity(chapters, texts, options) {
 }
 
 function suspiciousEntity(table, name) {
-  // V0.93.11：检测词表与 settle 建卡门同源（server/engine/names.js entityNamePlausible）——
+  // V0.93.11：检测词表与 settle 建卡门同源（server/engine/narrative/names.js entityNamePlausible）——
   // 写审同源：模型自报"青铜薄片"为地点时 settle 不建卡，存量误建卡由 doctor 同样检出。
   const kindMap = { locations: 'locations', factions: 'factions', items: 'items' };
   const reasons = entityNamePlausible(kindMap[table] || table, name);

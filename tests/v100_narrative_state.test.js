@@ -17,8 +17,8 @@ const {
   narrativeStateStatus,
   prepareAndCommitNarrativeRevision,
   validateNarrativeProjection,
-} = await import('../server/engine/narrative_state.js');
-const { settleChapter } = await import('../server/engine/settle.js');
+} = await import('../server/engine/narrative/narrative_state.js');
+const { settleChapter } = await import('../server/engine/pipeline/settle.js');
 
 const sha256 = value => createHash('sha256').update(String(value || '')).digest('hex');
 

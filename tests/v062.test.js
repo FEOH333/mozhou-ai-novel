@@ -14,7 +14,7 @@ const ROOT = process.cwd();
 
 describe('V0.62 自动化升级', () => {
   test('①pipeline 返工：replan 受轮数限制（防死循环）+ 事实级 high 纳入修订 + stale 升级 replan + coverage 复审', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pipeline.js'), 'utf8');
     assert.ok(src.includes('replanRound'), 'replan 应有轮数计数');
     assert.ok(src.includes('replanRound >= Math.max(2, maxRevise)'), 'replan 超限降级放行（防死循环）');
     assert.ok(src.includes("'设定冲突', '时间线冲突', '角色矛盾', '事实编造', '事实矛盾', '大纲偏离'"), '事实级 high 纳入修订');
@@ -24,18 +24,18 @@ describe('V0.62 自动化升级', () => {
   });
 
   test('②卷体检：failed 可重审 + 修订后复检 + P2 工单落债', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/volumereview.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/volumereview.js'), 'utf8');
     assert.ok(src.includes("r.status !== 'failed'"), '补审应排除 failed（可重审）');
     assert.ok(src.includes('_recheck'), '应有复检参数');
     assert.ok(src.includes('volume_review_recheck'), '应有复检事件');
     assert.ok(src.includes('revisedCount: revised + (re.revised || 0)'), '复检后 revised_count 累计');
     assert.ok(src.includes('卷体检工单'), 'P2 工单应落 conflicts');
-    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(pilot.includes("prevReview.status === 'failed'"), 'pilot 卷体检 failed 可重审');
   });
 
   test('③pilot 补写通道：缺章/缺场景自动检测 + 尝试上限 + 每 3 章补查', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(src.includes('backfillMissed'), '应有补写函数');
     assert.ok(src.includes('backfillAttempts'), '应有补写尝试计数（防无限重试）');
     assert.ok(src.includes('backfillAttempts.get(ch.id) >= 2'), '每章最多试 2 次');
@@ -45,12 +45,12 @@ describe('V0.62 自动化升级', () => {
   });
 
   test('④书级对齐：按章数间隔触发 + 未写卷 goal 同步', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/alignment.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/longform/alignment.js'), 'utf8');
     assert.ok(src.includes('intervalChapters = 8'), '书级对齐默认 8 章间隔');
     assert.ok(src.includes('doneCount - lastAlignChapters'), '按已完成章数判定');
     assert.ok(src.includes('书级对齐@${vols.length}卷${doneCount}章'), '日志记录卷数+章数');
     assert.ok(src.includes('patch.goal'), '未写卷 goal 同步');
-    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(pilot.includes('书级大纲自动对齐（回填实际+调整后续分卷）'), 'pilot 每章后检查书级对齐');
   });
 

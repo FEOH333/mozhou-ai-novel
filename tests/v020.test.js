@@ -14,9 +14,9 @@ let bookId, chapterId;
 
 before(async () => {
   store = await import('../server/db/store.js');
-  pipeline = await import('../server/engine/pipeline.js');
-  outline = await import('../server/engine/outline.js');
-  write = await import('../server/engine/write.js');
+  pipeline = await import('../server/engine/pipeline/pipeline.js');
+  outline = await import('../server/engine/planning/outline.js');
+  write = await import('../server/engine/pipeline/write.js');
   bookId = store.books.create({ title: '回归测试', genre: '玄幻', blurb: '灵感' }).id;
   chapterId = store.chapters.create(bookId, null, 1, { title: '第一章' }).id;
 });
@@ -101,6 +101,6 @@ test('V0.20: 契约评分门顺序——评分前契约已落库', async () => {
 
 test('V0.20: generateBookTitle 失败降级不抛异常', async () => {
   // 用无效 idea 也应返回 { ok:false } 而不是崩溃（mock 模式正常返回）
-  const r = await (await import('../server/engine/idea.js')).generateBookTitle(bookId, { idea: '' });
+  const r = await (await import('../server/engine/planning/idea.js')).generateBookTitle(bookId, { idea: '' });
   assert.equal(typeof r.ok, 'boolean');
 });

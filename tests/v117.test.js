@@ -9,7 +9,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v117-factbook-'));
 
 const store = await import('../server/db/store.js');
-const factbook = await import('../server/engine/factbook.js');
+const factbook = await import('../server/engine/narrative/factbook.js');
 
 describe('V0.93 事实簿覆盖语义', () => {
   test('发现不再被归一为获得', () => {

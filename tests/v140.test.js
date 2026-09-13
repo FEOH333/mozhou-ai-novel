@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import './helper.js';
 import { REDLINES, AI_TASTE_FULL, STRICT_MOTIFS, COMMON_MOTIFS } from '../server/data/redlines.js';
 import { AI_CLICHE_WORDS, styleRulesText } from '../server/data/creative_packs.js';
-import { detectMotifRepetition, detectDialogueBalance } from '../server/engine/rules.js';
+import { detectMotifRepetition, detectDialogueBalance } from '../server/engine/quality/rules.js';
 
 test('V0.95 红线单一来源：AI_TASTE_FULL = 注入词表 ∪ 检测黑名单（注入必可检/检出必注入）', () => {
   // 检测表覆盖注入表全量（写审同源铁律）

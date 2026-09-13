@@ -17,7 +17,7 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/roster.js')));
+const roster = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/roster.js')));
 
 // usage_logs 由 router.runTask 每次调用落库（mock 同样记账），是调用次数的单一事实源
 function countCastDesign(bookId) {
@@ -70,7 +70,7 @@ describe('V0.105.4 cast 设计幂等持久化', () => {
   });
 
   test('④pilot 不再持有进程内存 cast 标记（源码断言）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(!src.includes('const castDesignedVols = new Set()'), 'pilot 不得再用进程内存 Set 做 cast 幂等标记（重启即丢 → 历史卷重烧）');
     assert.ok(src.includes('sweepVolumeCastDesign'), 'pilot 应改调持久化 sweep');
   });

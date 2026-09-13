@@ -5,7 +5,7 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import * as rules from '../server/engine/rules.js';
+import * as rules from '../server/engine/quality/rules.js';
 
 const ROOT = process.cwd();
 const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -61,7 +61,7 @@ describe('V0.94.0b detectWeakEnding 豁免口径', () => {
 
 describe('V0.94.0b 审校接线闭环（写审同源：检测器必须参与审校 verdict）', () => {
   test('audit.js 将弱钩与母题检测器接入本地议题', () => {
-    const src = read('server/engine/audit.js');
+    const src = read('server/engine/pipeline/audit.js');
     assert.match(src, /detectWeakEnding\(chapterText/, '弱钩检测应接入章级 localIssues');
     assert.match(src, /detectMotifRepetition\(chapterText/, '母题配额应接入章级 localIssues');
     assert.match(src, /volumeFinal/, '弱钩检测应带卷末判定');

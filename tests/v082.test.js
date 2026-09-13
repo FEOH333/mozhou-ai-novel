@@ -13,7 +13,7 @@ const ROOT = process.cwd();
 
 describe('V0.78 宽松引用匹配 + 细纲根因 replan', () => {
   test('①sanitizeAuditResult 宽松匹配：模型改写引用不再误杀真实问题', async () => {
-    const { sanitizeAuditResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+    const { sanitizeAuditResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
     // 正文实际是"书架后那道灰衣身影"，审校引用"那人是灰衣人"（改写）→ 应保留（含"灰衣"关键词）
     const chapterText = '书架后那道灰衣身影还在。我往门口走时，他没有动，手指仍搭在卷宗格沿上。';
     const result = sanitizeAuditResult({
@@ -25,7 +25,7 @@ describe('V0.78 宽松引用匹配 + 细纲根因 replan', () => {
   });
 
   test('②sanitizeAuditResult 仍过滤完全无关的伪引用', async () => {
-    const { sanitizeAuditResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+    const { sanitizeAuditResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
     const chapterText = '李尘走进任务堂，翻看卷宗。';
     // quote 与正文完全无关 → 应过滤
     const result = sanitizeAuditResult({
@@ -37,7 +37,7 @@ describe('V0.78 宽松引用匹配 + 细纲根因 replan', () => {
   });
 
   test('③hasOutlineRootIssue：细纲根因 high → replan', async () => {
-    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     assert.equal(hasOutlineRootIssue({ issues: [{ type: '事实编造', severity: 'high' }] }), true);
     assert.equal(hasOutlineRootIssue({ issues: [{ type: '大纲偏离', severity: 'high' }] }), true);
     assert.equal(hasOutlineRootIssue({ issues: [{ type: '语句质量', severity: 'high' }] }), false);
@@ -46,8 +46,8 @@ describe('V0.78 宽松引用匹配 + 细纲根因 replan', () => {
   test('④完整链路：审校报大纲偏离（灰衣人 vs 老幺）→ sanitize保留 → replan 触发', async () => {
     // 模拟：正文写灰衣人，细纲要求老幺，审校报大纲偏离
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { sanitizeAuditResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
-    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { sanitizeAuditResult } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
+    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const chapterText = '书架后那道灰衣身影还在。林月低声说那是负责书库杂务的人。';
     const cleaned = sanitizeAuditResult({
       verdict: 'fix',
@@ -59,7 +59,7 @@ describe('V0.78 宽松引用匹配 + 细纲根因 replan', () => {
 
   test('⑤runChapterFlow mock 审校 accept 不破坏正常流程', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const b = store.books.create({ title: '正常书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });

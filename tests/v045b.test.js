@@ -13,7 +13,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v045b-'));
 describe('V0.45 pilot 对齐集成', () => {
   test('自动创作中：章名脱节→自动改名；卷写完→卷级对齐（卷名+卷大纲重写）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: '对齐pilot书', genre: '玄幻', blurb: 'x' });
     const v1 = store.volumes.create(b.id, 1, { title: '宗门大比与秘境', goal: '大比夺魁', status: 'outlined' });
     // 2 章规划：章名故意与将写内容无关（mock 正文+结算摘要）
@@ -44,7 +44,7 @@ describe('V0.45 pilot 对齐集成', () => {
 
   test('存量兼容：已对齐卷不重复修订（幂等）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     const b = store.books.create({ title: '幂等书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g' });
     const c = store.chapters.create(b.id, v.id, 1, { title: '第1章 药园风波', status: 'done' });

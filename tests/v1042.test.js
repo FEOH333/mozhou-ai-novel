@@ -13,7 +13,7 @@ import path from 'node:path';
 const store = await import('../server/db/store.js');
 const {
   recordChapterHealth, detectDrift, replanFrom, shouldRegenerateVolumeOutline,
-} = await import('../server/engine/recovery.js');
+} = await import('../server/engine/recovery/recovery.js');
 
 const ROOT = process.cwd();
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
@@ -140,7 +140,7 @@ test('V0.104.2 完成章遗留的质量门冲突应随完成态核销', () => {
 });
 
 test('V0.104.2 下一章续写不得再标成补写被跳过', () => {
-  const src = read('server/engine/pilot.js');
+  const src = read('server/engine/pipeline/pilot.js');
   assert.match(src, /续写第 \$\{ch\.idx\} 章/, 'maxDone+1 的下一章应显示续写，不是被跳过');
   assert.match(src, /ch\.idx < maxDone/, '只有进度内部的洞才叫补写被跳过');
 });

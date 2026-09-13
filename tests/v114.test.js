@@ -11,8 +11,8 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v114-ending-
 const ROOT = process.cwd();
 
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const continuation = await import(pathToFileURL(path.join(ROOT, 'server/engine/continuation.js')));
-const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform_lifecycle.js')));
+const continuation = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/continuation.js')));
+const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/longform_lifecycle.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
 
 function makeLongEnoughBook(title = '完本门测试书') {

@@ -13,13 +13,13 @@ import {
   detectNumericDataDump,
   runLocalRules,
   runSceneContinuityRules,
-} from '../server/engine/rules.js';
+} from '../server/engine/quality/rules.js';
 import { REDLINES } from '../server/data/redlines.js';
 import { CONTINUITY_CRAFT_TEXT } from '../server/data/literary_techniques.js';
 import { auditInstruction, writeSceneInstruction } from '../server/engine/prompts.js';
 import { auditDatabase } from '../server/maintenance/doctor.js';
 import { applyAnchoredTextPatch, resolveSupersededPatchFailures } from '../server/maintenance/patch-chain.js';
-import { chapterOutlineQualityIssues } from '../server/engine/outline.js';
+import { chapterOutlineQualityIssues } from '../server/engine/planning/outline.js';
 
 test('V0.97.1 场景边界：跨场景断句必须 high，完整换场不误报', () => {
   const broken = [

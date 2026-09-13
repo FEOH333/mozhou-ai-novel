@@ -10,7 +10,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v077-facts-'
 process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
-const { relevantFacts, applyFacts, archiveOldFacts } = await import('../server/engine/factbook.js');
+const { relevantFacts, applyFacts, archiveOldFacts } = await import('../server/engine/narrative/factbook.js');
 
 describe('V0.77 长篇事实记忆', () => {
   test('无关键词命中时返回最新事实，而不是最老事实', () => {

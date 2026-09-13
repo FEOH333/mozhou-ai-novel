@@ -11,7 +11,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v112-ending-
 const ROOT = process.cwd();
 
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform_lifecycle.js')));
+const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/longform_lifecycle.js')));
 
 const delivery = {
   final_opposition: '阻挡主角目标的最后力量',

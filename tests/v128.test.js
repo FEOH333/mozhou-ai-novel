@@ -14,13 +14,13 @@ const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
 const { estimateTokens } = await import(pathToFileURL(path.join(ROOT, 'server/llm/tokenizer.js')));
-const foreshadow = await import(pathToFileURL(path.join(ROOT, 'server/engine/foreshadow.js')));
-const characters = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
-const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
-const worldbook = await import(pathToFileURL(path.join(ROOT, 'server/engine/worldbook.js')));
+const foreshadow = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/foreshadow.js')));
+const characters = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
+const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
+const worldbook = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/worldbook.js')));
 const { styleRulesText } = await import(pathToFileURL(path.join(ROOT, 'server/data/creative_packs.js')));
 const { techniqueInjection, buildDynamicStyle, ENVIRONMENT_TEXT, PSYCHOLOGY_TEXT } = await import(pathToFileURL(path.join(ROOT, 'server/data/literary_techniques.js')));
-const { PLOT_DEAI_TEXT } = await import(pathToFileURL(path.join(ROOT, 'server/engine/plot_ai.js')));
+const { PLOT_DEAI_TEXT } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/plot_ai.js')));
 
 /** 塞满各注入源限流上限，构造"最坏情况"的 write 数据环境 */
 function seedWorstCase(bookId) {

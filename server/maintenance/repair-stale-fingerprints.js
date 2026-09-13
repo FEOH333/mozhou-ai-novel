@@ -7,7 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import * as store from '../db/store.js';
-import { isCompletedChapter } from '../engine/chapter_status.js';
+import { isCompletedChapter } from '../engine/pipeline/chapter_status.js';
 
 const BOOK_ARG = process.argv.find((arg, i) => process.argv[i - 1] === '--book');
 const APPLY = process.argv.includes('--apply');

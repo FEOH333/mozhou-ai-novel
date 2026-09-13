@@ -13,7 +13,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v1058-golden
 process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
-const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/rules.js')));
+const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/rules.js')));
 
 const GOLDEN = '墙修得再高，也挡不住人心的裂缝'; // 15 字
 
@@ -52,7 +52,7 @@ describe('V0.105.8 金句跨章短语复读', () => {
   });
 
   test('④源码断言：audit 接线 + redlines 阈值单源', () => {
-    const audit = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const audit = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(audit.includes('detectGoldenPhraseRepeats(chapterText'), 'audit 应接入金句检测');
     const red = fs.readFileSync(path.join(ROOT, 'server/data/redlines.js'), 'utf8');
     assert.match(red, /goldenPhraseMinChars: 10/, '阈值应进 redlines 单一真源');

@@ -13,7 +13,7 @@ process.env.NOVEL_NO_OPEN = '1';
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
 const { purgeMisplacedLocationCards, syncWorldLocations, locationCardText, tidyLocations } =
-  await import(pathToFileURL(path.join(ROOT, 'server/engine/locations.js')));
+  await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/locations.js')));
 
 describe('V0.71 成本页与地点库', () => {
   test('①成本页修复：costs.js 导入 state（此前漏导入 → "state is not defined"）', () => {
@@ -79,12 +79,12 @@ describe('V0.71 成本页与地点库', () => {
   });
 
   test('⑥pilot 每 5 章调 tidyLocations + 后端 locations API 路由', () => {
-    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(pilot.includes("tidyLocations(bookId"), 'pilot 应调用地点库整理');
     const idx = fs.readFileSync(path.join(ROOT, 'server/index.js'), 'utf8');
     assert.ok(idx.includes("'/api/books/:id/locations'"), 'locations GET 路由');
     assert.ok(idx.includes("'/api/books/:id/locations/tidy'"), 'locations tidy 路由');
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     assert.ok(w.includes('locationCardText'), '写作应注入地点卡');
   });
 });
@@ -98,7 +98,7 @@ describe('V0.71 过程打磨与伏笔收束', () => {
       const c = store.chapters.create(b.id, v.id, i, { title: 'C' + i, status: 'done' });
       store.summaries.set(c.id, b.id, '内容' + i);
     }
-    const { midStoryReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/polish.js')));
+    const { midStoryReview } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/polish.js')));
     const r = await midStoryReview(b.id, {});
     assert.ok(r.issues >= 1, '应发现问题');
     assert.ok(r.adjustments >= 1, '应生成规划调整');
@@ -115,7 +115,7 @@ describe('V0.71 过程打磨与伏笔收束', () => {
       store.summaries.set(c.id, b.id, 'x');
     }
     const f = store.foreshadows.create(b.id, { desc: '转生白光之谜', type: '剧情', importance: 'high', plantedChapter: 1 });
-    const { foreshadowClosurePlan } = await import(pathToFileURL(path.join(ROOT, 'server/engine/foreshadow.js')));
+    const { foreshadowClosurePlan } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/foreshadow.js')));
     const r = await foreshadowClosurePlan(b.id, {});
     assert.ok(r.overdue >= 1, '应识别超龄伏笔');
     assert.ok(r.assigned >= 1, '应分配回收');
@@ -126,10 +126,10 @@ describe('V0.71 过程打磨与伏笔收束', () => {
   });
 
   test('⑨pilot 每 10 章中期审阅 + 卷写完收束计划 + nextVolume 注入两段反馈', () => {
-    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(pilot.includes('midStoryReview'), 'pilot 应每 10 章中期审阅');
     assert.ok(pilot.includes('foreshadowClosurePlan'), 'pilot 应卷写完生成收束计划');
-    const cont = fs.readFileSync(path.join(ROOT, 'server/engine/continuation.js'), 'utf8');
+    const cont = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/continuation.js'), 'utf8');
     assert.ok(cont.includes('midReviewText') && cont.includes('closurePlanText'), '续卷应注入两段反馈');
     const ws = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
     assert.ok(ws.includes("case 'mid_review':") && ws.includes("case 'foreshadow_plan':"), '前端应处理新事件');

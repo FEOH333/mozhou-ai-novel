@@ -19,7 +19,7 @@ describe('V0.57 诊断修复进度可视化', () => {
   });
 
   test('recovery.js replanFrom 先提示重规划总数（让用户知道要等多久）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/recovery.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/recovery/recovery.js'), 'utf8');
     assert.ok(src.includes('将重规划'), '应提示重规划总数');
     assert.ok(src.includes('请稍候'), '应提示等待预期');
     assert.ok(src.includes('${replanned + 1}/${chapters.length}'), '应显示逐章进度 x/N');
@@ -29,10 +29,10 @@ describe('V0.57 诊断修复进度可视化', () => {
     // runTask 有超时/重试/熔断；replanFrom 有 signal.aborted 检查 + 单章 catch；maxRecoveryRounds 有上限
     const client = fs.readFileSync(path.join(ROOT, 'server/llm/client.js'), 'utf8');
     assert.ok(client.includes('totalTimeoutMs') || client.includes('maxRetries'), 'LLM 调用应有超时/重试');
-    const recovery = fs.readFileSync(path.join(ROOT, 'server/engine/recovery.js'), 'utf8');
+    const recovery = fs.readFileSync(path.join(ROOT, 'server/engine/recovery/recovery.js'), 'utf8');
     assert.ok(recovery.includes('signal?.aborted'), '重规划应响应中止');
     assert.ok(recovery.includes('单章重规划失败继续下一章'), '单章失败不应阻塞');
-    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(pilot.includes('maxRecoveryRounds'), '恢复轮数应有上限（超限暂停人工出口）');
   });
 });

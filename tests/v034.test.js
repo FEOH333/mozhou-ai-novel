@@ -32,9 +32,9 @@ describe('V0.34 大纲生成 TypeError 根因修复', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'v034-'));
     process.env.NOVEL_DATA_DIR = tmp;
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
-    const idea = await import(pathToFileURL(path.join(ROOT, 'server/engine/idea.js')));
-    const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
+    const idea = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/idea.js')));
+    const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
     // 书不存在 → 各入口抛明确业务错误（"卷不存在/章节不存在/作品不存在"），而不是 TypeError 崩溃
     await assert.rejects(() => outline.generateVolumeOutline('bk-none', 'vol-none', {}), /不存在/);
     await assert.rejects(() => outline.generateChapterOutline('bk-none', 'ch-none'), /不存在/);

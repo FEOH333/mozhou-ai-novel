@@ -7,9 +7,9 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
-import { detectTimelineAnchorConflict } from '../server/engine/rules.js';
-import { hasOutlineRootIssue, auditIssueRepairMode, normalizeAuditForRepair } from '../server/engine/pipeline.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
+import { detectTimelineAnchorConflict } from '../server/engine/quality/rules.js';
+import { hasOutlineRootIssue, auditIssueRepairMode, normalizeAuditForRepair } from '../server/engine/pipeline/pipeline.js';
 
 test('V0.102.4 开篇缺跨年的 LLM 时间线冲突打 proseFix，不走 replan', () => {
   const stamped = stampOpeningTimelineProseFix([

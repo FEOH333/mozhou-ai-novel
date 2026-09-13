@@ -14,8 +14,8 @@ let bookId;
 
 before(async () => {
   store = await import('../server/db/store.js');
-  idea = await import('../server/engine/idea.js');
-  outline = await import('../server/engine/outline.js');
+  idea = await import('../server/engine/planning/idea.js');
+  outline = await import('../server/engine/planning/outline.js');
   bookId = store.books.create({ title: '创意测试', genre: '玄幻', platform: '番茄', blurb: '' }).id;
 });
 

@@ -6,8 +6,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const store = await import('../server/db/store.js');
-const recovery = await import('../server/engine/recommendation_recovery.js');
-const contract = await import('../server/engine/recovery_contract.js');
+const recovery = await import('../server/engine/recovery/recommendation_recovery.js');
+const contract = await import('../server/engine/recovery/recovery_contract.js');
 
 function createSixChapterBook(title) {
   const book = store.books.create({ title, genre: '历史', platform: '番茄' });

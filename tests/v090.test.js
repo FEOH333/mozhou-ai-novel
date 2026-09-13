@@ -14,7 +14,7 @@ const ROOT = process.cwd();
 
 describe('V0.82 历史题材超级加强', () => {
   test('①朝代可配置：宋末默认内置包；自定义朝代走用户 seed 模板', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
     // 默认（无 era）→ 宋末内置考据包
     const b = store.books.create({ title: '宋末书', genre: '历史', blurb: 'x' });
@@ -38,7 +38,7 @@ describe('V0.82 历史题材超级加强', () => {
   });
 
   test('②era_context 双写修复：formatEraContext 输出带【时代红线】标签（章节级正则可匹配）', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const text = h.formatEraContext({
       era: '南宋末',
       real_events: ['1242年余玠筑山城'],
@@ -72,12 +72,12 @@ describe('V0.82 历史题材超级加强', () => {
     const plain = auditInstruction({ bookTitle: 'X', chapterTitle: 'C', chapterText: 'T', factsText: '', foreshadowsText: '', characterStates: '', contract: '', eraContext: '' });
     assert.ok(!plain.includes('历史时代基准'), '非历史不注入时代基准');
     // 史实错误已入细纲根因（replan 分流）
-    const { OUTLINE_ROOT_ISSUES } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { OUTLINE_ROOT_ISSUES } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     assert.ok(OUTLINE_ROOT_ISSUES.includes('史实错误'), '史实错误为细纲根因');
   });
 
   test('④历史阅读回报词表分流：只保留题材化计数信号，不凭缺词判空转', async () => {
-    const { attractionLocalRules, attractionLocalSignals } = await import(pathToFileURL(path.join(ROOT, 'server/engine/attraction.js')));
+    const { attractionLocalRules, attractionLocalSignals } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/attraction.js')));
     const histText = '王坚猛地拍案而起，识破这封军报里的阴谋，帐中诸将相顾动容，皆服其智。他缓步走出帐去，望见江上点点渔火。';
     const r1 = attractionLocalRules(histText, { isHistory: true });
     assert.ok(!r1.some(i => i.type === '本章无阅读回报'), '历史题材有识破/动容等史实回报词不应误判');
@@ -103,7 +103,7 @@ describe('V0.82 历史题材超级加强', () => {
   });
 
   test('⑥史实事件锚点：seedEraEvents 落库 + 边界注入（已过不可改前因/未到不得提前）', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
     const b = store.books.create({ title: '锚点书', genre: '历史', blurb: 'x' });
     h.seedEraEvents(b.id, {
@@ -125,7 +125,7 @@ describe('V0.82 历史题材超级加强', () => {
   });
 
   test('⑦纪年抽取：extractEraMarkers 提取 公元年/年号纪年/季节', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const m = h.extractEraMarkers('淳祐元年（1241年）春，蒙军哨骑出现在城下。');
     assert.equal(m.year, 1241);
     assert.ok(m.eraYear.includes('年'));
@@ -134,7 +134,7 @@ describe('V0.82 历史题材超级加强', () => {
   });
 
   test('⑧取名/避讳规则：注入契约与设定；红线扩充含错位称谓/异代制度', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const rules = h.historyNamingRules();
     assert.ok(rules.includes('避讳'), '含避讳规则');
     assert.ok(rules.includes('表字'), '含表字规则');
@@ -152,7 +152,7 @@ describe('V0.82 历史题材超级加强', () => {
   });
 
   test('⑨时代元素词条化：ensureEraContext 后世界书自动建官职/地理词条（持久注入）', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
     const b = store.books.create({ title: '词条书', genre: '历史', blurb: 'x' });
     h.seedEraWorldbook(b.id, {
@@ -175,7 +175,7 @@ describe('V0.82 历史题材超级加强', () => {
 
   test('⑩地点库朝代地理：admin_level/strategic 存储与注入文本', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { locationCardText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/locations.js')));
+    const { locationCardText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/locations.js')));
     const b = store.books.create({ title: '地点书', genre: '历史', blurb: 'x' });
     const l = store.locations.create(b.id, { name: '钓鱼城', card: {} });
     store.locations.update(l.id, { kind: '山城', adminLevel: '州·山城', strategic: '三江汇流，锁江天堑', desc: '合州城东要塞' });
@@ -189,7 +189,7 @@ describe('V0.82 历史题材超级加强', () => {
   });
 
   test('⑪金手指分流：formatPleasurePlan/formatBlueprintText 历史题材改"立身之本"', async () => {
-    const { formatPleasurePlan } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+    const { formatPleasurePlan } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
     const plan = { reward_rhythm: { small: '每1章', medium: '每6章', large: '每20章' }, protagonist_recipe: { golden_finger: { power: '熟知川蜀地理', limit: '只知地理不知军略' } } };
     const histText = formatPleasurePlan(plan, { isHistory: true });
     assert.ok(histText.includes('立身之本'), '历史题材注入立身之本');
@@ -209,7 +209,7 @@ describe('V0.82 历史题材超级加强', () => {
 
   test('⑫历史书 pilot 全流程：era 配置 + 史实锚点 + 世界书词条 + 边界注入', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: '端到端历史', genre: '历史', platform: '番茄', blurb: '蜀中孤儿守钓鱼城', era: JSON.stringify({ dynasty: '南宋末', years: '1234-1279', eraLine: '淳祐/宝祐/开庆', seed: '余玠帅蜀；王坚筑钓鱼城；蒙哥1259年死' }) });
     const r = await runBookPilot(b.id, { targetChapters: 2 });
     assert.ok(r.written >= 1, '应写完至少 1 章');
@@ -217,20 +217,20 @@ describe('V0.82 历史题材超级加强', () => {
     assert.ok(store.eraEvents.list(b.id).length >= 1, '应落史实锚点');
     assert.ok(store.worldbook.list(b.id).length >= 1, '应建时代词条');
     // 章节细纲注入史实边界（eraBoundary 非空——有史实锚点且当前年份已知）
-    const { eraBoundaryText, currentStoryYear } = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const { eraBoundaryText, currentStoryYear } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const boundary = eraBoundaryText(b.id, currentStoryYear(b.id));
     if (store.eraEvents.list(b.id).length) assert.ok(boundary.includes('史实边界'), '细纲/正文可注入史实边界');
   });
 
   test('⑬非历史题材零影响回归：爽点词表/审校/签约均走原逻辑', async () => {
-    const { attractionLocalRules } = await import(pathToFileURL(path.join(ROOT, 'server/engine/attraction.js')));
+    const { attractionLocalRules } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/attraction.js')));
     const r = attractionLocalRules('他猛地冲了上去，当众一脚踹翻那人，众人哗然震惊，反手一巴掌，爽！', { isHistory: false });
     assert.ok(!r.some(i => i.type === '本章无爽点'), '非历史通用爽点词仍有效');
-    const { formatPleasurePlan } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+    const { formatPleasurePlan } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
     const plan = { reward_rhythm: {}, protagonist_recipe: { golden_finger: { power: '系统面板' } } };
     assert.ok(formatPleasurePlan(plan, { isHistory: false }).includes('金手指'), '非历史保留金手指文案');
     // 红线检测仅历史题材启用——eraRedLineCheck 是纯函数，不注入非历史正文（调用点有 genre 保护）
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     assert.equal(h.eraRedLineCheck('他喝着咖啡看报纸。').length > 0, true, '红线检测函数本身可用（由调用点按题材启用）');
   });
 });

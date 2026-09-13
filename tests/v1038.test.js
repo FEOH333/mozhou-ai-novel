@@ -11,16 +11,16 @@ import path from 'node:path';
 import {
   classifyEventClass, compileDiversityContract, diversityContractIssues,
   diversityFeatures, diversityRegression, openerStructureTemplate,
-} from '../server/engine/chapter_diversity.js';
-import { chapterOutlineQualityIssues, healOutlineWordTargets } from '../server/engine/outline.js';
+} from '../server/engine/quality/chapter_diversity.js';
+import { chapterOutlineQualityIssues, healOutlineWordTargets } from '../server/engine/planning/outline.js';
 import {
   chapterOutlineInstruction, writeSceneInstruction, reviseInstruction,
   attractionRevisionNote, auditInstruction,
 } from '../server/engine/prompts.js';
 import { CONTINUITY_CRAFT_TEXT, techniqueInjection } from '../server/data/literary_techniques.js';
-import { detectChapterOpenerTic, detectOpenerStructureSaturation } from '../server/engine/rules.js';
-import { shouldImmediateReplanWipe } from '../server/engine/pipeline.js';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
+import { detectChapterOpenerTic, detectOpenerStructureSaturation } from '../server/engine/quality/rules.js';
+import { shouldImmediateReplanWipe } from '../server/engine/pipeline/pipeline.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
 
 function scenes(beats, extra = {}) {
   return beats.map((beat, i) => ({
@@ -458,12 +458,12 @@ test('V0.103.0 结算写入完整 features；管线接线不含书名开关', ()
   assert.equal(features.opener_family, 'place_wind_knife');
   assert.ok(features.initiative);
   const root = process.cwd();
-  const outlineSrc = fs.readFileSync(path.join(root, 'server/engine/outline.js'), 'utf8');
-  const writeSrc = fs.readFileSync(path.join(root, 'server/engine/write.js'), 'utf8');
-  const auditSrc = fs.readFileSync(path.join(root, 'server/engine/audit.js'), 'utf8');
-  const pipelineSrc = fs.readFileSync(path.join(root, 'server/engine/pipeline.js'), 'utf8');
-  const settleSrc = fs.readFileSync(path.join(root, 'server/engine/settle.js'), 'utf8');
-  const nsSrc = fs.readFileSync(path.join(root, 'server/engine/narrative_state.js'), 'utf8');
+  const outlineSrc = fs.readFileSync(path.join(root, 'server/engine/planning/outline.js'), 'utf8');
+  const writeSrc = fs.readFileSync(path.join(root, 'server/engine/pipeline/write.js'), 'utf8');
+  const auditSrc = fs.readFileSync(path.join(root, 'server/engine/pipeline/audit.js'), 'utf8');
+  const pipelineSrc = fs.readFileSync(path.join(root, 'server/engine/pipeline/pipeline.js'), 'utf8');
+  const settleSrc = fs.readFileSync(path.join(root, 'server/engine/pipeline/settle.js'), 'utf8');
+  const nsSrc = fs.readFileSync(path.join(root, 'server/engine/narrative/narrative_state.js'), 'utf8');
   assert.match(outlineSrc, /diversityContract|compileDiversityContract|loadRecentDiversityFeatures/);
   assert.match(writeSrc, /diversityText/);
   assert.match(auditSrc, /diversityRegression|diversityText/);

@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import * as store from '../server/db/store.js';
-import { replanFrom } from '../server/engine/recovery.js';
+import { replanFrom } from '../server/engine/recovery/recovery.js';
 
 function addSceneWithHistory(bookId, chapter, content, status = 'done') {
   const scene = store.scenes.create(chapter.id, 1, {

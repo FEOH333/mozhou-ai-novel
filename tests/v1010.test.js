@@ -9,15 +9,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const store = await import('../server/db/store.js');
-const { resolveCraftProfile, evidenceCertaintyThreshold } = await import('../server/engine/craft_profile.js');
+const { resolveCraftProfile, evidenceCertaintyThreshold } = await import('../server/engine/quality/craft_profile.js');
 const {
   countMotifHits,
   sceneMotifCap,
   buildCraftQuotaText,
-} = await import('../server/engine/craft_quota.js');
-const { characterCardsText } = await import('../server/engine/characters.js');
-const { detectSpeechForbidHits, detectEvidenceCertaintyStack } = await import('../server/engine/rules.js');
-const { schedulerCheck } = await import('../server/engine/pleasure.js');
+} = await import('../server/engine/quality/craft_quota.js');
+const { characterCardsText } = await import('../server/engine/narrative/characters.js');
+const { detectSpeechForbidHits, detectEvidenceCertaintyStack } = await import('../server/engine/quality/rules.js');
+const { schedulerCheck } = await import('../server/engine/quality/pleasure.js');
 const { writeSceneInstruction, rosterTidyInstruction, auditInstruction } = await import('../server/engine/prompts.js');
 const { VALLEY_FRAGMENT_TEXT } = await import('../server/data/literary_techniques.js');
 
@@ -161,8 +161,8 @@ test('V0.101 非历史题材不因语音卡空字段阻断；空禁腔零误报'
 });
 
 test('V0.101 质量内核仍在树中（精确版本号由 v025/当前版断言）', () => {
-  assert.ok(fs.existsSync(path.join(process.cwd(), 'server/engine/craft_quota.js')));
-  assert.ok(fs.existsSync(path.join(process.cwd(), 'server/engine/craft_profile.js')));
+  assert.ok(fs.existsSync(path.join(process.cwd(), 'server/engine/quality/craft_quota.js')));
+  assert.ok(fs.existsSync(path.join(process.cwd(), 'server/engine/quality/craft_profile.js')));
 });
 
 test('V0.101 语音卡与题材偏好有前端观察入口，不是引擎内部黑盒', () => {

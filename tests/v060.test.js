@@ -14,7 +14,7 @@ describe('V0.60 防屎山', () => {
   test('audit 落库过滤：语句质量/文学性/low 级不记债，仅需圆场类型 medium+ 记债', async () => {
     // V0.109.3：类型语义迁入 issue_types 注册表单一真源——audit 只查表，不再内嵌白名单。
     // 「是否接线」用源码断言，「语义是否正确」直接 import 注册表判定（比 grep 更强）。
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     assert.ok(src.includes('needsRoundup'), 'audit 应查 issue_types 的 needsRoundup');
     // 只允许注释里提到旧名（迁移溯源）；不得再出现第二份白名单**声明**
     assert.ok(!/const\s+NEEDS_ROUNDUP\s*=/.test(src), '不应再内嵌第二份白名单（单一真源）');
@@ -47,7 +47,7 @@ describe('V0.60 防屎山', () => {
   });
 
   test('settle 章结算后自动 prune（过期债务清理接线）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/settle.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/settle.js'), 'utf8');
     assert.ok(src.includes('pruneBefore'), '结算应清理过期债务');
     assert.ok(src.includes('chapter.idx - 4'), '保留最近 5 章窗口');
   });

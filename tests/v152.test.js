@@ -6,8 +6,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import './helper.js';
 import * as store from '../server/db/store.js';
-import { syncCastCharacters } from '../server/engine/roster.js';
-import { characterRollCallText, characterCardsText } from '../server/engine/characters.js';
+import { syncCastCharacters } from '../server/engine/narrative/roster.js';
+import { characterRollCallText, characterCardsText } from '../server/engine/narrative/characters.js';
 
 const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -63,12 +63,12 @@ test('V0.96 tokens 口径：promptTokens 已含 hit+miss，前端不得四项相
 // ---------- ③ 审校用量透传 ----------
 
 test('V0.96 审校用量进本次运行统计：auditChapter 接受 streamCb 且 pipeline 透传', () => {
-  const audit = read('server/engine/audit.js');
+  const audit = read('server/engine/pipeline/audit.js');
   assert.ok(/export async function auditChapter\(bookId, chapterId, \{ signal, streamCb \} = \{\}\)/.test(audit),
     'auditChapter 应接受 streamCb 参数');
   assert.ok(audit.includes('streamCb: { onUsage: streamCb?.onUsage, onUsageCost: streamCb?.onUsageCost }'),
     '审校 runTask 调用应透传 usage 回调');
-  const pipeline = read('server/engine/pipeline.js');
+  const pipeline = read('server/engine/pipeline/pipeline.js');
   assert.ok(pipeline.includes("const usageCb = { onUsage: u => emit('usage', u), onUsageCost: c => emit('usage_cost', c) }"),
     'pipeline 审校环节应把 usage 事件发到 SSE 流（此前审校 tokens 前端完全看不到）');
 });

@@ -3,8 +3,8 @@
 'use strict';
 import { structureInjection, CONTRAST_BUILDUP_TEXT, COLD_OPEN_CRAFT_TEXT, TITLE_CRAFT_TEXT, VOLUME_TITLE_CRAFT_TEXT } from '../data/literary_techniques.js'; // V0.83 叙事结构纪律 // V0.85 对比铺垫·先立后破 // V0.98.3 远期楔子·神开局工艺 // V0.107 章卷命名工艺单一真源（书纲/卷纲/细纲/改名四处共用，禁止内嵌第二份）
 import { AI_TASTE_FULL, EXTREME_CLICHES, STRICT_MOTIFS, REDLINES } from '../data/redlines.js'; // V0.100.15 返工候选文风注入与本地检测同源
-import { RECOVERY_WINDOW_LENGTH_RATIOS } from './recovery_contract.js'; // V0.100.15 窗口篇幅上下限与本地闸同源
-import { formatPhaseDutyRule } from './historical_guardrails.js'; // V0.102.3 阶段任务核验与指令同源：列出可核验动作，不必抄写规划套话
+import { RECOVERY_WINDOW_LENGTH_RATIOS } from './recovery/recovery_contract.js'; // V0.100.15 窗口篇幅上下限与本地闸同源
+import { formatPhaseDutyRule } from './longform/historical_guardrails.js'; // V0.102.3 阶段任务核验与指令同源：列出可核验动作，不必抄写规划套话
 
 // ========== 前缀（恒定） ==========
 

@@ -57,9 +57,9 @@ describe('V0.42 叙述视角（人称）', () => {
   });
 
   test('写正文/审校接线传 perspective + API 视角切换', async () => {
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
-    const a = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
-    const o = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
+    const a = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
+    const o = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     const idx = fs.readFileSync(path.join(ROOT, 'server/index.js'), 'utf8');
     const lib = fs.readFileSync(path.join(ROOT, 'web/js/views/library.js'), 'utf8');
     const ol = fs.readFileSync(path.join(ROOT, 'web/js/views/outline.js'), 'utf8');

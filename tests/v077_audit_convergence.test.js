@@ -11,10 +11,10 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
 const cache = await import('../server/llm/cache.js');
-const audit = await import('../server/engine/audit.js');
-const pipeline = await import('../server/engine/pipeline.js');
-const pilot = await import('../server/engine/pilot.js');
-const rules = await import('../server/engine/rules.js');
+const audit = await import('../server/engine/pipeline/audit.js');
+const pipeline = await import('../server/engine/pipeline/pipeline.js');
+const pilot = await import('../server/engine/pipeline/pilot.js');
+const rules = await import('../server/engine/quality/rules.js');
 
 test('审校消息只携带固定材料和本章指令，不把旧章节正文当成本章', () => {
   assert.equal(typeof cache.assembleReviewMessages, 'function', '应提供隔离式审校消息组装器');

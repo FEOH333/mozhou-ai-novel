@@ -12,9 +12,9 @@ process.env.NOVEL_NO_OPEN = '1';
 const ROOT = process.cwd();
 
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const signing = await import(pathToFileURL(path.join(ROOT, 'server/engine/signing.js')));
-const safety = await import(pathToFileURL(path.join(ROOT, 'server/engine/data_safety.js')));
-const pilot = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+const signing = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/signing.js')));
+const safety = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/data_safety.js')));
+const pilot = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
 
 function completedChapter(bookId, volumeId, idx, text) {
   const chapter = store.chapters.create(bookId, volumeId, idx, {

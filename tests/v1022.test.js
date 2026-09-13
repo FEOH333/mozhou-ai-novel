@@ -15,7 +15,7 @@ const {
   assertNarrativeStateReady,
   ensureNarrativeStateReady,
   prepareAndCommitNarrativeRevision,
-} = await import('../server/engine/narrative_state.js');
+} = await import('../server/engine/narrative/narrative_state.js');
 
 const sha256 = value => createHash('sha256').update(String(value || '')).digest('hex');
 const ANCHOR = '主角烧掉退路文书';
@@ -108,7 +108,7 @@ test('V0.102.2 显式重建接口规划失败仍 fail-closed，不得默认降�
 });
 
 test('V0.102.2 写章入口把规划降级开关传给同版重建', () => {
-  const src = fs.readFileSync('server/engine/narrative_state.js', 'utf8');
+  const src = fs.readFileSync('server/engine/narrative/narrative_state.js', 'utf8');
   assert.match(src, /allowDegradedPlan:\s*true/);
   assert.match(src, /deterministicPlanReconciliation/);
   assert.match(src, /narrative_plan_degraded/);

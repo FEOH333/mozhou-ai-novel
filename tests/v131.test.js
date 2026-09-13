@@ -12,7 +12,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v131-ending-'));
 const ROOT = process.cwd();
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
 
 const V = (title, goal, summary) => ({ idx: 0, title, goal, summary });
 

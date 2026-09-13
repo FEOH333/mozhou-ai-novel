@@ -3,9 +3,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { buildBookExport } from '../server/engine/export.js';
-import { buildOpeningPublishPatch, composeOpeningAsset } from '../server/engine/opening_intervention.js';
-import { openingFingerprint } from '../server/engine/opening_diagnosis.js';
+import { buildBookExport } from '../server/engine/pipeline/export.js';
+import { buildOpeningPublishPatch, composeOpeningAsset } from '../server/engine/planning/opening_intervention.js';
+import { openingFingerprint } from '../server/engine/planning/opening_diagnosis.js';
 import { checkOpeningAssets } from '../server/maintenance/doctor.js';
 
 const book = { id: 'bk-export', title: '导出书' };

@@ -20,7 +20,7 @@ const weakDiagnosis = { rubric: { promise_alignment: { score: 2 } }, recommendat
 
 beforeEach(async () => {
   ({ book, volume, firstScene } = createOpeningFixture(store));
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: promiseData });
 });
 
@@ -32,7 +32,7 @@ const planFields = ({ kind, family, signature, content = '' }) => ({
 });
 
 test('V0.98.2 契约目标在场时远期楔子是默认核心策略；顺叙强化只在弱开篇时救济', async () => {
-  const { planOpeningStrategies, inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { planOpeningStrategies, inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const target = inferOpeningContractTarget(book.id);
   assert.ok(target, 'fixture 卷纲带 1259 稳定事件键，应解析出契约目标');
 
@@ -57,7 +57,7 @@ test('V0.98.2 契约目标在场时远期楔子是默认核心策略；顺叙强
 });
 
 test('V0.98.2 契约事件上下文携带目标卷材料与第一章年份差', async () => {
-  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const context = openingContractEventContext(book.id, inferOpeningContractTarget(book.id));
   assert.equal(context.volume_title, '城头卷');
   assert.equal(context.opening_year, 1241);
@@ -67,7 +67,7 @@ test('V0.98.2 契约事件上下文携带目标卷材料与第一章年份差', 
 });
 
 test('V0.98.2 候选写作与审校指令同源注入远期事件契约（生成前 grounding，不是事后附加）', async () => {
-  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const { openingCandidateInstruction, openingCandidateAuditInstruction } = await import('../server/engine/prompts.js');
   const contractEvent = openingContractEventContext(book.id, inferOpeningContractTarget(book.id));
   const strategy = { kind: 'chapter1_cold_open', strategy_family: 'future_result_present_question' };
@@ -91,7 +91,7 @@ test('V0.98.2 候选写作与审校指令同源注入远期事件契约（生成
 });
 
 test('V0.98.2 前置层无目标事件信号 → high 问题禁止采用（本作事故回归）', async () => {
-  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const source = store.scenes.get(firstScene.id).content;
   const nightSceneRewrite = `后半夜的风从东南边吹过来，带着铁锈和灰烬的气味。${'他扒住墙头往外探，那点暗红一动不动。'.repeat(20)}\n\n一切都要从那个庙会的秋天说起。`;
   const candidates = [
@@ -110,7 +110,7 @@ test('V0.98.2 前置层无目标事件信号 → high 问题禁止采用（本�
 });
 
 test('V0.98.2 前置层复用第一章正文（章内重排冒充未来楔子）→ high 问题禁止采用', async () => {
-  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
  const chapterText = '天边压着一线暗红。主角把弟弟往上颠了颠。庙会的锣声隔着田埂传过来，糖油味混着香火味。母亲在灶房里喊他们回家吃饭，父亲蹲在门槛上磨那把短猎刀。';
   store.scenes.update(firstScene.id, { content: chapterText.repeat(4) });
   const echo = `1259年，钓鱼城头。${chapterText.repeat(6)}\n\n十八年前，淳祐元年的庙会锣声正响。`;
@@ -128,14 +128,14 @@ test('V0.98.2 前置层复用第一章正文（章内重排冒充未来楔子）
 
 test('V0.98.2 无契约目标且开篇健康 → 零模型调用早退，不生成无锚候选', async () => {
   process.env.NOVEL_MOCK_LLM = '1';
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   const plainBook = store.books.create({ title: '无锚书', genre: '都市', platform: '番茄', blurb: '普通故事' });
   const plainVolume = store.volumes.create(plainBook.id, 1, { title: '第一卷' });
   const plainChapter = store.chapters.create(plainBook.id, plainVolume.id, 1, { title: '一', status: 'done' });
   store.scenes.create(plainChapter.id, 1, { content: '普通正文，没有远期事件锚点。', status: 'done' });
   await buildStoryPromiseProfile(plainBook.id, { data: promiseData });
 
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const events = [];
   const result = await composeOpeningCandidates(plainBook.id, { mode: 'repair', onEvent: event => events.push(event) });
   assert.equal(result.skipped, true);
@@ -147,7 +147,7 @@ test('V0.98.2 无契约目标且开篇健康 → 零模型调用早退，不生�
 });
 
 test('V0.98.2 存量修复允许「原稿 + 单楔子」精简批次，仍拒绝同族重复', async () => {
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const single = [{
     ...planFields({ kind: 'chapter1_cold_open', family: 'future_result_present_question', signature: '1259|守城少年|城下异动|回望',
  content: `开庆元年，钓鱼城头的炮石砸进城下军阵。${'主角先按住身边人的肩，望向尚未回答的危局。'.repeat(12)}\n\n十八年前，淳祐元年的庙会锣声正响。` }),

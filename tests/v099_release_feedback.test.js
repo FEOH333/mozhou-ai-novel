@@ -19,7 +19,7 @@ const {
   syncFanqiePublication,
   validateMetricSnapshot,
   validatePublicationProfile,
-} = await import('../server/engine/publication_feedback.js');
+} = await import('../server/engine/quality/publication_feedback.js');
 const {
   assertPublishedRewritePermission,
   baselineRiskForChapter,
@@ -30,13 +30,13 @@ const {
   validateRecoveryProseImprovement,
   validateBlindComparison,
   validateRecoveryDiagnosis,
-} = await import('../server/engine/recommendation_recovery.js');
-const { hasCompleteCandidateProvenance } = await import('../server/engine/recovery_contract.js');
+} = await import('../server/engine/recovery/recommendation_recovery.js');
+const { hasCompleteCandidateProvenance } = await import('../server/engine/recovery/recovery_contract.js');
 const {
   applyValidatedChapterRewrite,
   runPolish,
   splitChapterTextForScenes,
-} = await import('../server/engine/polish.js');
+} = await import('../server/engine/quality/polish.js');
 
 let bookA;
 let bookB;
@@ -2384,11 +2384,11 @@ test('V0.99 动态反馈只追加到 L4 最终用户任务，写作与审核从�
   assert.match(appended, /平台发布与推荐反馈/);
   assert.match(appended, /当前规划第 21 章/);
 
-  for (const file of ['outline.js', 'write.js', 'audit.js', 'volumereview.js', 'polish.js']) {
+  for (const file of ['planning/outline.js', 'pipeline/write.js', 'pipeline/audit.js', 'planning/volumereview.js', 'quality/polish.js']) {
     const source = fs.readFileSync(new URL(`../server/engine/${file}`, import.meta.url), 'utf8');
     assert.match(source, /appendPublicationFeedback/, `${file} 必须消费同一份发布反馈函数`);
   }
-  const writeSource = fs.readFileSync(new URL('../server/engine/write.js', import.meta.url), 'utf8');
+  const writeSource = fs.readFileSync(new URL('../server/engine/pipeline/write.js', import.meta.url), 'utf8');
   assert.match(writeSource, /instructionWithFeedback\s*=\s*appendPublicationFeedback\(\s*instruction/s,
     '发布反馈应先注入任务，再把中断草稿放回指令末尾，不能破坏续写断点的近因位置');
   assert.ok(writeSource.indexOf('instructionWithFeedback') < writeSource.indexOf('const instructionFinal'),
@@ -2396,7 +2396,7 @@ test('V0.99 动态反馈只追加到 L4 最终用户任务，写作与审核从�
 });
 
 test('V0.99 推荐返工审稿隔离旧正文历史，避免候选与既有 assistant 稿件串线', () => {
-  const source = fs.readFileSync(new URL('../server/engine/recommendation_recovery.js', import.meta.url), 'utf8');
+  const source = fs.readFileSync(new URL('../server/engine/recovery/recommendation_recovery.js', import.meta.url), 'utf8');
   assert.match(source, /assembleReviewMessages/);
   assert.doesNotMatch(source, /\bassembleMessages\b/);
 });
@@ -2417,11 +2417,11 @@ test('V0.99 整章候选映射回多场景时只在完整句边界切分', () =>
 });
 
 test('V0.99 所有常用正文写入路径都会登记已发布章节的线上同步债务', () => {
-  for (const file of ['write.js', 'polish.js']) {
+  for (const file of ['pipeline/write.js', 'quality/polish.js']) {
     const source = fs.readFileSync(new URL(`../server/engine/${file}`, import.meta.url), 'utf8');
     assert.match(source, /markPendingSync/, `${file} 改动已发布正文后必须加入线上待同步清单`);
   }
-  const auditSource = fs.readFileSync(new URL('../server/engine/audit.js', import.meta.url), 'utf8');
+  const auditSource = fs.readFileSync(new URL('../server/engine/pipeline/audit.js', import.meta.url), 'utf8');
   assert.match(auditSource, /applyValidatedSceneRewrite/,
     'audit.js 必须复用 polish 的场景写入门禁，由单一入口登记线上同步债务与叙事状态失效');
   const workshopSource = fs.readFileSync(new URL('../web/js/views/workshop.js', import.meta.url), 'utf8');
@@ -2456,7 +2456,7 @@ test('V0.99 自动创作只在发布快照过期时刷新，抓取逻辑必须�
   assert.equal(shouldRefreshPublication({ work_url: 'https://fanqienovel.com/page/1', last_synced_at: null }, { now }), true);
   assert.equal(shouldRefreshPublication({ work_url: 'https://fanqienovel.com/page/1', last_synced_at: now - 60_000 }, { now }), false);
   assert.equal(shouldRefreshPublication({ work_url: 'https://fanqienovel.com/page/1', last_synced_at: now - 7 * 60 * 60_000 }, { now }), true);
-  const pilotSource = fs.readFileSync(new URL('../server/engine/pilot.js', import.meta.url), 'utf8');
+  const pilotSource = fs.readFileSync(new URL('../server/engine/pipeline/pilot.js', import.meta.url), 'utf8');
   assert.match(pilotSource, /syncFanqiePublication/);
   assert.match(pilotSource, /publication_feedback/);
 });

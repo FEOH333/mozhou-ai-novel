@@ -27,7 +27,7 @@ describe('V0.58 细纲质量优先（回滚 V0.56 降质提速）', () => {
 
   test('mock 冒烟：细纲生成仍正常（详实要求不影响结构）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: 'T', genre: '玄幻', blurb: 'x', platform: '通用' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g', status: 'outlined' });
     const c = store.chapters.create(b.id, v.id, 1, { title: 'C1', status: 'planned' });

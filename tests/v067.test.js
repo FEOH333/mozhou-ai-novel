@@ -12,7 +12,7 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const { reviewDueVolumes } = await import(pathToFileURL(path.join(ROOT, 'server/engine/volumereview.js')));
+const { reviewDueVolumes } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/volumereview.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
 
 describe('V0.67 卷体检补检', () => {
@@ -57,7 +57,7 @@ describe('V0.67 卷体检补检', () => {
   });
 
   test('③pilot 每章对齐块含补体检调用（reviewDueVolumes）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(src.includes('reviewDueVolumes(bookId)'), 'pilot 应调用补检候选');
     assert.ok(src.includes('补体检：第'), '应有补体检事件');
   });

@@ -6,8 +6,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chapterFailurePolicy } from '../server/engine/pilot.js';
-import { groupIssuesByScene } from '../server/engine/pipeline.js';
+import { chapterFailurePolicy } from '../server/engine/pipeline/pilot.js';
+import { groupIssuesByScene } from '../server/engine/pipeline/pipeline.js';
 
 test('V0.102.6 已有草稿时普通失败保持 drafted，不打回 planned', () => {
   assert.equal(chapterFailurePolicy('API_ERROR').status, 'planned');

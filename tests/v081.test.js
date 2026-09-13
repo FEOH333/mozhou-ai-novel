@@ -13,7 +13,7 @@ const ROOT = process.cwd();
 
 describe('V0.78 细纲根因问题 replan', () => {
   test('①hasOutlineRootIssue：细纲根因 high 问题 → true', async () => {
-    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     // 事实编造（老幺未登记）→ replan
     assert.equal(hasOutlineRootIssue({ issues: [{ type: '事实编造', severity: 'high', quote: 'x' }] }), true);
     // 大纲偏离（正文与细纲不符）→ replan
@@ -36,7 +36,7 @@ describe('V0.78 细纲根因问题 replan', () => {
 
   test('②runChapterFlow 正常流程不破坏（mock 审校 accept → done）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { runChapterFlow } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const b = store.books.create({ title: '正常书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -49,7 +49,7 @@ describe('V0.78 细纲根因问题 replan', () => {
   test('③textFixable 不再包含细纲根因类型（正文修订只处理文本级）', async () => {
     // 从源码确认 textFixable 不含细纲根因——通过 pipeline 的行为间接验证
     // 这里验证 hasOutlineRootIssue 覆盖了所有原 textFixable 中的细纲类型
-    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline.js')));
+    const { hasOutlineRootIssue } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pipeline.js')));
     const rootTypes = ['设定冲突', '时间线冲突', '角色矛盾', '事实编造', '事实矛盾', '大纲偏离'];
     for (const t of rootTypes) {
       assert.equal(hasOutlineRootIssue({ issues: [{ type: t, severity: 'high' }] }), true, `${t} 应触发 replan`);

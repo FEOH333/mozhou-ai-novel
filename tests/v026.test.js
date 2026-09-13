@@ -14,8 +14,8 @@ let store, outline, idea;
 
 before(async () => {
   store = await import('../server/db/store.js');
-  outline = await import('../server/engine/outline.js');
-  idea = await import('../server/engine/idea.js');
+  outline = await import('../server/engine/planning/outline.js');
+  idea = await import('../server/engine/planning/idea.js');
 });
 
 after(() => { try { fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); } catch { /* ignore */ } });

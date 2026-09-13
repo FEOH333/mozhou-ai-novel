@@ -17,7 +17,7 @@ const promiseData = {
 
 beforeEach(async () => {
   ({ book, volume, firstScene } = createOpeningFixture(store));
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: promiseData });
 });
 
@@ -34,7 +34,7 @@ test('V0.98.3 神开局工艺文本写审同源：候选写作/审校/压缩三�
   assert.ok(COLD_OPEN_CRAFT_TEXT.includes('前三句'), '工艺必须落到第一屏');
   assert.ok(COLD_OPEN_CRAFT_TEXT.includes('回切即钩子'), '回切钩子是楔子的收束工艺');
 
-  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { openingContractEventContext, inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const { openingCandidateInstruction, openingCandidateAuditInstruction, openingCandidateLengthRepairInstruction } = await import('../server/engine/prompts.js');
   const contractEvent = openingContractEventContext(book.id, inferOpeningContractTarget(book.id));
   const strategy = { kind: 'chapter1_cold_open', strategy_family: 'future_result_present_question' };
@@ -53,7 +53,7 @@ test('V0.98.3 神开局工艺文本写审同源：候选写作/审校/压缩三�
 });
 
 test('V0.98.3 事件信号迟到第一屏之后 → high 问题禁止采用（第一屏生死线）', async () => {
-  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const late = `${'他在城头上来回走动，逐一检查垛口与礌石的绳结，又吩咐身边人加固门板。'.repeat(8)}开庆元年，钓鱼城的砲声忽然沉了下去。\n\n十八年前，淳祐元年。`;
   const candidates = [{
     ...planFields({ kind: 'chapter1_cold_open', family: 'future_result_present_question', signature: '1259|守城少年|城下异动|回望', content: late }),

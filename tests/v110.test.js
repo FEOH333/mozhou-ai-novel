@@ -13,12 +13,12 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const guardrails = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_guardrails.js')))
+const guardrails = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_guardrails.js')))
   .catch(() => ({}));
-const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
-const characters = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
-const factbook = await import(pathToFileURL(path.join(ROOT, 'server/engine/factbook.js')));
-const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
+const characters = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
+const factbook = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/factbook.js')));
+const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
 
 function historyFixture() {
  const book = store.books.create({ title: '示例历史长篇', genre: '历史' });

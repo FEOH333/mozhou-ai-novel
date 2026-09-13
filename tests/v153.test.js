@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './helper.js';
-import { detectMotifRepetition } from '../server/engine/rules.js';
+import { detectMotifRepetition } from '../server/engine/quality/rules.js';
 import { STRICT_MOTIFS, CLOSEOUT_TIC_PATTERNS } from '../server/data/redlines.js';
 
 test('V0.96.2 蹲类变体合并计数：蹲下/蹲在/蹲回/蹲身求和达阈值即报', () => {

@@ -11,7 +11,7 @@ const store = await import('../server/db/store.js');
 const {
   diagnoseRecommendationRecovery,
   validateRecoveryDiagnosis,
-} = await import('../server/engine/recommendation_recovery.js');
+} = await import('../server/engine/recovery/recommendation_recovery.js');
 
 function diagnosisRow(chapter, evidence, action = 'tune') {
   return {

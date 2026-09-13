@@ -22,7 +22,7 @@ describe('V0.49 角色与情感引擎', () => {
 
   test('cast 材料落库 + 公共前缀注入（书纲生成后）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: '未命名', genre: '玄幻', blurb: 'x' });
     await outline.generateBookOutline(b.id, {});
     const cast = store.materials.get(b.id, 'cast');
@@ -43,7 +43,7 @@ describe('V0.49 角色与情感引擎', () => {
 
   test('设定指令含社会生态 + 落独立 ecology 材料（V0.50：不进公共前缀按场景注入）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateBookSettings } = await import(pathToFileURL(path.join(ROOT, 'server/engine/settings.js')));
+    const { generateBookSettings } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/settings.js')));
     const b = store.books.create({ title: '生态书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', 'c');
     store.materials.set(b.id, 'outline', 'o');
@@ -78,8 +78,8 @@ describe('V0.49 角色与情感引擎', () => {
     assert.ok(s.includes('q6_emotional_change'), '应含 q6');
     assert.ok(s.includes('角色内心或人与人关系发生了变化'), 'q6 应定义情感/关系变化');
     // outline.js 判定逻辑
-    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const outline = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes('q6'), 'fiveQuestionsCheck 应读取 q6');
   });
 
@@ -104,7 +104,7 @@ describe('V0.49 角色与情感引擎', () => {
 
   test('结算 character_emotional 回写角色卡（心境/关系）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { settleChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/settle.js')));
+    const { settleChapter } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/settle.js')));
     const b = store.books.create({ title: '结算书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     // 真实管线是在正文写完、章节仍为 drafted 时进入结算；done 代表已完成旧书，

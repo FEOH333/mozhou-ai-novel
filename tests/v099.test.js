@@ -31,7 +31,7 @@ describe('V0.90 先立后破结构强化', () => {
   });
 
   test('②细纲层注入：悲剧章 contrastBuildup 拼入结构约束，非悲剧章不注入', async () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes('BUILDUP_STRUCTURE_TEXT'), '细纲层引用结构约束');
     assert.ok(src.includes('isTragedyChapter'), '悲剧章判定变量');
     assert.ok(src.includes("`${CONTRAST_BUILDUP_TEXT}\\n\\n${BUILDUP_STRUCTURE_TEXT}`"), '悲剧章拼两段');
@@ -41,7 +41,7 @@ describe('V0.90 先立后破结构强化', () => {
   });
 
   test('③卷纲层注入：开篇卷含悲剧词 → volumeBuildupText；非开篇卷不注入', async () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes('volumeBuildupText: vol.idx === 1 && /城破|破城|家破'), '开篇卷+悲剧词判定');
     const { volumeOutlineInstruction } = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
     const v = volumeOutlineInstruction({ bookTitle: 'X', volumeIdx: 1, volumeTitle: '第一卷', bookOutline: {}, chapterCount: 8, volumeBuildupText: '【卷结构·开篇卷先立后破】（V0.90 硬要求）\n前 2-3 章必须为铺垫章' });
@@ -61,7 +61,7 @@ describe('V0.90 先立后破结构强化', () => {
 
   test('⑤端到端：开篇悲剧卷生成卷纲含铺垫章结构（mock 验证注入不破坏流程）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateVolumeOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { generateVolumeOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
  const b = store.books.create({ title: '示例历史长篇', genre: '历史', blurb: '蜀中孤儿', platform: '番茄' });
     const v = store.volumes.create(b.id, 1, { title: '第一卷·云山', goal: '破城家亡', outline_json: '{"goal":"城破家亡","title":"云山"}', status: 'planned' });
     const outline = await generateVolumeOutline(b.id, v.id, {});

@@ -12,7 +12,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v045-'));
 
 describe('V0.45 大纲对齐系统', () => {
   test('titleHitsText：中文窗口匹配（2-4 字）', async () => {
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     assert.equal(align.titleHitsText('第3章 药园风波', '李尘在药园里修垄，风波突起'), true, '整名应命中');
     assert.equal(align.titleHitsText('第3章 药园风波', '李尘白天修垄，夜晚风波突起'), true, '2 字窗口「风波」应命中');
     assert.equal(align.titleHitsText('第3章 药园风波', '范管事告知巡查队将至'), false, '无关内容不命中');
@@ -22,7 +22,7 @@ describe('V0.45 大纲对齐系统', () => {
 
   test('checkChapterAlignment：脱节检测（本地零成本）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     const b = store.books.create({ title: '对齐书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g' });
     const c1 = store.chapters.create(b.id, v.id, 1, { title: '第1章 药园风波', status: 'done' });
@@ -38,7 +38,7 @@ describe('V0.45 大纲对齐系统', () => {
 
   test('checkVolumeAlignment：卷名脱节 + goal_met 读取', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     const b = store.books.create({ title: '卷对齐书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: '宗门大比与秘境', goal: '大比夺魁' });
     const c1 = store.chapters.create(b.id, v.id, 1, { title: '第1章', status: 'done' });
@@ -57,7 +57,7 @@ describe('V0.45 大纲对齐系统', () => {
 
   test('adjustChapterTitle / adjustVolumeTitle：mock 改名 + 日志', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     const b = store.books.create({ title: '改名书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g' });
     const c = store.chapters.create(b.id, v.id, 1, { title: '第1章 旧名', status: 'done' });
@@ -75,7 +75,7 @@ describe('V0.45 大纲对齐系统', () => {
 
   test('rewriteVolumeOutline：已写回填 + 未写重规划 + goal 更新（mock）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     const b = store.books.create({ title: '回填书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: '第一卷', goal: '旧目标', outline: { goal: '旧目标', arc: '旧arc', chapters: [] } });
     const c1 = store.chapters.create(b.id, v.id, 1, { title: '第1章', status: 'done', outline: { beat: '旧beat1' } });
@@ -94,7 +94,7 @@ describe('V0.45 大纲对齐系统', () => {
 
   test('rewriteBookOutline：书纲材料更新 + 未写卷名同步（mock）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     const b = store.books.create({ title: '书纲对齐书', genre: '玄幻', blurb: 'x' });
     const v1 = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g' });
     const c1 = store.chapters.create(b.id, v1.id, 1, { title: '第1章', status: 'done' });
@@ -113,7 +113,7 @@ describe('V0.45 大纲对齐系统', () => {
 
   test('bookAlignDue：已写 >=3 卷且距上次对齐 >=3 才触发', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/alignment.js')));
+    const align = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/alignment.js')));
     const b = store.books.create({ title: '书级触发书', genre: '玄幻', blurb: 'x' });
     assert.equal(align.bookAlignDue(b.id), false, '无卷不触发');
     for (let i = 1; i <= 2; i++) {

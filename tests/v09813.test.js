@@ -60,8 +60,8 @@ test('V0.98.13 近战残酷纪律文本：禁-正例-量化三要素齐备，且
 });
 
 test('V0.98.13 卷纲/章纲/正文三处拼接统一用写审同源常量（防第四处漂移）', () => {
-  const outline = fs.readFileSync('server/engine/outline.js', 'utf8');
-  const write = fs.readFileSync('server/engine/write.js', 'utf8');
+  const outline = fs.readFileSync('server/engine/planning/outline.js', 'utf8');
+  const write = fs.readFileSync('server/engine/pipeline/write.js', 'utf8');
   const occurrences = (outline.match(/WARFARE_BODY_TEXT/g) || []).length + (write.match(/WARFARE_BODY_TEXT/g) || []).length;
   assert.ok(occurrences >= 3, `卷纲/章纲/正文拼接点必须统一为 WARFARE_BODY_TEXT（当前 ${occurrences} 处）`);
 });
@@ -81,7 +81,7 @@ test('V0.98.13 审校 1.6 战争边界与写作纪律同源：短兵残酷/成�
 });
 
 test('V0.98.13 战斗章无血肉痕迹本地检测：medium 提示智斗化，非战斗章零影响', async () => {
-  const { detectBloodlessCombat } = await import('../server/engine/rules.js');
+  const { detectBloodlessCombat } = await import('../server/engine/quality/rules.js');
   const bloodless = detectBloodlessCombat(
     '他提刀冲上垛口，一刀劈翻一个敌兵，又抬起盾顶住第二刀，反手再砍。',
     { title: '守城', outline: '攻城云梯填壕' },
@@ -97,13 +97,13 @@ test('V0.98.13 战斗章无血肉痕迹本地检测：medium 提示智斗化，�
 });
 
 test('V0.98.13 成长印记入主角状态白名单：战历/伤疤/杀敌不被状态压缩误删', async () => {
-  const { PROTAGONIST_KEEP_KEYS } = await import('../server/engine/growth.js');
+  const { PROTAGONIST_KEEP_KEYS } = await import('../server/engine/planning/growth.js');
   for (const key of ['战历', '伤疤', '杀敌']) {
     assert.ok(PROTAGONIST_KEEP_KEYS.includes(key), `主角状态白名单必须保留 ${key}（残酷经历→成长印记的协同载体）`);
   }
 });
 
 test('V0.98.13 本地防线挂载进章节审校（战斗章无血肉痕迹进入 localIssues）', () => {
-  const audit = fs.readFileSync('server/engine/audit.js', 'utf8');
+  const audit = fs.readFileSync('server/engine/pipeline/audit.js', 'utf8');
   assert.ok(audit.includes('detectBloodlessCombat'), '审校本地规则链必须调用近战残酷检测');
 });

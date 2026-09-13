@@ -19,7 +19,7 @@ const promiseData = {
 
 beforeEach(async () => {
   ({ book, volume, firstScene } = createOpeningFixture(store));
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: promiseData });
 });
 
@@ -31,7 +31,7 @@ const planFields = ({ kind, family, signature, content = '' }) => ({
 });
 
 test('V0.98.10 审校引文空白差异被本地重定位，意见保留', async () => {
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
  const content = '开庆元年七月，钓鱼城北崖，第二拨砲石已经压进膛口。\n\n主角拽开传令兵，自己探身去看江面。\n\n十八年前，淳祐元年的秋天，他九岁。';
   const candidates = [{
     ...planFields({ kind: 'chapter1_cold_open', family: 'future_result_present_question', signature: '1259|守城少年|城下异动|回望', content }),
@@ -59,7 +59,7 @@ test('V0.98.10 审校引文空白差异被本地重定位，意见保留', async
 });
 
 test('V0.98.10 hard_failure 引文不可定位同样隔离；无最强轴仍整份 fail-closed', async () => {
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const content = '开庆元年七月，钓鱼城北崖，砲石压进膛口。\n\n十八年前，淳祐元年。';
   const candidates = [{
     ...planFields({ kind: 'chapter1_cold_open', family: 'future_result_present_question', signature: '1259|守城少年|城下异动|回望', content }),

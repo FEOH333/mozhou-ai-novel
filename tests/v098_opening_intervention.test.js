@@ -18,7 +18,7 @@ const promiseData = {
 
 beforeEach(async () => {
   ({ book, volume, firstScene } = createOpeningFixture(store));
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(book.id, { data: promiseData });
 });
 
@@ -129,7 +129,7 @@ function repairCandidates() {
 }
 
 test('V0.98 候选软预算允许合理偏离，一个强吸引轴不被平均分淘汰', async () => {
-  const { candidateBudget, validateCandidateLength, coldReadJudgment, candidateCanWin } = await import('../server/engine/opening_intervention.js');
+  const { candidateBudget, validateCandidateLength, coldReadJudgment, candidateCanWin } = await import('../server/engine/planning/opening_intervention.js');
   assert.deepEqual(candidateBudget('chapter1_cold_open'), { preferred: [300, 800], hardMax: 1000, soft: true });
   assert.equal(validateCandidateLength('chapter1_cold_open', '字'.repeat(850)).severity, 'note');
   assert.equal(validateCandidateLength('chapter1_cold_open', '字'.repeat(1001)).severity, 'error');
@@ -139,7 +139,7 @@ test('V0.98 候选软预算允许合理偏离，一个强吸引轴不被平均�
 });
 
 test('V0.98 编排器生成进入逻辑不同的存量候选，并自动把原稿纳入比较', async () => {
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const events = [];
   const result = await composeOpeningCandidates(book.id, {
     mode: 'repair', data: { candidates: repairCandidates() }, onEvent: event => events.push(event),
@@ -156,7 +156,7 @@ test('V0.98 编排器生成进入逻辑不同的存量候选，并自动把原�
 });
 
 test('V0.98 有稳定卷事件键时自动校正读者契约，未落地契约禁止选择', async () => {
-  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, selectOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const candidates = repairCandidates();
   candidates[1].contract = {};
   const result = await composeOpeningCandidates(book.id, { mode: 'repair', data: { candidates } });
@@ -172,8 +172,8 @@ test('V0.98 有稳定卷事件键时自动校正读者契约，未落地契约�
 });
 
 test('V0.98 契约目标由通用史实语义锚推导，不依赖具体书名', async () => {
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
-  const { inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
+  const { inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const otherBook = store.books.create({
     title: '蜀地守城录', genre: '历史', platform: '番茄', blurb: '一个孩子最终走上山城。',
   });
@@ -193,8 +193,8 @@ test('V0.98 契约目标由通用史实语义锚推导，不依赖具体书名',
 });
 
 test('V0.98 契约推导跳过只提前引用事件的卷，继续寻找事件真实发生卷', async () => {
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
-  const { inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
+  const { inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const anchoredBook = store.books.create({
     title: '山城年代记', genre: '历史', platform: '番茄', blurb: '先预告未来事件，数卷后才真正发生。',
   });
@@ -219,8 +219,8 @@ test('V0.98 契约推导跳过只提前引用事件的卷，继续寻找事件�
 });
 
 test('V0.98 事件键与其真实年份成对推导，不把卷起始年误绑为兑现年', async () => {
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
-  const { inferOpeningContractTarget } = await import('../server/engine/opening_intervention.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
+  const { inferOpeningContractTarget } = await import('../server/engine/planning/opening_intervention.js');
   const rangeBook = store.books.create({ title: '跨年卷测试', genre: '历史', platform: '番茄', blurb: '跨年事件。' });
   store.volumes.create(rangeBook.id, 1, { title: '开篇', outline: { year: 1241 } });
   const rangeVolume = store.volumes.create(rangeBook.id, 2, {
@@ -240,7 +240,7 @@ test('V0.98 未来冷开场未在正文中定位回第一章时不得胜选或�
   const {
     composeOpeningCandidates, compareOpeningCandidates,
     selectOpeningAsset, applySelectedOpeningAsset,
-  } = await import('../server/engine/opening_intervention.js');
+  } = await import('../server/engine/planning/opening_intervention.js');
   const candidates = repairCandidates();
  candidates[1].content = `开庆元年，主角想起1241年早已远去。${'他按住身边人的肩，望向城下。'.repeat(14)}`;
   const composed = await composeOpeningCandidates(book.id, { mode: 'repair', data: { candidates } });
@@ -269,7 +269,7 @@ test('V0.98 未来冷开场未在正文中定位回第一章时不得胜选或�
 
 test('V0.98.2 mock 存量修复：确定性蓝图只生成远期楔子，健康开篇不做章内重写', async () => {
   process.env.NOVEL_MOCK_LLM = '1';
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const events = [];
   const result = await composeOpeningCandidates(book.id, { mode: 'repair', onEvent: event => events.push(event) });
   assert.equal(result.candidates.length, 2, '原稿 + 一个远期高能楔子');
@@ -294,7 +294,7 @@ test('V0.98 模型候选超过硬上限时自动收敛，不能整批报错并�
     },
   };
   store.books.update(book.id, { settings });
-  const { composeOpeningCandidates, validateCandidateLength } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, validateCandidateLength } = await import('../server/engine/planning/opening_intervention.js');
   const events = [];
   const headPlan = {
     kind: 'head_rewrite', strategy_family: 'chronological_choice',
@@ -322,7 +322,7 @@ test('V0.98 模型候选超过硬上限时自动收敛，不能整批报错并�
 
 test('V0.98 无效契约目标在调用模型前失败，不能先花费生成候选再报确定性错误', async () => {
   process.env.NOVEL_MOCK_LLM = '1';
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const settings = store.books.settings(book.id);
   settings.openingIntervention = {
     contractTarget: {
@@ -341,7 +341,7 @@ test('V0.98 无效契约目标在调用模型前失败，不能先花费生成�
 });
 
 test('V0.98 重复 entry_signature fail closed，不把同义改写五连落库', async () => {
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const candidates = repairCandidates();
   candidates[1].entry_signature = candidates[0].entry_signature;
   await assert.rejects(
@@ -352,7 +352,7 @@ test('V0.98 重复 entry_signature fail closed，不把同义改写五连落库'
 });
 
 test('V0.98 同一策略族只改签名仍不算结构多样，候选硬伤必须有可核对引文', async () => {
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const sameFamily = repairCandidates();
   sameFamily[1].strategy_family = sameFamily[0].strategy_family;
   await assert.rejects(
@@ -374,8 +374,8 @@ test('V0.98 同一策略族只改签名仍不算结构多样，候选硬伤必�
 });
 
 test('V0.98 新书在第一章落笔前至少得到三种进入逻辑，临时候选不污染 asset 表', async () => {
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
-  const { composeOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
+  const { composeOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const newBook = store.books.create({ title: '新书', genre: '历史', platform: '番茄', blurb: '新书简介' });
   await buildStoryPromiseProfile(newBook.id, { data: promiseData });
   const candidates = [
@@ -393,7 +393,7 @@ test('V0.98 新书在第一章落笔前至少得到三种进入逻辑，临时�
 test('V0.98 独立楔子默认不进入策略；兼容性未实测时即使请求也拒绝', async () => {
   const {
     planOpeningStrategies, composeOpeningCandidates, platformFrontMatterCompatibility,
-  } = await import('../server/engine/opening_intervention.js');
+  } = await import('../server/engine/planning/opening_intervention.js');
   assert.equal(platformFrontMatterCompatibility({ frontMatter: 'verified' }).verified, false,
     '只写一个 verified 字符串不能冒充真实平台实测');
   const verified = {
@@ -421,7 +421,7 @@ test('V0.98 独立楔子默认不进入策略；兼容性未实测时即使请�
 });
 
 test('V0.98 匿名比较：同模型只能 advisory；不同裁判且两轮同胜者才允许 auto_safe', async () => {
-  const { composeOpeningCandidates, compareOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, compareOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const composed = await composeOpeningCandidates(book.id, { mode: 'repair', data: { candidates: repairCandidates() } });
   const cold = composed.candidates.find(item => item.kind === 'chapter1_cold_open');
   const assetIds = composed.candidates.filter(item => item.asset_id).map(item => item.asset_id);
@@ -452,7 +452,7 @@ test('V0.98 匿名比较：同模型只能 advisory；不同裁判且两轮同�
 });
 
 test('V0.98 两轮胜者不一致时保留原稿，不用平均分强行选稿', async () => {
-  const { composeOpeningCandidates, compareOpeningCandidates } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, compareOpeningCandidates } = await import('../server/engine/planning/opening_intervention.js');
   const composed = await composeOpeningCandidates(book.id, { mode: 'repair', data: { candidates: repairCandidates() } });
   const assetIds = composed.candidates.filter(item => item.asset_id).map(item => item.asset_id);
   const ids = composed.candidates.map(item => item.candidate_id);
@@ -466,7 +466,7 @@ test('V0.98 两轮胜者不一致时保留原稿，不用平均分强行选稿',
 });
 
 test('V0.98 场景片段应用必须同时命中源哈希和原文范围', async () => {
-  const { applyValidatedScenePatch } = await import('../server/engine/polish.js');
+  const { applyValidatedScenePatch } = await import('../server/engine/quality/polish.js');
   const before = store.scenes.get(firstScene.id).content;
   const patch = {
     sceneId: firstScene.id, start: 0, end: 8, expected: before.slice(0, 8),
@@ -478,7 +478,7 @@ test('V0.98 场景片段应用必须同时命中源哈希和原文范围', async
 });
 
 test('V0.98 错字符范围 fail closed，正文逐字保持不变', async () => {
-  const { applyValidatedScenePatch } = await import('../server/engine/polish.js');
+  const { applyValidatedScenePatch } = await import('../server/engine/quality/polish.js');
   const before = store.scenes.get(firstScene.id).content;
   const result = applyValidatedScenePatch(book.id, {
     sceneId: firstScene.id, start: 0, end: 8, expected: '并非这里',
@@ -489,7 +489,7 @@ test('V0.98 错字符范围 fail closed，正文逐字保持不变', async () =>
 });
 
 test('V0.98 应用顺叙资产先快照并原子转 applied；源场景变化时整批拒绝', async () => {
-  const { composeOpeningCandidates, applySelectedOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, applySelectedOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const composed = await composeOpeningCandidates(book.id, { mode: 'repair', data: { candidates: repairCandidates() } });
   const head = composed.candidates.find(item => item.kind === 'head_rewrite');
   store.openingAssets.transition(head.asset_id, 'selected');
@@ -505,7 +505,7 @@ test('V0.98 应用顺叙资产先快照并原子转 applied；源场景变化时
   const secondVolume = store.volumes.create(secondBook.id, 1, { title: '第一卷' });
   const secondChapter = store.chapters.create(secondBook.id, secondVolume.id, 1, { title: '一', status: 'done' });
   const secondScene = store.scenes.create(secondChapter.id, 1, { content: '原始场景正文足够长，可以安全验证精确范围。', status: 'done' });
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   await buildStoryPromiseProfile(secondBook.id, { data: promiseData });
   const raw = [
     { ...planFields({ kind: 'head_rewrite', family: 'chronological_choice', signature: 'a|b|c|d', content: '新的顺叙正文足够长，可以安全验证。' }),
@@ -524,7 +524,7 @@ test('V0.98 应用顺叙资产先快照并原子转 applied；源场景变化时
 });
 
 test('V0.98 内嵌楔子应用只激活读者层，不写入第一章场景', async () => {
-  const { composeOpeningCandidates, applySelectedOpeningAsset, composeOpeningAsset } = await import('../server/engine/opening_intervention.js');
+  const { composeOpeningCandidates, applySelectedOpeningAsset, composeOpeningAsset } = await import('../server/engine/planning/opening_intervention.js');
   const composed = await composeOpeningCandidates(book.id, { mode: 'repair', data: { candidates: repairCandidates() } });
   const cold = composed.candidates.find(item => item.kind === 'chapter1_cold_open');
   store.openingAssets.transition(cold.asset_id, 'selected');
@@ -556,7 +556,7 @@ test('V0.98 前置正文完全隔离，三个写审提示只得到同一份结�
     title: '军报', status: 'planned', outline: { year: 1242, event_keys: [] },
   });
 
-  const { openingReaderContractText } = await import('../server/engine/opening_intervention.js');
+  const { openingReaderContractText } = await import('../server/engine/planning/opening_intervention.js');
   const { chapterOutlineInstruction, writeSceneInstruction, auditInstruction } = await import('../server/engine/prompts.js');
   const contractText = openingReaderContractText(book.id, 2);
   const messages = [
@@ -600,7 +600,7 @@ test('V0.98 读者契约只在真实目标卷年份和事件键同时命中且�
     outline: { year: 1258, event_keys: [contract.target_event_key] },
   });
 
-  const { fulfillOpeningReaderContract } = await import('../server/engine/opening_intervention.js');
+  const { fulfillOpeningReaderContract } = await import('../server/engine/planning/opening_intervention.js');
   assert.equal(fulfillOpeningReaderContract(book.id, wrongYear.id, { auditPassed: true }).fulfilled, false);
   assert.equal(fulfillOpeningReaderContract(book.id, target.id, { auditPassed: false }).fulfilled, false);
   const fulfilled = fulfillOpeningReaderContract(book.id, target.id, { auditPassed: true });
@@ -616,10 +616,10 @@ test('V0.98 读者契约只在真实目标卷年份和事件键同时命中且�
 });
 
 test('V0.98 新书跨模型稳定胜者成为真实第一章草稿，仍留给正常审校结算', async () => {
-  const { buildStoryPromiseProfile } = await import('../server/engine/story_promise.js');
+  const { buildStoryPromiseProfile } = await import('../server/engine/planning/story_promise.js');
   const {
     composeOpeningCandidates, compareDraftOpeningCandidates, applyNewBookOpeningCandidate,
-  } = await import('../server/engine/opening_intervention.js');
+  } = await import('../server/engine/planning/opening_intervention.js');
   const newBook = store.books.create({ title: '待写新书', genre: '历史', platform: '番茄', blurb: '孩子守住故乡' });
   const newVolume = store.volumes.create(newBook.id, 1, { title: '第一卷' });
   const newChapter = store.chapters.create(newBook.id, newVolume.id, 1, { title: '风起', status: 'planned' });
@@ -653,7 +653,7 @@ test('V0.98 新书跨模型稳定胜者成为真实第一章草稿，仍留给�
 });
 
 test('V0.98 开篇检查点坏 JSON 显式 unreviewed 但不抛错、不阻断后续章', async () => {
-  const { maybeReviewOpening } = await import('../server/engine/opening_intervention.js');
+  const { maybeReviewOpening } = await import('../server/engine/planning/opening_intervention.js');
   const events = [];
   const failed = await maybeReviewOpening(book.id, 1, { data: {}, onEvent: event => events.push(event) });
   assert.equal(failed.ok, false);

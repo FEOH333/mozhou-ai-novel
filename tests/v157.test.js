@@ -71,7 +71,7 @@ test('V0.105.1 审校 3.14 含高潮释放段定格核查（与写作指令同�
 // ---------- 工艺互斥自查：既有防线不重复、不冲突 ----------
 
 test('V0.105.1 名场面工艺不与既有议论防线冲突（偈语/收束检测仍在，各管一层）', () => {
-  const rules = read('server/engine/rules.js');
+  const rules = read('server/engine/quality/rules.js');
   const prompts = read('server/engine/prompts.js');
   assert.ok(/detectCommentaryClosers/.test(rules), '章末议论收束检测仍在（句级防线不动）');
   assert.ok(/偈语/.test(prompts), '对白偈语配额仍在（台词级防线不动）');

@@ -3,8 +3,8 @@
 // 议论变体/动作母题/弱钩章末/章名脱节/跨章比喻复读/时间线锚点矛盾/场景尾部重演
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import * as rules from '../server/engine/rules.js';
-import { safelyMergeContinuation, enforceSceneDashBudget } from '../server/engine/write.js';
+import * as rules from '../server/engine/quality/rules.js';
+import { safelyMergeContinuation, enforceSceneDashBudget } from '../server/engine/pipeline/write.js';
 
 describe('V0.94 detectNotButPattern 变体与对话豁免', () => {
   test('「不是X，是Y」（无而/却）叙事句计入', () => {

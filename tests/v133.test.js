@@ -11,10 +11,10 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v133-figures-'));
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
-const guardrails = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_guardrails.js')));
+const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
+const guardrails = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_guardrails.js')));
 const prompts = await import(pathToFileURL(path.join(ROOT, 'server/engine/prompts.js')));
-const hl = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_longform.js')));
+const hl = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_longform.js')));
 
 describe('V0.93.10 历史人物档案自动化', () => {
   test('era_context 指令要求结构化人物档案（登场窗/官职/立场/卒年）', () => {

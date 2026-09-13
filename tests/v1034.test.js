@@ -6,8 +6,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stampOpeningTimelineProseFix } from '../server/engine/historical_guardrails.js';
-import { auditIssueRepairMode, hasOutlineRootIssue } from '../server/engine/pipeline.js';
+import { stampOpeningTimelineProseFix } from '../server/engine/longform/historical_guardrails.js';
+import { auditIssueRepairMode, hasOutlineRootIssue } from '../server/engine/pipeline/pipeline.js';
 
 test('V0.102.14 开庆元年余玠已卒被标成事实矛盾走 revise', () => {
   const issues = stampOpeningTimelineProseFix([{

@@ -11,8 +11,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v127-ledger-'));
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const pending = await import(pathToFileURL(path.join(ROOT, 'server/engine/pending.js')));
-const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+const pending = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/pending.js')));
+const pleasure = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
 
 function freshBook(title = '联动测试') {
   return store.books.create({ title, genre: '历史', settings: { lengthProfile: 5000 } });

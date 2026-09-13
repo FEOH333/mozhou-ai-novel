@@ -10,9 +10,9 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v108-live-bl
 process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
-const pipeline = await import('../server/engine/pipeline.js');
-const pilot = await import('../server/engine/pilot.js');
-const safety = await import('../server/engine/data_safety.js');
+const pipeline = await import('../server/engine/pipeline/pipeline.js');
+const pilot = await import('../server/engine/pipeline/pilot.js');
+const safety = await import('../server/engine/pipeline/data_safety.js');
 
 describe('V0.91.1 审校卡章收敛', () => {
   test('medium 客观问题进入局部修订，高等级细纲根因仍交给重规划', () => {
@@ -55,7 +55,7 @@ describe('V0.91.1 审校卡章收敛', () => {
     assert.deepEqual(pilot.chapterFailurePolicy('API_ERROR'), {
       qualityStop: false, status: 'planned', pause: true,
     });
-    const source = fs.readFileSync(path.join(process.cwd(), 'server/engine/pilot.js'), 'utf8');
+    const source = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.match(source, /\['quality_blocked', 'partial', 'failed'\]\.includes\(chapter\.status\)/,
       '质量卡章转成 partial/failed 后也必须继续受顺序闸保护');
   });
@@ -76,7 +76,7 @@ describe('V0.91.1 暂停与可见进度', () => {
   });
 
   test('首次生成章细纲也透传 onEvent/signal，长思考期间页面能收到内部阶段事件', () => {
-    const source = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline.js'), 'utf8');
+    const source = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/pipeline.js'), 'utf8');
     assert.match(source, /generateChapterOutline\(bookId, chapterId, \{ onEvent, signal \}\)/);
   });
 });

@@ -15,8 +15,8 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const polish = await import(pathToFileURL(path.join(ROOT, 'server/engine/polish.js')));
-const write = await import(pathToFileURL(path.join(ROOT, 'server/engine/write.js')));
+const polish = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/polish.js')));
+const write = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/write.js')));
 
 // 构造任意字数的正文段（以句号分句，可控制末句是否截断）
 function prose(chars, { brokenTail = false } = {}) {
@@ -68,8 +68,8 @@ describe('V0.105.5 末句完整性收口', () => {
   });
 
   test('④源码断言：三道闸全部接线', () => {
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
-    const p = fs.readFileSync(path.join(ROOT, 'server/engine/polish.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
+    const p = fs.readFileSync(path.join(ROOT, 'server/engine/quality/polish.js'), 'utf8');
     assert.ok(w.includes('closeTrailingSentence(content)'), 'autoHealSceneLength 开头应收口');
     assert.ok((p.match(/closeTrailingSentence\(normalizeChapterParagraphs/g) || []).length >= 2, '两个落库闸应收口');
   });

@@ -40,7 +40,7 @@ describe('V0.81 历史题材专项', () => {
   });
 
   test('③诗词选择：城破场景命中亡国/沙场词', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const r = h.poetryForScene('城破之时，他跪在尸山血海里求人救自己的家', 'fight');
     assert.ok(r.poems.length > 0, '应选到诗词');
     assert.ok(r.text.includes('诗词融入纪律'), '应带纪律文本');
@@ -51,7 +51,7 @@ describe('V0.81 历史题材专项', () => {
   });
 
   test('④时代红线检测：咖啡/烟草/报纸命中，正常文本不命中', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const hits = h.eraRedLineCheck('他喝了杯咖啡，抽了袋烟草，批着文件，盘算着效率。');
     const terms = hits.map(r => r.term);
     assert.ok(terms.includes('咖啡'), '应命中咖啡');
@@ -62,7 +62,7 @@ describe('V0.81 历史题材专项', () => {
 
   test('⑤ensureEraContext：历史书生成 era_context 材料（史实骨架/红线/可改史点）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
  const b = store.books.create({ title: '示例历史长篇', genre: '历史', blurb: '蜀中孤儿', platform: '番茄' });
     const r = await h.ensureEraContext(b.id, {});
     assert.equal(r.ok, true);
@@ -81,7 +81,7 @@ describe('V0.81 历史题材专项', () => {
 
   test('⑥成长波动：历史书白身+藏拙蛰伏不判偏离；无藏拙才判', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { detectGrowthDeviation } = await import(pathToFileURL(path.join(ROOT, 'server/engine/growth.js')));
+    const { detectGrowthDeviation } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/growth.js')));
     // 120 章 done + 主角白身藏拙
     const b = store.books.create({ title: '蛰伏书', genre: '历史', blurb: 'x' });
     const vol = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -99,15 +99,15 @@ describe('V0.81 历史题材专项', () => {
   });
 
   test('⑦历史去AI味：现代词命中', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const issues = h.detectHistoryMarkers('他格局打开，提升效率，做好复盘，继续推进。');
     assert.ok(issues.length > 0, '现代词应命中');
     assert.equal(h.detectHistoryMarkers('他按了按腰间的刀，望向城外的烽烟。').length, 0, '正常文本不命中');
   });
 
   test('⑧历史考据要求注入设定指令', async () => {
-    const settings = await import(pathToFileURL(path.join(ROOT, 'server/engine/settings.js')));
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const settings = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/settings.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const text = settings.settingsInstruction({ bookTitle: 'X', genre: '历史', contract: '', outlineText: '', pleasureText: '', historyReq: h.historySettingsRequirements() });
     assert.ok(text.includes('历史考据要求'), '应注入历史考据要求');
     assert.ok(text.includes('官职'), '含官职');
@@ -119,7 +119,7 @@ describe('V0.81 历史题材专项', () => {
   });
 
   test('⑨史实锚定文本：大框架符合史实+主角改史', async () => {
-    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/history.js')));
+    const h = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/history.js')));
     const t = h.historyAnchorsText();
     assert.ok(t.includes('史实锚定'), '史实锚定段');
     assert.ok(t.includes('改'), '含主角改史语义');
@@ -128,7 +128,7 @@ describe('V0.81 历史题材专项', () => {
 
   test('⑩历史书 pilot 全流程：era_context 生成、题材感知、开篇蓝图无金手指', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pilot.js')));
+    const { runBookPilot } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/pilot.js')));
     const b = store.books.create({ title: '历史端到端', genre: '历史', platform: '番茄', blurb: '蜀中孤儿守钓鱼城' });
     const r = await runBookPilot(b.id, { targetChapters: 2 });
     assert.ok(r.written >= 1, '应写完至少 1 章');

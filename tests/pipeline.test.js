@@ -4,11 +4,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import * as store from '../server/db/store.js';
-import { generateBookOutline, generateVolumeOutline, generateChapterOutline } from '../server/engine/outline.js';
-import { writeScene } from '../server/engine/write.js';
-import { auditChapter, coverageCheck } from '../server/engine/audit.js';
-import { settleChapter } from '../server/engine/settle.js';
-import { ensureSceneRows } from '../server/engine/pipeline.js';
+import { generateBookOutline, generateVolumeOutline, generateChapterOutline } from '../server/engine/planning/outline.js';
+import { writeScene } from '../server/engine/pipeline/write.js';
+import { auditChapter, coverageCheck } from '../server/engine/pipeline/audit.js';
+import { settleChapter } from '../server/engine/pipeline/settle.js';
+import { ensureSceneRows } from '../server/engine/pipeline/pipeline.js';
 import { historyStats, budgetCheck } from '../server/llm/cache.js';
 
 test('端到端：mock 模式完整写一章（书纲→卷纲→细纲→正文→审校→覆盖→结算）', async () => {
@@ -93,7 +93,7 @@ test('端到端：修订场景会重建历史（truncate+append）', async () =>
   await writeScene(bookId, ch.id, sc.id, {});
   const before = historyStats(bookId).messages; // 3
 
-  const { reviseScene } = await import('../server/engine/audit.js');
+  const { reviseScene } = await import('../server/engine/pipeline/audit.js');
   await reviseScene(bookId, ch.id, sc.id, { issues: [{ type: '语句质量', severity: 'low', quote: '', issue: '测试' }] });
   const after = historyStats(bookId).messages;
   assert.equal(before, after, '修订替换消息而非新增');
@@ -122,7 +122,7 @@ test('端到端：修订中间场景会清空后续场景，管线自动重写',
   assert.ok(store.scenes.get(scenes[1].id).content.length > 0, '场景2已有内容');
 
   // 修订场景1 → 场景2 应被清空重置（V0.63：历史改为原地 replace，消息数不变——前缀保持命中缓存）
-  const { reviseScene } = await import('../server/engine/audit.js');
+  const { reviseScene } = await import('../server/engine/pipeline/audit.js');
   await reviseScene(bookId, ch.id, scenes[0].id, { issues: [{ type: '语句质量', severity: 'low', quote: '', issue: 'x' }] });
   assert.equal(store.scenes.get(scenes[1].id).status, 'planned', '场景2应被重置为 planned');
   assert.equal(store.scenes.get(scenes[1].id).content, '', '场景2内容应清空');
@@ -153,7 +153,7 @@ test('端到端：修订已结算场景会废止旧投影并登记同版重建�
     contentHash: createHash('sha256').update(before).digest('hex'), result: { summary: '旧摘要' },
   });
 
-  const { reviseScene } = await import('../server/engine/audit.js');
+  const { reviseScene } = await import('../server/engine/pipeline/audit.js');
   const result = await reviseScene(book.id, chapter.id, first.id, {
     issues: [{ type: '语句质量', severity: 'low', quote: '', issue: '测试完成章修订' }],
   });

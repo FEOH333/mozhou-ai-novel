@@ -10,53 +10,53 @@ import { APP_VERSION } from './version.js';
 import * as store from './db/store.js';
 import { historyStats, budgetCheck, materialsInfo, archiveInjectionText } from './llm/cache.js';
 import { peakHint } from './llm/cost.js';
-import { generateBookOutline, generateVolumeOutline, generateChapterOutline, ensureHistory, rebuildHistory, generateBookContract } from './engine/outline.js';
-import { tidyPendingEntities, migrateMisplacedCharacters } from './engine/pending.js'; // V0.40 待登记自动治理
-import { autoReviewVolumes } from './engine/volumereview.js'; // V0.41 卷级整体审阅
-import { buildBookExport } from './engine/export.js';
-import { generateBookSettings } from './engine/settings.js';
+import { generateBookOutline, generateVolumeOutline, generateChapterOutline, ensureHistory, rebuildHistory, generateBookContract } from './engine/planning/outline.js';
+import { tidyPendingEntities, migrateMisplacedCharacters } from './engine/narrative/pending.js'; // V0.40 待登记自动治理
+import { autoReviewVolumes } from './engine/planning/volumereview.js'; // V0.41 卷级整体审阅
+import { buildBookExport } from './engine/pipeline/export.js';
+import { generateBookSettings } from './engine/planning/settings.js';
 import { logApi } from './util/oplog.js';
-import { writeScene } from './engine/write.js';
-import { auditChapter, coverageCheck, reviseScene } from './engine/audit.js';
-import { settleChapter } from './engine/settle.js';
-import { runChapterFlow } from './engine/pipeline.js';
-import { runBookPilot } from './engine/pilot.js';
-import { runPolish, rebuildHistoryFromChapters, applyValidatedSceneRewrite } from './engine/polish.js';
-import { runArchive, checkArchiveNeed, archiveSearch } from './engine/archive.js';
-import { detectDrift, autoRecover } from './engine/recovery.js';
-import { forgottenList } from './engine/foreshadow.js';
-import { auditPleasure, planBookPleasure, pleasureStatus, registerHooksFromOutline, schedulerCheck } from './engine/pleasure.js';
+import { writeScene } from './engine/pipeline/write.js';
+import { auditChapter, coverageCheck, reviseScene } from './engine/pipeline/audit.js';
+import { settleChapter } from './engine/pipeline/settle.js';
+import { runChapterFlow } from './engine/pipeline/pipeline.js';
+import { runBookPilot } from './engine/pipeline/pilot.js';
+import { runPolish, rebuildHistoryFromChapters, applyValidatedSceneRewrite } from './engine/quality/polish.js';
+import { runArchive, checkArchiveNeed, archiveSearch } from './engine/pipeline/archive.js';
+import { detectDrift, autoRecover } from './engine/recovery/recovery.js';
+import { forgottenList } from './engine/narrative/foreshadow.js';
+import { auditPleasure, planBookPleasure, pleasureStatus, registerHooksFromOutline, schedulerCheck } from './engine/quality/pleasure.js';
 import { healthSnapshot } from './llm/resilience.js';
-import { generateIdeaSeeds, amplifyIdea, applyIdeaOption, scoreContract, generateBookTitle } from './engine/idea.js';
+import { generateIdeaSeeds, amplifyIdea, applyIdeaOption, scoreContract, generateBookTitle } from './engine/planning/idea.js';
 import { initEmbedding, embeddingStatus } from './memory/embedding.js';
 import { indexBook } from './memory/indexer.js';
 import { semanticSearch } from './memory/vectorstore.js';
 import { acquireBookLease } from './jobs/book-lease.js';
 import { recoveryJobs, writeJobs } from './jobs/recovery-jobs.js';
-import { batchQualityScan } from './engine/batch_scan.js'; // V0.96：引擎概览（批次自检现场跑）
-import { resolveCraftProfile, formatCraftProfileLine } from './engine/craft_profile.js';
-import { snapshotDiffOverview, snapshotChapterDiff } from './engine/data_safety.js'; // V0.96.4：快照 diff 对比
-import { hasExplicitCompletedStatus, transitionChapterStatus, isCompletedChapter } from './engine/chapter_status.js'; // V0.93.1：完成态单一真源 // V0.93.2：状态写入单一真源
+import { batchQualityScan } from './engine/quality/batch_scan.js'; // V0.96：引擎概览（批次自检现场跑）
+import { resolveCraftProfile, formatCraftProfileLine } from './engine/quality/craft_profile.js';
+import { snapshotDiffOverview, snapshotChapterDiff } from './engine/pipeline/data_safety.js'; // V0.96.4：快照 diff 对比
+import { hasExplicitCompletedStatus, transitionChapterStatus, isCompletedChapter } from './engine/pipeline/chapter_status.js'; // V0.93.1：完成态单一真源 // V0.93.2：状态写入单一真源
 import {
   storyPromiseStatus, buildStoryPromiseProfile, ensureStoryPromiseProfile,
   lockStoryPromiseFields, unlockStoryPromiseFields,
-} from './engine/story_promise.js';
-import { openingDiagnosisStatus, diagnoseOpening } from './engine/opening_diagnosis.js';
+} from './engine/planning/story_promise.js';
+import { openingDiagnosisStatus, diagnoseOpening } from './engine/planning/opening_diagnosis.js';
 import {
   composeOpeningCandidates, compareOpeningCandidates, compareDraftOpeningCandidates,
   auditOpeningAsset, selectOpeningAsset,
   applySelectedOpeningAsset, retireOpeningAsset, currentOpeningPublishPatch,
   recordOpeningFeedback, openingAssetFreshness, removeOpeningAsset,
-} from './engine/opening_intervention.js';
+} from './engine/planning/opening_intervention.js';
 import {
   publicationDashboard, syncFanqiePublication, validateMetricSnapshot, validatePublicationProfile,
-} from './engine/publication_feedback.js';
+} from './engine/quality/publication_feedback.js';
 import {
   diagnoseRecommendationRecovery, executeRecommendationRecovery, annotateRecoveryRunsResumability,
-} from './engine/recommendation_recovery.js';
+} from './engine/recovery/recommendation_recovery.js';
 import {
   markNarrativeStateStale, narrativeStateStatus, prepareAndCommitNarrativeRevision,
-} from './engine/narrative_state.js';
+} from './engine/narrative/narrative_state.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = path.join(ROOT, 'web');
@@ -580,7 +580,7 @@ route('PUT', '/api/books/:id/perspective', async (req, res, p) => {
   const book = store.books.update(p.id, { perspective });
   const { buildSystemPrompt } = await import('./engine/prompts.js');
   store.materials.set(p.id, 'system', buildSystemPrompt(store.books.get(p.id)));
-  const { rebuildHistory } = await import('./engine/outline.js');
+  const { rebuildHistory } = await import('./engine/planning/outline.js');
   rebuildHistory(p.id);
   sendJSON(res, 200, { ok: true, perspective, note: '已更新，仅影响后续章节' });
 });
@@ -621,7 +621,7 @@ route('PATCH', '/api/books/:id', async (req, res, p) => {
   }
   if (body.era !== undefined && (book.genre === '历史')) {
     try {
-      const { ensureEraContext } = await import('./engine/history.js');
+      const { ensureEraContext } = await import('./engine/narrative/history.js');
       // 幂等跳过已存在卡 → force 强制按新朝代重生成
       await ensureEraContext(p.id, { force: true });
     } catch { /* 时代卡重生成失败由 pilot 兜底 */ }
@@ -875,7 +875,7 @@ route('POST', '/api/books/:id/chapters/:cid/confirm', async (req, res, p) => {
 // V0.82：手动章节改名（AI 改名；历史题材自动带时代风格约束）——前端大纲页/写作台"改名"按钮
 route('POST', '/api/books/:id/chapters/:cid/rename', async (req, res, p) => {
   try {
-    const { adjustChapterTitle } = await import('./engine/alignment.js');
+    const { adjustChapterTitle } = await import('./engine/longform/alignment.js');
     const r = await adjustChapterTitle(p.id, p.cid);
     if (!r) return sendJSON(res, 200, { ok: false, error: '改名失败（可能 AI 返回重名/空名），请重试' });
     sendJSON(res, 200, { ok: true, oldTitle: r.oldTitle, newTitle: r.newTitle });
@@ -891,7 +891,7 @@ route('POST', '/api/books/:id/chapters/:cid/rewrite', async (req, res, p) => {
     const body = await readBody(req);
     const ch = store.chapters.get(p.cid);
     if (!ch) return sendJSON(res, 404, { error: '章节不存在' });
-    const { rewriteChapterRange } = await import('./engine/signing.js');
+    const { rewriteChapterRange } = await import('./engine/planning/signing.js');
     const toIdx = Number(body?.toIdx) || ch.idx;
     const r = rewriteChapterRange(p.id, { fromIdx: ch.idx, toIdx, label: '手动章节重写' });
     if (!r.ok) return sendJSON(res, 200, r);
@@ -1469,7 +1469,7 @@ route('POST', '/api/books/:id/pleasure/plan', async (req, res, p) => {
 // V0.83：开篇蓝图手动端点（老书/中断书补生成入口——此前只有 pilot 骨架一处触发）
 route('POST', '/api/books/:id/opening-blueprint/generate', async (req, res, p) => {
   try {
-    const { generateOpeningBlueprint } = await import('./engine/opening.js');
+    const { generateOpeningBlueprint } = await import('./engine/planning/opening.js');
     const r = await generateOpeningBlueprint(p.id, { force: true });
     sendJSON(res, 200, { ok: r.ok, error: r.error, chapters: r.blueprint?.hook_ladder?.length || 0 });
   } catch (e) {
@@ -1585,14 +1585,14 @@ route('DELETE', '/api/books/:id/characters/:cid', (req, res, p) => {
   sendJSON(res, 200, { ok: true });
 }, { owned: OWNED.character });
 // V0.50：角色库 AI 自动整理（补建/分级/补全）
-route('POST', '/api/books/:id/characters/tidy', async (req, res, p) => {  const { tidyRoster } = await import('./engine/roster.js');
+route('POST', '/api/books/:id/characters/tidy', async (req, res, p) => {  const { tidyRoster } = await import('./engine/narrative/roster.js');
   sendJSON(res, 200, await tidyRoster(p.id, {}));
 });
 // V0.82：角色 AI 取名（历史题材注入命名/避讳规则；前端角色库"AI 取名"按钮）
 route('POST', '/api/books/:id/characters/name', async (req, res, p) => {
   try {
     const body = await readBody(req);
-    const { generateCharacterNames } = await import('./engine/history.js');
+    const { generateCharacterNames } = await import('./engine/narrative/history.js');
     sendJSON(res, 200, await generateCharacterNames(p.id, {
       hint: body.hint || '', count: Number(body.count) || 5, gender: body.gender || '',
     }));
@@ -1640,7 +1640,7 @@ route('DELETE', '/api/books/:id/locations/:lid', (req, res, p) => {
   sendJSON(res, 200, { ok: true });
 }, { owned: OWNED.location });
 route('POST', '/api/books/:id/locations/tidy', async (req, res, p) => {
-  const { tidyLocations } = await import('./engine/locations.js');
+  const { tidyLocations } = await import('./engine/narrative/locations.js');
   sendJSON(res, 200, await tidyLocations(p.id, {}));
 });
 
@@ -1690,7 +1690,7 @@ registerSimpleEntityRoutes('factions', store.factions, '势力', OWNED.faction);
 
 // V0.50：全书一键自动整理（AI 本位：待登记→角色库→事实冲突，各司其职汇总）
 route('POST', '/api/books/:id/tidy-all', async (req, res, p) => {
-  const { tidyRoster } = await import('./engine/roster.js');
+  const { tidyRoster } = await import('./engine/narrative/roster.js');
   const notes = [];
   // 1) 待登记实体整理（pending → 建卡/去重/归档）
   try {

@@ -14,7 +14,7 @@ const ROOT = process.cwd();
 describe('V0.80 章间钩子链 + 剧情去AI味', () => {
   test('①细纲 ending_hook 登记到期待账本且 due=chN+1', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { registerHooksFromOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+    const { registerHooksFromOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
     const b = store.books.create({ title: '钩子书', genre: '玄幻', blurb: 'x' });
     const outline = { ending_hook: { desc: '门外传来沉重的脚步声', type: '危机钩', intensity: 4 } };
     const registered = registerHooksFromOutline(b.id, outline, 3);
@@ -26,7 +26,7 @@ describe('V0.80 章间钩子链 + 剧情去AI味', () => {
 
   test('②章细纲 schema 支持 ending_hook（mock 返回含钩子）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateChapterOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { generateChapterOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: '钩子书2', genre: '玄幻', blurb: 'x', platform: '番茄' });
     store.materials.set(b.id, 'contract', 'x');
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
@@ -37,7 +37,7 @@ describe('V0.80 章间钩子链 + 剧情去AI味', () => {
   });
 
   test('③detectPlotAiMarkers：巧合词过密 / 解决太干净 / 情绪标签', async () => {
-    const { detectPlotAiMarkers } = await import(pathToFileURL(path.join(ROOT, 'server/engine/plot_ai.js')));
+    const { detectPlotAiMarkers } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/plot_ai.js')));
     // 巧合词 3 次
     const ai1 = detectPlotAiMarkers('恰好此时他赶到，正好撞见，偏偏那人也在场。');
     assert.ok(ai1.some(i => i.type === '剧情AI味'), '巧合词过密应命中');
@@ -50,7 +50,7 @@ describe('V0.80 章间钩子链 + 剧情去AI味', () => {
   });
 
   test('④PLOT_DEAI_TEXT 注入写场景指令', async () => {
-    const { PLOT_DEAI_TEXT } = await import(pathToFileURL(path.join(ROOT, 'server/engine/plot_ai.js')));
+    const { PLOT_DEAI_TEXT } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/plot_ai.js')));
     assert.ok(PLOT_DEAI_TEXT.includes('因果别太顺'), '应含反模式1');
     assert.ok(PLOT_DEAI_TEXT.includes('配角别都懂事'), '应含反模式3');
     assert.ok(PLOT_DEAI_TEXT.includes('巧合要限流'), '应含反模式5');
@@ -58,7 +58,7 @@ describe('V0.80 章间钩子链 + 剧情去AI味', () => {
 
   test('⑤detectEmotionPattern：3连情绪重复2次 → 模式化', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { detectEmotionPattern } = await import(pathToFileURL(path.join(ROOT, 'server/engine/plot_ai.js')));
+    const { detectEmotionPattern } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/plot_ai.js')));
     const b = store.books.create({ title: '情绪书', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V1', goal: 'g' });
     // 构造 9 章：情绪序列 紧张→爆发→余韵 重复 3 次

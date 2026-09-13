@@ -22,8 +22,8 @@ const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/rules.js')));
-const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/audit.js')));
+const rules = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/rules.js')));
+const audit = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/audit.js')));
 const issueTypes = await import(pathToFileURL(path.join(ROOT, 'server/data/issue_types.js')));
 const aiFlavor = await import(pathToFileURL(path.join(ROOT, 'server/data/ai_flavor.js')));
 const redlines = await import(pathToFileURL(path.join(ROOT, 'server/data/redlines.js')));
@@ -224,7 +224,7 @@ describe('V0.109.3 通用中文 AI 腔', () => {
   });
 
   test('注册表：rules.js 产出的每个 issue type 都已登记（防漏登记导致静默失效）', () => {
-    const src = read('server/engine/rules.js');
+    const src = read('server/engine/quality/rules.js');
     const types = new Set([...src.matchAll(/type:\s*'([^']+[\u4e00-\u9fff][^']*)'/g)].map(m => m[1]));
     assert.ok(types.size >= 5, `应提取到多个中文类型（实际 ${types.size}）`);
     const missing = [...types].filter(t => !issueTypes.isRegisteredIssueType(t));
@@ -279,28 +279,28 @@ describe('V0.109.3 通用中文 AI 腔', () => {
     const p = read('server/engine/prompts.js');
     assert.match(p, /polishDiagnoseInstruction[\s\S]*?机器腔维度/, 'polish 诊断应含机器腔维度');
     assert.match(p, /polishExecuteInstruction[\s\S]*?aiFlavorBrief/, 'polish 执行应能注入简报');
-    const polish = read('server/engine/polish.js');
+    const polish = read('server/engine/quality/polish.js');
     assert.match(polish, /aiFlavorBrief:\s*CREATIVE_AI_FLAVOR_BRIEF/, 'polish 调用点应传简报');
   });
 
   // ---------- ⑤ 架构：闸与改写单元同职责 ----------
 
   test('返工文风闸排除篇章级分布指标（防"旧稿有一项→候选必然还有一项"批量误杀）', () => {
-    const src = read('server/engine/recommendation_recovery.js');
+    const src = read('server/engine/recovery/recommendation_recovery.js');
     assert.match(src, /filter\(issue => !issue\.statistical\)/,
       'blockingProseIssues 应排除 statistical 指标（与 axis 同类处理）');
   });
 
   test('audit 与 pipeline 的文本级/记债判定已改为查注册表（单一真源）', () => {
-    const auditSrc = read('server/engine/audit.js');
+    const auditSrc = read('server/engine/pipeline/audit.js');
     assert.match(auditSrc, /needsRoundup\(type\)/, 'audit 记债应查注册表');
     assert.match(auditSrc, /isFixableIssue/, 'audit 可修判定应查注册表');
     assert.doesNotMatch(auditSrc, /const\s+NEEDS_ROUNDUP\s*=/, '不得残留第二份白名单');
 
-    const pipeSrc = read('server/engine/pipeline.js');
+    const pipeSrc = read('server/engine/pipeline/pipeline.js');
     assert.match(pipeSrc, /isAllTextOnly/, 'pipeline textOnly 应查注册表');
 
-    const divSrc = read('server/engine/chapter_diversity.js');
+    const divSrc = read('server/engine/quality/chapter_diversity.js');
     assert.match(divSrc, /isClicheOnlyType/, 'chapter_diversity 应查注册表');
   });
 

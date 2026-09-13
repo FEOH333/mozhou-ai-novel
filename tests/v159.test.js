@@ -32,6 +32,6 @@ test('V0.105.3 runPilot 使用边界翻译且 UI 文案改为「再写几章」'
   assert.ok(src.includes("placeholder: '再写几章'"), '输入框占位文案应为「再写几章」');
   assert.ok(src.includes('再写 N 章'), 'title 应说明相对语义');
   // 后端绝对语义不动（pilot 的 cap/完成判断保持既有行为）
-  const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+  const pilot = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
   assert.ok(pilot.includes('targetChapters 表示本轮只推进到指定全书章号'), 'pilot 绝对语义注释应在');
 });

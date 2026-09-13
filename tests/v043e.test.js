@@ -13,7 +13,7 @@ const ROOT = process.cwd();
 
 describe('V0.43 长度灵活化与快感阶段感知', () => {
   test('lengthProfileOf：题材默认 + settings 覆盖', async () => {
-    const { lengthProfileOf } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { lengthProfileOf } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     assert.equal(lengthProfileOf({ genre: '玄幻' }), 3500);
     assert.equal(lengthProfileOf({ genre: '悬疑' }), 2800);
     assert.equal(lengthProfileOf({ genre: '都市' }), 3000);
@@ -42,7 +42,7 @@ describe('V0.43 长度灵活化与快感阶段感知', () => {
 
   test('快感上下文含卷内阶段（铺垫/推进/收束）', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { buildPleasureContext } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pleasure.js')));
+    const { buildPleasureContext } = await import(pathToFileURL(path.join(ROOT, 'server/engine/quality/pleasure.js')));
     const b = store.books.create({ title: 'T', genre: '玄幻', blurb: 'x' });
     const v = store.volumes.create(b.id, 1, { title: 'V', status: 'outlined' });
     for (let i = 1; i <= 10; i++) store.chapters.create(b.id, v.id, i, { title: `第${i}章`, status: 'done' });

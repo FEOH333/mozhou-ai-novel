@@ -9,7 +9,7 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v120-align-'));
 
 const store = await import('../server/db/store.js');
-const alignment = await import('../server/engine/alignment.js');
+const alignment = await import('../server/engine/longform/alignment.js');
 
 describe('V0.93 卷纲按实际正文对齐', () => {
   test('planned 章不进入 doneChapters，也不得写入 actual_beat', async () => {
@@ -48,7 +48,7 @@ describe('V0.93 卷纲按实际正文对齐', () => {
   });
 
   test('自动创作显式导入对齐幂等函数，且对齐失败可在下次运行重试', () => {
-    const source = fs.readFileSync(path.join(process.cwd(), 'server/engine/pilot.js'), 'utf8');
+    const source = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.match(source, /volumeAlignedRecently/);
     assert.match(source, /checkVolumeAlignment[\s\S]{0,180}volumeAlignedRecently/);
     assert.match(source, /if \(volDone/);

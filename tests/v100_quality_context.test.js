@@ -10,9 +10,9 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const store = await import('../server/db/store.js');
 const { assembleCreativeMessages } = await import('../server/llm/context_planner.js');
-const { chapterOutlineQualityIssues } = await import('../server/engine/outline.js');
+const { chapterOutlineQualityIssues } = await import('../server/engine/planning/outline.js');
 const { writeSceneInstruction } = await import('../server/engine/prompts.js');
-const { PLOT_DEAI_TEXT } = await import('../server/engine/plot_ai.js');
+const { PLOT_DEAI_TEXT } = await import('../server/engine/quality/plot_ai.js');
 const {
   CONTINUITY_CRAFT_TEXT,
   ENVIRONMENT_TEXT,
@@ -118,9 +118,9 @@ test('V0.100 outline gate rejects missing dramatic contract and repeated causal 
 
 test('V0.100 creative pipeline is wired to bounded context and isolated settlement context', () => {
   const root = process.cwd();
-  const writeSource = fs.readFileSync(path.join(root, 'server/engine/write.js'), 'utf8');
-  const outlineSource = fs.readFileSync(path.join(root, 'server/engine/outline.js'), 'utf8');
-  const settleSource = fs.readFileSync(path.join(root, 'server/engine/settle.js'), 'utf8');
+  const writeSource = fs.readFileSync(path.join(root, 'server/engine/pipeline/write.js'), 'utf8');
+  const outlineSource = fs.readFileSync(path.join(root, 'server/engine/planning/outline.js'), 'utf8');
+  const settleSource = fs.readFileSync(path.join(root, 'server/engine/pipeline/settle.js'), 'utf8');
   assert.match(writeSource, /assembleCreativeMessages\(bookId/);
   assert.match(outlineSource, /assembleCreativeMessages\(bookId/);
   assert.match(settleSource, /assembleReviewMessages\(bookId/);
@@ -130,7 +130,7 @@ test('V0.100 creative pipeline is wired to bounded context and isolated settleme
 });
 
 test('V0.100 chapter length gate reports a blocking issue before settlement', async () => {
-  const { chapterCompletionLengthIssue } = await import('../server/engine/pipeline.js');
+  const { chapterCompletionLengthIssue } = await import('../server/engine/pipeline/pipeline.js');
   const book = store.books.create({ title: '短章门', settings: { lengthProfile: 5000 } });
   const chapter = store.chapters.create(book.id, null, 1, { title: '过短', status: 'drafted' });
   store.scenes.create(chapter.id, 1, { content: '短正文'.repeat(450), status: 'done' });

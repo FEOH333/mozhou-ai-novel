@@ -12,7 +12,7 @@ process.env.NOVEL_NO_OPEN = '1';
 
 const ROOT = process.cwd();
 const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-const { normalizePredicate, tidyFacts, archiveOldFacts, applyFacts } = await import(pathToFileURL(path.join(ROOT, 'server/engine/factbook.js')));
+const { normalizePredicate, tidyFacts, archiveOldFacts, applyFacts } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/factbook.js')));
 
 describe('V0.68 事实库整理', () => {
   test('①谓词同义词归一（获得/得到/拿到→获得；对X说→告诉）', () => {
@@ -49,7 +49,7 @@ describe('V0.68 事实库整理', () => {
   });
 
   test('④pilot 每 5 章调 tidyFacts（定期整理接线）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     assert.ok(src.includes('tidyFacts(bookId)'), 'pilot 应调用 tidyFacts');
     assert.ok(src.includes('已整理事实库'), '应有整理事件');
   });

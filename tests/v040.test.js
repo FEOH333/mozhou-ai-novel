@@ -14,7 +14,7 @@ const ROOT = process.cwd();
 
 describe('V0.40 待登记实体自动治理', () => {
   test('inferEntityType：地点/物品/势力/角色/概念分类', async () => {
-    const { inferEntityType } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pending.js')));
+    const { inferEntityType } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/pending.js')));
     assert.equal(inferEntityType('秦家禁地', '藏经阁所在'), 'location');
     assert.equal(inferEntityType('青林坳', '父亲提及的地名'), 'location');
     assert.equal(inferEntityType('秦家西院', '秦朗住所'), 'location');
@@ -31,7 +31,7 @@ describe('V0.40 待登记实体自动治理', () => {
   test('tidyPendingEntities：推断建卡 + 已登记去重 + 超期归档', async () => {
         const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'v040-'));
         const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { tidyPendingEntities } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pending.js')));
+    const { tidyPendingEntities } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/pending.js')));
     const b = store.books.create({ title: '测试书', genre: '玄幻', blurb: 'x' });
     // 预置：已登记角色 + 各类型待登记
     store.characters.create(b.id, { name: '林晚', card: {} });
@@ -65,7 +65,7 @@ describe('V0.40 待登记实体自动治理', () => {
   test('migrateMisplacedCharacters：误建角色卡迁移到正确卡表', async () => {
         const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'v040b-'));
         const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { migrateMisplacedCharacters } = await import(pathToFileURL(path.join(ROOT, 'server/engine/pending.js')));
+    const { migrateMisplacedCharacters } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/pending.js')));
     const b = store.books.create({ title: '测试书', genre: '玄幻', blurb: 'x' });
     // 模拟 V0.30 误建：物品被建成 autoConfirmed 角色卡
     store.characters.create(b.id, { name: '地牢屏障', card: { autoConfirmed: true, note: '反弹屏障' } });
@@ -79,7 +79,7 @@ describe('V0.40 待登记实体自动治理', () => {
   });
 
   test('结算自动整理接线 + 前端整理入口', () => {
-    const s = fs.readFileSync(path.join(ROOT, 'server/engine/settle.js'), 'utf8');
+    const s = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/settle.js'), 'utf8');
     const idx = fs.readFileSync(path.join(ROOT, 'server/index.js'), 'utf8');
     const f = fs.readFileSync(path.join(ROOT, 'web/js/views/facts.js'), 'utf8');
     assert.ok(s.includes("tidyPendingEntities(bookId, { currentChapter"), '结算应自动整理');

@@ -10,8 +10,8 @@ process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v115-sample-lifecycle-'));
 const ROOT = process.cwd();
 
-const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/historical_longform.js')));
-const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform_lifecycle.js')));
+const history = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/historical_longform.js')));
+const lifecycle = await import(pathToFileURL(path.join(ROOT, 'server/engine/longform/longform_lifecycle.js')));
 
 const BOOK = {
  title: '示例历史长篇', genre: '历史',

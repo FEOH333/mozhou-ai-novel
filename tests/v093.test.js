@@ -54,7 +54,7 @@ describe('V0.85 卷大纲解析失败修复', () => {
 
   test('⑤generateVolumeOutline 容错：chapters 是对象转数组；坏 JSON 自动重试', async () => {
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { generateVolumeOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/outline.js')));
+    const { generateVolumeOutline } = await import(pathToFileURL(path.join(ROOT, 'server/engine/planning/outline.js')));
     const b = store.books.create({ title: '卷纲容错书', genre: '玄幻', blurb: 'x' });
     store.materials.set(b.id, 'contract', '契约');
     const v = store.volumes.create(b.id, 1, { title: '第一卷', goal: 'g' });
@@ -62,13 +62,13 @@ describe('V0.85 卷大纲解析失败修复', () => {
     const r = await generateVolumeOutline(b.id, v.id, { chapterCount: 6 });
     assert.ok(r.chapters?.length >= 1, '正常生成');
     // 源码含重试逻辑
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(src.includes('for (let attempt = 0; attempt < 3'), '卷大纲 3 次重试');
     assert.ok(src.includes('Object.values(chapters)'), 'chapters 对象转数组');
   });
 
   test('⑥pilot 骨架卷纲段软降级：卷大纲失败建空章不崩自动创作', async () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pilot.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/pilot.js'), 'utf8');
     const skeletonStart = src.indexOf('if (!volumes.length)');
     const skeletonEnd = src.indexOf('V0.43：自动创作前自动快照');
     const seg = src.slice(skeletonStart, skeletonEnd);

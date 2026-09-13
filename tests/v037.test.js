@@ -16,7 +16,7 @@ const ROOT = process.cwd();
 
 describe('V0.37 角色生命周期与防诈尸机制', () => {
   test('detectDeath：状态键/值命中死亡词返回 true', async () => {
-    const { detectDeath } = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
+    const { detectDeath } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
     assert.equal(detectDeath(['位置=青云城', '状态=死亡']), true, '状态=死亡应检出');
     assert.equal(detectDeath(['状态=战死']), true);
     assert.equal(detectDeath(['状态=陨落']), true);
@@ -30,8 +30,8 @@ describe('V0.37 角色生命周期与防诈尸机制', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'v037-'));
     process.env.NOVEL_DATA_DIR = tmp;
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const settle = await import(pathToFileURL(path.join(ROOT, 'server/engine/settle.js')));
-    const { applyDeathAndCardEnrich } = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
+    const settle = await import(pathToFileURL(path.join(ROOT, 'server/engine/pipeline/settle.js')));
+    const { applyDeathAndCardEnrich } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
     const b = store.books.create({ title: '测试书', genre: '玄幻', blurb: 'x' });
     // 预建两个角色
     store.characters.create(b.id, { name: '林晚', card: { role: '主角' }, state: { 位置: '青云城' } });
@@ -66,7 +66,7 @@ describe('V0.37 角色生命周期与防诈尸机制', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'v037b-'));
     process.env.NOVEL_DATA_DIR = tmp;
     const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')));
-    const { characterRollCallText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/characters.js')));
+    const { characterRollCallText } = await import(pathToFileURL(path.join(ROOT, 'server/engine/narrative/characters.js')));
     const b = store.books.create({ title: '测试书', genre: '玄幻', blurb: 'x' });
     store.characters.create(b.id, { name: '林晚', card: { role: '主角' }, state: { 位置: '青云城', 实力: '练气三层' } });
     store.characters.create(b.id, { name: '赵无涯', card: { role: '反派' }, state: { 死因: '被雷劫劈死' } });
@@ -84,9 +84,9 @@ describe('V0.37 角色生命周期与防诈尸机制', () => {
   });
 
   test('注入接线：正文/细纲/审校指令均传 rollCallText 或 deceasedText', () => {
-    const w = fs.readFileSync(path.join(ROOT, 'server/engine/write.js'), 'utf8');
-    const o = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
-    const a = fs.readFileSync(path.join(ROOT, 'server/engine/audit.js'), 'utf8');
+    const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
+    const o = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
+    const a = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
     const p = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
     assert.ok(w.includes('characterRollCallText(bookId'), 'write.js 应注入点名册');
     assert.ok(w.includes('rollCallText,'), 'writeSceneInstruction 应传参');

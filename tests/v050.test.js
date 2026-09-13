@@ -57,10 +57,10 @@ describe('V0.50 稳定性防线', () => {
     assert.ok(src.includes('画龙点睛'), '应强调按需不喧宾夺主');
     assert.ok(src.includes('ecologyText'), 'writeSceneInstruction 应接收 ecologyText');
     // q6 恢复建议制（不再强制）
-    const outlineSrc = fs.readFileSync(path.join(ROOT, 'server/engine/outline.js'), 'utf8');
+    const outlineSrc = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     assert.ok(!outlineSrc.includes('pass = all && q6'), 'q6 不应强制');
     // ecology 独立材料
-    const settingsSrc = fs.readFileSync(path.join(ROOT, 'server/engine/settings.js'), 'utf8');
+    const settingsSrc = fs.readFileSync(path.join(ROOT, 'server/engine/planning/settings.js'), 'utf8');
     assert.ok(settingsSrc.includes("'ecology'"), '社会生态应落独立 ecology 材料');
   });
 

@@ -10,9 +10,9 @@ const {
   annotateRecoveryRunsResumability,
   diagnoseRecommendationRecovery,
   executeRecommendationRecovery,
-} = await import('../server/engine/recommendation_recovery.js');
-const { RECOVERY_PLAN_CONTRACT_VERSION } = await import('../server/engine/recovery_contract.js');
-const { publicationDashboard } = await import('../server/engine/publication_feedback.js');
+} = await import('../server/engine/recovery/recommendation_recovery.js');
+const { RECOVERY_PLAN_CONTRACT_VERSION } = await import('../server/engine/recovery/recovery_contract.js');
+const { publicationDashboard } = await import('../server/engine/quality/publication_feedback.js');
 
 function createRecoveryBook(title, chapterCount) {
   const book = store.books.create({ title, genre: '历史', platform: '番茄' });
