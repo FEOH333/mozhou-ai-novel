@@ -13,6 +13,7 @@ import { renderPleasure } from './views/pleasure.js';
 import { renderFacts } from './views/facts.js';
 import { renderCosts } from './views/costs.js';
 import { renderSettings } from './views/settings.js';
+import { renderChangelog } from './views/changelog.js'; // 更新日志（只读观察面）
 import { registerAbortController, unregisterAbortController, abortAllControllers } from './sse-registry.js';
 import { chapterIdxFromEvent } from './pilot-observe.js';
 
@@ -116,7 +117,8 @@ function parseHash() {
 
 const VIEW_TITLES = {
   library: '作品库', workshop: '写作台', outline: '大纲', world: '设定', roster: '角色库',
-  foreshadows: '伏笔看板', facts: '事实库', pleasure: '快感', costs: '成本', settings: '设置',
+  foreshadows: '伏笔看板', facts: '事实库', pleasure: '快感', costs: '成本',
+  settings: '设置', changelog: '更新日志',
 };
 
 function writeJobLabel(job) {
@@ -192,7 +194,7 @@ async function route() {
     // V0.26 修复：先确定 state.book，再渲染导航。
     // 此前 renderNav 在 state.book 更新前执行——进作品库时残留旧书导航、进书页时显示空导航，
     // 且 get() 完成后不再重渲染，导致"作品库页面出现大纲/设定等书内入口，点进作品反而只剩作品库"。
-    if (r.name === 'library' || r.name === 'settings') {
+    if (r.name === 'library' || r.name === 'settings' || r.name === 'changelog') {
       state.book = null;
     } else if (r.name === 'book' && r.params.id) {
       // 兼容旧 hash：#/book/:id → 默认写作台（hash 变化会再次触发 route）
@@ -207,8 +209,9 @@ async function route() {
     document.title = `${VIEW_TITLES[r.name] || r.name} · 墨舟`;
     renderNav(r);
 
-    if (r.name === 'library' || r.name === 'settings') {
+    if (r.name === 'library' || r.name === 'settings' || r.name === 'changelog') {
       if (r.name === 'settings') await renderSettings(view);
+      else if (r.name === 'changelog') await renderChangelog(view);
       else await renderLibrary(view);
     } else if (r.params.id && state.book) {
       switch (r.name) {
@@ -270,6 +273,7 @@ function renderNav(r) {
   } else {
     items.push(navItem('#/library', 'book', '作品库'));
   }
+  items.push(sep(), navItem('#/changelog', 'list', '更新日志'));
   items.push(sep(), navItem('#/settings', 'settings', '设置'));
   for (const a of items) nav.append(a);
   const themeBtn = document.getElementById('theme-toggle');

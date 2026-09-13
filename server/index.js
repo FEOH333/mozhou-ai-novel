@@ -16,6 +16,7 @@ import { autoReviewVolumes } from './engine/planning/volumereview.js'; // V0.41 
 import { buildBookExport } from './engine/pipeline/export.js';
 import { generateBookSettings } from './engine/planning/settings.js';
 import { logApi } from './util/oplog.js';
+import { parseChangelog } from './util/changelog.js'; // 更新日志解析（纯函数，可单测）
 import { writeScene } from './engine/pipeline/write.js';
 import { auditChapter, coverageCheck, reviseScene } from './engine/pipeline/audit.js';
 import { settleChapter } from './engine/pipeline/settle.js';
@@ -322,6 +323,18 @@ function route(method, pattern, handler, { owned: ownership = [] } = {}) {
 // 健康检查
 route('GET', '/api/health', (_req, res) => {
   sendJSON(res, 200, { ok: true, time: Date.now(), peak: peakHint(resolveModelName('write', 'deepseek-v4-pro', getGlobal())), version: APP_VERSION });
+});
+
+// 更新日志：直接读仓库根的 CHANGELOG.md，拆成前端好渲染的结构。
+// 单一真源——不在代码里维护第二份日志，改 CHANGELOG.md 即生效（只读观察面）。
+route('GET', '/api/changelog', (_req, res) => {
+  let markdown = '';
+  try {
+    markdown = fs.readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
+  } catch {
+    return sendJSON(res, 200, { versions: [], markdown: '', error: 'CHANGELOG.md 不可读' });
+  }
+  sendJSON(res, 200, { versions: parseChangelog(markdown), markdown });
 });
 
 // 设置
