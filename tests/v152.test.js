@@ -77,7 +77,9 @@ test('V0.96 审校用量进本次运行统计：auditChapter 接受 streamCb 且
 
 test('V0.96 统计条工厂：自动创作与一键写本章共用（单章写作不再零统计）', () => {
   const ws = read('web/js/views/workshop.js');
-  assert.ok(/function runStatsBar\(\)/.test(ws), '应存在 runStatsBar 模块级工厂');
+  // V0.109.5：runStatsBar 工厂移入 workshop/shared.js（自动创作与单章共用，属共用件）。
+  const shared = read('web/js/views/workshop/shared.js');
+  assert.ok(/function runStatsBar\(\)/.test(shared), '应存在 runStatsBar 模块级工厂');
   // runFlow（一键写本章）挂统计条 + usage 累计
   const runFlowStart = ws.indexOf("async function runFlow");
   const runFlowEnd = ws.indexOf('V0.78 修复：revised 也是已完成');

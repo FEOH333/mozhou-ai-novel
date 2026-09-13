@@ -17,7 +17,8 @@ describe('V0.43 自动创作可视化', () => {
   });
 
   test('实时成本条累计 usage 帧（V0.96 起收进 runStatsBar 工厂，自动创作与单章共用）', () => {
-    const w = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    // V0.109.5：runStatsBar 工厂与成本条标记已随拆分移入 workshop/shared.js（自动创作与单章共用的实现）。
+    const w = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop/shared.js'), 'utf8');
     assert.ok(w.includes('cost-mini'), '成本条');
     assert.ok(w.includes('function runStatsBar()'), '统计条工厂（累计 tokens 的单一实现）');
     assert.ok(w.includes('promptCacheHitTokens'), '累计命中');

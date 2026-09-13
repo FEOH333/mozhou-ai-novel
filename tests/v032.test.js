@@ -32,7 +32,9 @@ describe('V0.32 el() 误用防御', () => {
   });
 
   test('全前端 JS 无其他 el(\'td\', 变量节点) 模式残留', () => {
-    const views = fs.readdirSync(path.join(WEB, 'js/views'));
+    // V0.109.5：views/ 下已出现子目录（workshop/），必须只取 .js 文件——
+    // 否则 readFileSync 会对目录抛 EISDIR。
+    const views = fs.readdirSync(path.join(WEB, 'js/views')).filter(f => f.endsWith('.js'));
     let bad = 0;
     for (const f of views) {
       const src = fs.readFileSync(path.join(WEB, 'js/views', f), 'utf8');

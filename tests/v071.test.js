@@ -21,9 +21,15 @@ describe('V0.71 成本页与地点库', () => {
     assert.ok(/import \{[\s\S]*\bstate\b[\s\S]*\} from '\.\.\/app\.js'/.test(src), 'costs.js 应导入 state');
     assert.ok(src.includes("state.route?.name !== 'costs'"), '竞态防护保留');
     // 全站无其他漏导入
-    const views = fs.readdirSync(path.join(ROOT, 'web/js/views'));
-    for (const f of views) {
-      const s = fs.readFileSync(path.join(ROOT, 'web/js/views', f), 'utf8');
+    // V0.109.5：views/ 下已出现子目录（workshop/），只取 .js 文件，否则对目录 readFileSync 抛 EISDIR。
+    // 子目录里的模块同样要查漏导入 state——递归收集。
+    const collect = (dir) => fs.readdirSync(dir, { withFileTypes: true })
+      .flatMap(e => (e.isDirectory()
+        ? collect(path.join(dir, e.name))
+        : (e.name.endsWith('.js') ? [[e.name, path.join(dir, e.name)]] : [])));
+    const views = collect(path.join(ROOT, 'web/js/views'));
+    for (const [f, full] of views) {
+      const s = fs.readFileSync(full, 'utf8');
       const usesState = /\bstate\./.test(s);
       const importsState = /import[^;]*\bstate\b/.test(s);
       if (usesState && !importsState) assert.fail(`${f} 漏导入 state`);

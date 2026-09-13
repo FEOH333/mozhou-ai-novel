@@ -4,6 +4,10 @@
 import { get, post, patch, put, del, sse, openingApi, publicationApi, narrativeApi, writeApi } from '../api.js';
 import { el, toast, confirmDialog, openModal, icon, fmt, fmtTokens, fmtMoney, fmtPct, esc, pageHead, progressCard, CHAPTER_STATUS, CHAPTER_STATUS_TAG, chapterStatusLabel } from '../ui.js';
 import { state, refreshBook, refreshGlobal, rerender, registerSSE, unregisterSSE } from '../app.js';
+import {
+  STEP_META, chapterListState, runStatsBar,
+  getChFilter, setChFilter, getLivePatch, setLivePatch,
+} from './workshop/shared.js';
 import { chapterIdxFromEvent, pilotGridSize, resolvePilotTarget } from '../pilot-observe.js';
 import {
   openingDiagnosisSummary,
@@ -12,57 +16,9 @@ import {
   openingComposeProgressMessage,
 } from '../opening-status.js';
 
-const STEP_META = [
-  ['outline', '细纲'], ['write', '正文'], ['audit', '审校'], ['revise', '修订'], ['settle', '结算'],
-];
 
-// V0.94.1：章节列表过滤（模块级——切章/重渲染期间保持用户的过滤选择）
-let chFilter = 'all';
-/** 自动创作进行中不整页 rerender（会拆掉观察流），侧栏用这个补丁跟作业同步。 */
-let livePatchChapterList = () => {};
 
-function chapterListState(c) {
-  const s = c.status || 'planned';
-  if (s === 'done' || s === 'settled' || s === 'revised') return 'done';
-  if (s === 'quality_blocked' || s === 'partial' || s === 'failed') return 'blocked';
-  if (s === 'planned') return 'planned';
-  return 'doing';
-}
 
-// V0.96：本次运行统计条工厂——自动创作与「一键写本章」共用。
-// 此前统计条只在 runPilot 内部创建：单章写作走 runFlow 时 usage 事件只 refreshGlobal，
-// tokens/费用/缓存命中全程不可见（用户实测"经常看不到都是0"的另一半根因——
-// 数据链路修复在 router.js/client.js：非流式端点终帧补推 + tokens 口径修正）。
-function runStatsBar() {
-  let tokens = 0, cost = 0, hit = 0, miss = 0, calls = 0;
-  const t = el('b', { text: '0 tokens' });
-  const c = el('b', { text: '¥0' });
-  const h = el('b', { text: '—' });
-  const n = el('b', { text: '0 次调用' });
-  const node = el('div', { class: 'cost-mini' },
-    el('span', {}, '本次运行：', t, ' · 费用 ', c, ' · 缓存命中 ', h, ' · ', n));
-  const upd = () => {
-    t.textContent = fmtTokens(tokens);
-    c.textContent = fmtMoney(cost);
-    h.textContent = (hit + miss) ? fmtPct(hit / (hit + miss)) : '—';
-    n.textContent = `${calls} 次调用`;
-  };
-  return {
-    node,
-    /** usage 帧：promptTokens 已含 hit+miss（normalizeUsage 语义），不得四项相加重复计 */
-    onUsage(u = {}) {
-      tokens += (u.promptTokens || 0) + (u.completionTokens || 0);
-      hit += u.promptCacheHitTokens || 0;
-      miss += u.promptCacheMissTokens || 0;
-      calls++;
-      if (u.cost?.total) cost += u.cost.total;
-      upd();
-    },
-    /** 流结束费用帧（router.js onUsageCost） */
-    onCost(d = {}) { if (d.cost) { cost += d.cost; upd(); } },
-    summary: () => `${calls} 次调用 / ${fmtTokens(tokens)} / ${fmtMoney(cost)}`,
-  };
-}
 
 export async function renderWorkshop(view, book) {
   const params = state.route?.query || new URLSearchParams();
@@ -419,7 +375,7 @@ export async function renderWorkshop(view, book) {
       const chipRow = el('div', { class: 'chip-row mb' });
       const renderList = () => {
         list.innerHTML = '';
-        const visible = chapters.filter(c => chFilter === 'all' || chapterListState(c) === chFilter);
+        const visible = chapters.filter(c => getChFilter() === 'all' || chapterListState(c) === getChFilter());
         let lastVol = null;
         for (const c of visible) {
           const volKey = c.volume_id || '';
@@ -450,19 +406,19 @@ export async function renderWorkshop(view, book) {
           const span = btn.querySelector('.chip-n');
           if (span) span.textContent = String(n);
           btn.title = `${btn.getAttribute('data-ch-filter-label') || ''} ${n} 章`;
-          btn.classList.toggle('active', key === chFilter);
+          btn.classList.toggle('active', key === getChFilter());
         }
       };
       for (const [key, label, n] of FILTERS) {
         chipRow.append(el('button', {
-          class: 'chip' + (chFilter === key ? ' active' : ''),
+          class: 'chip' + (getChFilter() === key ? ' active' : ''),
           'data-ch-filter': key,
           'data-ch-filter-label': label,
-          onclick: () => { chFilter = key; refreshChips(); renderList(); },
+          onclick: () => { setChFilter(key); refreshChips(); renderList(); },
           title: `${label} ${n} 章`,
         }, `${label}`, el('span', { class: 'chip-n', text: String(n) })));
       }
-      livePatchChapterList = (idx, patch = {}) => {
+      setLivePatch((idx, patch = {}) => {
         const c = chapters.find(ch => Number(ch.idx) === Number(idx));
         if (c) {
           if (patch.status) c.status = patch.status;
@@ -471,7 +427,7 @@ export async function renderWorkshop(view, book) {
         }
         refreshChips();
         renderList();
-      };
+      });
       renderList();
       requestAnimationFrame(() => list.querySelector('li.active')?.scrollIntoView({ block: 'nearest' }));
       return el('div', {}, chipRow, list);
@@ -1953,7 +1909,7 @@ async function runPilot(book, root, btn, opts = {}) {
           setCur(`第 ${data.idx} / ${total} 章《${data.title}》`);
           bar.firstChild.style.width = `${Math.round(((data.idx - 1) / Math.max(total, 1)) * 100)}%`;
           feed('章节', `开始第 ${data.idx} 章《${data.title}》`, 'write');
-          livePatchChapterList(data.idx, { status: 'writing', title: data.title });
+          getLivePatch()(data.idx, { status: 'writing', title: data.title });
           break;
         }
         case 'chapter_done': {
@@ -1965,12 +1921,12 @@ async function runPilot(book, root, btn, opts = {}) {
           setStatus(`第 ${data.idx} 章完成${wc}${dur}`);
           bar.firstChild.style.width = `${Math.round((data.idx / total) * 100)}%`;
           feed('章节', `第 ${data.idx} 章完成${data.partial ? '（部分场景失败）' : ''}${wc}${dur}`, 'settle');
-          livePatchChapterList(data.idx, { status: 'done', wordCount: data.wordCount, title: data.title });
+          getLivePatch()(data.idx, { status: 'done', wordCount: data.wordCount, title: data.title });
           // 完成卡片（异步补摘要）
           (async () => {
             try {
               const ch = await get(`/api/books/${book.id}/chapters/${data.chapterId}`);
-              livePatchChapterList(data.idx, { status: ch.status, wordCount: ch.word_count, title: ch.title });
+              getLivePatch()(data.idx, { status: ch.status, wordCount: ch.word_count, title: ch.title });
               const sum = (ch.summary || '').slice(0, 60) || '（无摘要）';
               const item = el('div', { class: 'ch-done-item', onclick: () => { location.hash = `#/book/${book.id}/workshop?chapter=${data.chapterId}`; } },
                 el('div', {}, el('b', { text: `第${data.idx}章 ${ch.title || ''}` }), el('span', { class: 'small muted', style: 'margin-left:8px', text: `${ch.word_count || 0} 字` })),
@@ -1991,14 +1947,14 @@ async function runPilot(book, root, btn, opts = {}) {
           setStatus(`第 ${data.idx} 章未通过质量门（${data.error}），已暂停后续创作并保留正文`);
           feed('卡章', `第 ${data.idx} 章未通过质量门，已暂停；再次启动会先修复本章`, 'warn');
           markChapter(data.idx, 'ch-cell failed');
-          livePatchChapterList(data.idx, { status: 'quality_blocked' });
+          getLivePatch()(data.idx, { status: 'quality_blocked' });
           break;
         case 'blocked_fixed':
           setStatus(`${data.message}`);
           feed('修复', data.message, 'ok');
           (data.chapters || []).forEach(idx => {
             markChapter(idx, 'ch-cell done');
-            livePatchChapterList(idx, { status: 'done' });
+            getLivePatch()(idx, { status: 'done' });
           });
           break;
         case 'blocked_pending':
@@ -2115,7 +2071,7 @@ async function runPilot(book, root, btn, opts = {}) {
           setStatus(data.message || `补写第 ${data.idx} 章…`);
           setCurFromEvent(data, data.message);
           feed('补写', data.message || `补写第 ${data.idx} 章`, 'write');
-          if (data.idx) livePatchChapterList(data.idx, { status: 'writing' });
+          if (data.idx) getLivePatch()(data.idx, { status: 'writing' });
           break;
         case 'backfill_scene':
           break; // 细节帧，不打扰

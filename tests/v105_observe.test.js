@@ -42,17 +42,20 @@ test('V0.105 写作台：目标章数在主行、网格用 pilotGridSize、记�
   assert.match(runPilotSrc, /setInterval/);
   assert.match(runPilotSrc, /emittedAt/);
   assert.match(runPilotSrc, /mozhou-pilot-idx/);
-  assert.match(runPilotSrc, /livePatchChapterList/);
+  // V0.109.5：livePatchChapterList 移入 workshop/shared.js，通过 getLivePatch()/setLivePatch 访问
+  // （拆多文件后直接读写模块级变量会形成 index ↔ pilot 循环依赖）。断言随之更新。
+  assert.match(runPilotSrc, /getLivePatch\(\)\(/);
 });
 
 test('V0.105 自动创作中侧栏状态要跟作业走，切过滤不得拆掉观察流', () => {
   const ws = read('web/js/views/workshop.js');
   assert.match(ws, /data-chapter-idx/);
   assert.match(ws, /data-ch-filter/);
-  assert.match(ws, /function chapterListState/);
+  // chapterListState 已移入 shared.js
+  assert.match(read('web/js/views/workshop/shared.js'), /function chapterListState/);
   const sidebar = ws.slice(ws.indexOf('侧栏：章列表'), ws.indexOf('view.append(deskFold)'));
   assert.doesNotMatch(sidebar, /chFilter = key; rerender\(\)/);
-  assert.match(sidebar, /livePatchChapterList = /);
+  assert.match(sidebar, /setLivePatch\(\(/);
 });
 
 test('V0.105 顶栏作业花片从 lastEvent 文案提取章号', () => {
