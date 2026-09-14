@@ -5,6 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { promptsSource } from './helpers/prompts-source.js';
 
 const ROOT = process.cwd();
 process.env.NOVEL_MOCK_LLM = '1';
@@ -52,7 +53,7 @@ describe('V0.50 稳定性防线', () => {
   });
 
   test('V0.50 按需注入：细纲 pace 字段 + advance 章不注入人物戏 + ecology 独立材料', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const src = promptsSource();
     assert.ok(src.includes('"pace"'), '细纲应有 pace 字段');
     assert.ok(src.includes('画龙点睛'), '应强调按需不喧宾夺主');
     assert.ok(src.includes('ecologyText'), 'writeSceneInstruction 应接收 ecologyText');

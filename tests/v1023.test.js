@@ -11,6 +11,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { phaseCoveredByText, historicalOutlineIssues } from '../server/engine/longform/historical_guardrails.js';
+import { promptsSource } from './helpers/prompts-source.js';
 
 const SEAM_PHASE = '接住上卷出口，建立新压力源（难民+围城前夕）';
 
@@ -69,7 +70,7 @@ test('V0.102.3 既有连接词与过渡式分词零回归', () => {
 });
 
 test('V0.102.3 章纲指令列出可核验动作而非要求抄规划套话', () => {
-  const src = fs.readFileSync('server/engine/prompts.js', 'utf8');
+  const src = promptsSource();
   assert.match(src, /formatPhaseDutyRule|phaseDutyRule/);
   assert.match(src, /规划套话|不必抄写/);
 });

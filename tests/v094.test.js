@@ -8,6 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { workshopSource } from './helpers/workshop-source.js';
+import { promptsSource } from './helpers/prompts-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v094-'));
@@ -32,7 +33,7 @@ describe('V0.86 创作质量与重写机制', () => {
     assert.ok(pipeSrc.includes('已记债放行'), '收敛保护记债放行');
     assert.ok(pipeSrc.includes('store.conflicts.create'), '遗漏要点记 conflicts');
     // 细纲 checkpoints 纪律：禁止强制原句
-    const chOutline = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const chOutline = promptsSource();
     assert.ok(chOutline.includes('禁止写"必须出现某原句/逐字复刻"类要点'), '细纲 checkpoints 纪律');
   });
 

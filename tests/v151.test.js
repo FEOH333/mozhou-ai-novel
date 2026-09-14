@@ -15,6 +15,7 @@ import {
   historicalScaleTier, historicalScaleRegisterText, historicalScaleBeatRule,
 } from '../server/engine/longform/historical_longform.js';
 import * as prompts from '../server/engine/prompts.js';
+import { promptsSource } from './helpers/prompts-source.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SAMPLE = { title: '示例历史长篇' };
@@ -93,7 +94,7 @@ describe('V0.95.8 三处注入接线（写审同源源断言）', () => {
   });
 
   test('chapterOutlineInstruction 渲染 scaleBeatRule + auditInstruction 渲染 3.12 核查项', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const src = promptsSource();
     assert.ok(src.includes('${scaleBeatRule ? scaleBeatRule + \'\\n\' : \'\'}'), '细纲指令应渲染节拍规则');
     assert.ok(src.includes('3.12 山河尺度核查'), '审校指令应有 3.12 尺度核查项');
     assert.ok(src.includes('verdict 至少 fix'), '配额未达须推 verdict 至 fix（否则配额无约束力）');

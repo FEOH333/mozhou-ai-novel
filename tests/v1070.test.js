@@ -4,6 +4,7 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { promptsSource } from './helpers/prompts-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v1070-'));
@@ -16,7 +17,7 @@ test('V0.107: TITLE_CRAFT_TEXT / VOLUME_TITLE_CRAFT_TEXT 单一真源与防漂�
   assert.ok(TITLE_CRAFT_TEXT.includes('事件承诺必须兑现'), '章名工艺须含事件承诺兑现（写审同源）');
   assert.ok(VOLUME_TITLE_CRAFT_TEXT.includes('意象化'), '卷名工艺须含意象化要求');
   // 防漂移：prompts.js 引用合并常量，不再残留 V0.73 内嵌字符串
-  const promptsSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/prompts.js'), 'utf8');
+  const promptsSrc = promptsSource();
   assert.ok(promptsSrc.includes('TITLE_CRAFT_TEXT') && promptsSrc.includes('VOLUME_TITLE_CRAFT_TEXT'), 'prompts 须引用合并常量');
   assert.ok(!promptsSrc.includes('V0.73 文学性要求'), 'V0.73 内嵌命名文本应全部替换为单一真源');
 });
@@ -141,7 +142,7 @@ test('V0.107: checkChapterAlignment 事件承诺零在场 → autoFix 改名候�
 test('V0.107: audit localIssues 挂载 chapterTitleDeliveryIssues（源码接线断言）', async () => {
   const auditSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/audit.js'), 'utf8');
   assert.ok(auditSrc.includes('chapterTitleDeliveryIssues'), 'audit.js 须挂载章名核对闸');
-  const promptsSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/prompts.js'), 'utf8');
+  const promptsSrc = promptsSource();
   assert.ok(promptsSrc.includes('事件承诺型章名'), '审校 3.11 须含事件承诺判定（写审同源）');
   assert.ok(promptsSrc.includes('章名承诺：章名里的核心意象或事件'), '写作指令须含章名兑现一句（写侧同源）');
 });
@@ -159,7 +160,7 @@ test('V0.107: 卷纲生成——章数承诺生效（mock 按请求数返回）+
 });
 
 test('V0.107: 书纲/续卷章数口径同步（源码断言）', async () => {
-  const promptsSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/prompts.js'), 'utf8');
+  const promptsSrc = promptsSource();
   assert.ok(promptsSrc.includes('每卷 10-16 章'), '书纲口径应为 10-16 章');
   assert.ok(!promptsSrc.includes('每卷 8-15 章'), '旧口径应清除');
   const contSrc = fs.readFileSync(path.join(process.cwd(), 'server/engine/pipeline/continuation.js'), 'utf8');

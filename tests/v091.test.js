@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { promptsSource } from './helpers/prompts-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v091-'));
@@ -214,7 +215,7 @@ describe('V0.83 开书前全链路最终检查', () => {
     const b = { genre: '历史', settings_json: '{}' };
     assert.equal(volumeChapterCount(b, { isFirst: true }), 8, '首卷 8 章（V0.107 分章科学化）');
     assert.equal(volumeChapterCount(b), 12, '常规卷 12 章（V0.107 分章科学化）');
-    const pr = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const pr = promptsSource();
     assert.ok(pr.includes('volumes 数组**前 ${volumes || 4} 卷写完整'), 'volumeCount 插值接线');
   });
 

@@ -18,6 +18,7 @@ import {
 } from '../server/engine/longform/historical_guardrails.js';
 import { detectSceneTailDuplication } from '../server/engine/quality/rules.js';
 import { hasOutlineRootIssue, auditIssueRepairMode } from '../server/engine/pipeline/pipeline.js';
+import { promptsSource } from './helpers/prompts-source.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // ch27 实证开头（氛围铺陈，无跨年标记）
@@ -94,7 +95,7 @@ describe('V0.95.7 写侧硬闸接线（源断言：写审同源）', () => {
   });
 
   test('prompts.js 渲染独立硬要求块（不再埋在坐标帧长行里）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const src = promptsSource();
     assert.ok(src.includes('【跨年开篇硬要求（本地校验逐字核查，不满足将被驳回重写）】'),
       '跨年章场景1指令应有独立醒目硬要求块');
   });

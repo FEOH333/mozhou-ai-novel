@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { promptsSource } from './helpers/prompts-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_FAULT = '';
@@ -232,7 +233,7 @@ describe('V0.109.3 通用中文 AI 腔', () => {
   });
 
   test('注册表：audit 指令的类型枚举与注册表口径一致', () => {
-    const src = read('server/engine/prompts.js');
+    const src = promptsSource();
     assert.match(src, /\|AI 腔\|/, 'typeEnum 应含 AI 腔');
     const enumTypes = ['角色矛盾', '时间线冲突', '设定冲突', '人称视角', '伏笔遗忘', '事实编造',
       '事实矛盾', '语句质量', 'AI 腔', '大纲偏离', '情感连贯性', '文学性', '史实错误',
@@ -276,7 +277,7 @@ describe('V0.109.3 通用中文 AI 腔', () => {
   });
 
   test('polish 诊断与执行两侧都消费 AI 腔口径', () => {
-    const p = read('server/engine/prompts.js');
+    const p = promptsSource();
     assert.match(p, /polishDiagnoseInstruction[\s\S]*?机器腔维度/, 'polish 诊断应含机器腔维度');
     assert.match(p, /polishExecuteInstruction[\s\S]*?aiFlavorBrief/, 'polish 执行应能注入简报');
     const polish = read('server/engine/quality/polish.js');

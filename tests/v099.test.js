@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { promptsSource } from './helpers/prompts-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v099-'));
@@ -49,7 +50,7 @@ describe('V0.90 先立后破结构强化', () => {
   });
 
   test('④正文第8条闪回豁免收紧 + CONTRAST_BUILDUP_TEXT 第6条对齐 + 蓝图铺垫成章', async () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const src = promptsSource();
     assert.ok(src.includes('细纲已明确安排用回忆闪回补足先立后破铺垫'), '正文第8条闪回需背书');
     assert.ok(src.includes('闪回补足只是细纲背书下的例外，不是默认路径'), '正文明确非默认路径');
     assert.ok(src.includes('铺垫要**成章/成场景**'), '蓝图铺垫成章');

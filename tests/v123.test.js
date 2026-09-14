@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { promptsSource } from './helpers/prompts-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v123-review-cleanup-'));
@@ -129,7 +130,7 @@ describe('V0.93.1 全面审查清理', () => {
   test('P1 死导出清理：summarizeInstruction/protagonistFixInstruction 移除，perspectiveText 收敛为唯一视角纪律源', () => {
     assert.ok(!('summarizeInstruction' in prompts), 'summarizeInstruction 已移除');
     assert.ok(!('protagonistFixInstruction' in prompts), 'protagonistFixInstruction 已移除');
-    const src = read('server/engine/prompts.js');
+    const src = promptsSource();
     assert.ok(!/export function summarizeInstruction/.test(src));
     assert.ok(!/export function protagonistFixInstruction/.test(src));
     const sig = /export function buildPublicMaterials\(\{([^}]*)\}\)/.exec(src);

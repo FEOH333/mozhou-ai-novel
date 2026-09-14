@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { promptsSource } from './helpers/prompts-source.js';
 
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v100-narrative-lessons-'));
 process.env.NOVEL_MOCK_LLM = '1';
@@ -41,7 +42,7 @@ test('V0.100 outline and prose prompts consume the same scoped learning ledger',
   const root = process.cwd();
   const outline = fs.readFileSync(path.join(root, 'server/engine/planning/outline.js'), 'utf8');
   const write = fs.readFileSync(path.join(root, 'server/engine/pipeline/write.js'), 'utf8');
-  const prompts = fs.readFileSync(path.join(root, 'server/engine/prompts.js'), 'utf8');
+  const prompts = promptsSource();
   assert.match(outline, /narrativeLessonsText\(bookId, chapter\.idx\)/);
   assert.match(write, /narrativeLessonsText\(bookId, chapter\.idx\)/);
   assert.match(prompts, /narrativeLessons/);

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { promptsSource } from './helpers/prompts-source.js';
 
 const ROOT = process.cwd();
 process.env.NOVEL_MOCK_LLM = '1';
@@ -18,7 +19,7 @@ describe('V0.58 细纲质量优先（回滚 V0.56 降质提速）', () => {
   });
 
   test('细纲指令要求具体详实（beat 100-150 字为正文提供依据，不再限 2500 tokens）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const src = promptsSource();
     assert.ok(src.includes('细纲要具体详实'), '应要求详实细纲');
     assert.ok(src.includes('100-150 字'), 'beat 应 100-150 字');
     assert.ok(!src.includes('输出要精炼'), '不应再要求精炼');

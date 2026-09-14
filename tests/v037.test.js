@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { promptsSource } from './helpers/prompts-source.js';
 
 // V0.47 修复：必须在任何 server 模块加载前设置（首个测试加载 characters.js→store 正式库，
 // 第二个测试再设 env 已晚——模块缓存生效，测试书污染正式库）
@@ -87,7 +88,7 @@ describe('V0.37 角色生命周期与防诈尸机制', () => {
     const w = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/write.js'), 'utf8');
     const o = fs.readFileSync(path.join(ROOT, 'server/engine/planning/outline.js'), 'utf8');
     const a = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/audit.js'), 'utf8');
-    const p = fs.readFileSync(path.join(ROOT, 'server/engine/prompts.js'), 'utf8');
+    const p = promptsSource();
     assert.ok(w.includes('characterRollCallText(bookId'), 'write.js 应注入点名册');
     assert.ok(w.includes('rollCallText,'), 'writeSceneInstruction 应传参');
     assert.ok(o.includes('rollCallText: characterRollCallText'), '细纲应注入点名册');

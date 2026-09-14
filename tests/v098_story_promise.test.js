@@ -3,6 +3,7 @@ import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import * as store from '../server/db/store.js';
+import { promptsSource as promptsAllSource } from './helpers/prompts-source.js';
 
 let book;
 
@@ -31,7 +32,7 @@ test('V0.98 平台指导区分官方事实、创作指导、样本观察与未�
 });
 
 test('V0.98 三类开篇提示词使用分层证据且不预测平台指标', async () => {
-  const promptsSource = fs.readFileSync('server/engine/prompts.js', 'utf8');
+  const promptsSource = promptsAllSource();
   const attractionSource = fs.readFileSync('server/engine/quality/attraction.js', 'utf8');
   assert.doesNotMatch(promptsSource, /番茄铁律|三秒原则|expected_retention|expected_follow_rate|avg_chapter_completion/);
   assert.doesNotMatch(attractionSource, /番茄铁律|三秒原则/);

@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import './helper.js';
+import { promptsSource } from './helpers/prompts-source.js';
 
 const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -94,7 +95,7 @@ test('V0.108: 三处生成指令含人物活性新字段', async () => {
   assert.ok(settingsSrc.includes('"backstory"') && settingsSrc.includes('"motive_root"'), '设定指令 characters 字段含新键');
   assert.ok(settingsSrc.includes('"agenda"') && settingsSrc.includes('"no_retreat"') && settingsSrc.includes('"stance"'), '设定指令含对手三件');
   assert.ok(settingsSrc.includes('rival: c.rival === true'), '建卡处写入 rival 标记');
-  const promptsSrc = read('server/engine/prompts.js');
+  const promptsSrc = promptsSource();
   assert.ok(promptsSrc.includes('【对手设计】'), 'cast 设计含对手段');
   assert.ok(promptsSrc.includes('多边关系'), 'cast 设计含多边关系');
   assert.ok(promptsSrc.includes('退不了的理由'), '书纲弧光段含反派三件');
