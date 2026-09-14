@@ -2,9 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const api = fs.readFileSync('web/js/api.js', 'utf8');
-const workshop = fs.readFileSync('web/js/views/workshop.js', 'utf8');
+const workshop = workshopSource();
 
 test('V0.98 前端 API 统一封装开篇创作闭环', () => {
   for (const endpoint of [

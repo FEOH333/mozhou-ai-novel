@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { workshopSource } from './helpers/workshop-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v070-'));
@@ -24,7 +25,7 @@ describe('V0.70 五轮大检查修复', () => {
   });
 
   test('②前端 pilot 事件补全 + 成本页竞态防护', () => {
-    const ws = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const ws = workshopSource();
     for (const ev of ["case 'backfill':", "case 'backfill_done':", "case 'continuation':", "case 'book_done':",
       "case 'align_chapter':", "case 'align_volume':", "case 'align_book':", "case 'auto_tidy':",
       "case 'volume_review_start':", "case 'volume_review_recheck':"]) {

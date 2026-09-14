@@ -7,6 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const store = await import('../server/db/store.js');
 const { resolveCraftProfile, evidenceCertaintyThreshold } = await import('../server/engine/quality/craft_profile.js');
@@ -168,7 +169,7 @@ test('V0.101 质量内核仍在树中（精确版本号由 v025/当前版断言�
 test('V0.101 语音卡与题材偏好有前端观察入口，不是引擎内部黑盒', () => {
   const idx = fs.readFileSync(path.join(process.cwd(), 'server/index.js'), 'utf8');
   const roster = fs.readFileSync(path.join(process.cwd(), 'web/js/views/roster.js'), 'utf8');
-  const workshop = fs.readFileSync(path.join(process.cwd(), 'web/js/views/workshop.js'), 'utf8');
+  const workshop = workshopSource();
   assert.match(idx, /speechForbid/);
   assert.match(idx, /craftProfile/);
   assert.match(roster, /speechForbid/);

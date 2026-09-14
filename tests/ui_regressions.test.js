@@ -4,26 +4,34 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { workshopSource, workshopModule } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 describe('UI 核心路径回归', () => {
   test('空书在章节判空前挂载独立的自动创作控制卡', () => {
-    const src = read('web/js/views/workshop.js');
-    const renderStart = src.indexOf('export async function renderWorkshop');
-    const emptyGuard = src.indexOf('if (!chapterId)', renderStart);
+    // V0.109.5：workshop.js 已拆为 workshop/ 目录。
+    // 存在性断言用全文（拼接）；**顺序/切片断言必须读承载编排顺序的 index.js**——
+    // 拼接顺序按文件名排序（chapter 在 index 前），用全文做位置比较会得出错误区间，
+    // 而 doesNotMatch(空切片) 会恒真、防线静默失效（比报错更危险）。
+    const src = workshopSource();
+    const idx = workshopModule('index.js');
+    const renderStart = idx.indexOf('export async function renderWorkshop');
+    const emptyGuard = idx.indexOf('if (!chapterId)', renderStart);
     assert.ok(renderStart >= 0 && emptyGuard > renderStart, '应能定位写作台与章节判空');
     assert.match(src, /function renderAutoCreationCard\s*\(/, '自动创作控制卡应提取为独立函数');
     assert.match(
-      src.slice(renderStart, emptyGuard),
+      idx.slice(renderStart, emptyGuard),
       /append\(renderAutoCreationCard\(/,
       '自动创作控制卡必须在无章节 return 之前挂载',
     );
 
-    const chapterStart = src.indexOf('function renderChapter');
-    const sceneStart = src.indexOf('// ---- 场景卡 ----', chapterStart);
-    assert.doesNotMatch(src.slice(chapterStart, sceneStart), /id:\s*'pilot-btn'/, '章节视图不应重复创建 pilot 按钮');
+    const chapter = workshopModule('chapter.js');
+    const chapterStart = chapter.indexOf('function renderChapter');
+    const sceneStart = chapter.indexOf('// ---- 场景卡 ----', chapterStart);
+    assert.ok(chapterStart >= 0 && sceneStart > chapterStart, '应能定位章节视图与场景卡边界');
+    assert.doesNotMatch(chapter.slice(chapterStart, sceneStart), /id:\s*'pilot-btn'/, '章节视图不应重复创建 pilot 按钮');
   });
 
   test('SSE 控制器注册表可追踪、注销并一次取消全部任务', async () => {
@@ -52,7 +60,7 @@ describe('UI 核心路径回归', () => {
 
   test('app 路由取消观察 SSE，workshop 每条流都注册和注销', () => {
     const app = read('web/js/app.js');
-    const workshop = read('web/js/views/workshop.js');
+    const workshop = workshopSource();
     assert.match(app, /_activeSSE:\s*new Set\(\)/, '全局状态应持有控制器集合');
     assert.match(app, /abortAllControllers\(state\._activeSSE\)/, '路由切换应取消观察流');
     assert.match(app, /不取消服务端作业/, '路由切换不得被理解成取消自动创作作业');
@@ -100,7 +108,7 @@ describe('UI 核心路径回归', () => {
   });
 
   test('重写安全闸拒绝正文时，自动创作与手动打磨都给出可见警告', () => {
-    const src = read('web/js/views/workshop.js');
+    const src = workshopSource();
     assert.equal((src.match(/case 'chapter_rewrite_rejected'/g) || []).length, 2,
       'pilot 与 polish 两条事件流都应显示重写拒绝原因');
     assert.match(src, /data\.code/);

@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { chapterIdxFromEvent, pilotGridSize } from '../web/js/pilot-observe.js';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -27,7 +28,7 @@ test('V0.105 事件章号认「第 N 章」，不把细纲 1/3 误成第 1 章',
 });
 
 test('V0.105 写作台：目标章数在主行、网格用 pilotGridSize、记债进事件流、等待心跳', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   assert.match(ws, /from '\.\.\/pilot-observe\.js'/);
   assert.match(ws, /pilotGridSize\(/);
   assert.match(ws, /id: 'pilot-target'/);
@@ -48,7 +49,7 @@ test('V0.105 写作台：目标章数在主行、网格用 pilotGridSize、记�
 });
 
 test('V0.105 自动创作中侧栏状态要跟作业走，切过滤不得拆掉观察流', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   assert.match(ws, /data-chapter-idx/);
   assert.match(ws, /data-ch-filter/);
   // chapterListState 已移入 shared.js
@@ -88,7 +89,7 @@ test('V0.105 卷大纲重试可见、限流等待可取消', () => {
   const client = read('server/llm/client.js');
   assert.match(client, /function sleep\(ms, signal\)/);
   assert.match(client, /signal\?\.addEventListener\('abort'/);
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   const runPilotSrc = ws.slice(ws.indexOf('async function runPilot'));
   assert.match(runPilotSrc, /case 'api_retry':/);
   assert.match(runPilotSrc, /feed\('重试'/);
@@ -107,7 +108,7 @@ test('V0.105 懒加载下一卷：安全闸拦截不得再烧一遍缝前体检'
 });
 
 test('V0.105 卷审修订过程要进标题和事件流，不能停在宪章完成', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   const runPilotSrc = ws.slice(ws.indexOf('async function runPilot'));
   const startCase = runPilotSrc.slice(runPilotSrc.indexOf("case 'volume_review_start'"), runPilotSrc.indexOf("case 'volume_review_error'"));
   assert.match(startCase, /setCur\(/);

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 process.env.NOVEL_MOCK_LLM = '1';
@@ -20,7 +21,7 @@ describe('V0.52 自动创作自动整理', () => {
   });
 
   test('workshop.js 处理 auto_tidy 事件', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const src = workshopSource();
     assert.ok(src.includes("case 'auto_tidy'"), '前端应处理 auto_tidy');
   });
 

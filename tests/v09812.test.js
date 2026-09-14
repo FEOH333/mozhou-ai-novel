@@ -10,6 +10,7 @@ import { spawn } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 import * as store from '../server/db/store.js';
 import { createOpeningFixture, validContract, sha256 } from './helpers/opening_fixture.js';
+import { workshopSource } from './helpers/workshop-source.js';
 
 let book, volume, firstScene;
 
@@ -186,7 +187,7 @@ test('V0.98.12 removeOpeningAsset 可删 selected（未应用的选中方案）'
 
 test('V0.98.12 前端提供删除入口：api 封装 + 决策台删除按钮', () => {
   const api = fs.readFileSync('web/js/api.js', 'utf8');
-  const workshop = fs.readFileSync('web/js/views/workshop.js', 'utf8');
+  const workshop = workshopSource();
   assert.ok(api.includes('removeOpeningAsset'), 'api.js 必须封装删除方法');
   assert.ok(api.includes("api('DELETE'") || api.includes('del('), '删除必须走 DELETE 动词');
   assert.ok(workshop.includes('removeOpeningAsset'), '候选卡片必须调用删除 API');
@@ -196,7 +197,7 @@ test('V0.98.12 前端提供删除入口：api 封装 + 决策台删除按钮', (
 });
 
 test('V0.98.12 async 事件处理器禁止在 await 之后访问 ev.currentTarget（点击无反应的根因回归）', () => {
-  const workshop = fs.readFileSync('web/js/views/workshop.js', 'utf8');
+  const workshop = workshopSource();
   assert.equal(workshop.includes('await run(ev.currentTarget'), false,
     'confirmDialog/await 之后 currentTarget 已被 DOM 清空为 null——必须同步阶段捕获按钮（V0.98.12 实测：删除方案点击无反应、控制台 Cannot set properties of null）');
   assert.match(workshop, /删除此方案[\s\S]{0,300}const btn = ev\.currentTarget/,

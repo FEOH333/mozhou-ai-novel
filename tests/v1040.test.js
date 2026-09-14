@@ -9,6 +9,7 @@ import path from 'node:path';
 import { clearBookLeasesForTests } from '../server/jobs/book-lease.js';
 import { createRecoveryJobRegistry, writeJobs } from '../server/jobs/recovery-jobs.js';
 import { isImmediateReplanIssue } from '../server/engine/longform/historical_guardrails.js';
+import { workshopSource, workshopModule } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
@@ -26,7 +27,7 @@ afterEach(() => {
 });
 
 test('V0.104.0 源码：workshop/roster/outline 死引用与完成态字段', () => {
-  const workshop = read('web/js/views/workshop.js');
+  const workshop = workshopSource();
   const roster = read('web/js/views/roster.js');
   const outline = read('web/js/views/outline.js');
   const ui = read('web/js/ui.js');
@@ -55,7 +56,7 @@ test('V0.104.0 源码：workshop/roster/outline 死引用与完成态字段', ()
 
 test('V0.104.0 源码：空 CSS token、场景草稿态、过时文案', () => {
   const css = read('web/css/app.css');
-  const workshop = read('web/js/views/workshop.js');
+  const workshop = workshopSource();
   const library = read('web/js/views/library.js');
   const opening = read('web/js/opening-status.js');
 
@@ -134,11 +135,14 @@ test('V0.104.0 HTTP：POST /pilot 与 /polish 不得 abortOnDisconnect', () => {
 });
 
 test('V0.104.0 写作台 DOM：自动创作卡之后即可到达章节正文，驾驶舱默认可折叠', () => {
-  const src = read('web/js/views/workshop.js');
-  const auto = src.indexOf('renderAutoCreationCard(book, mainRoot)');
-  const chapter = src.indexOf('renderChapter(book, chapter)');
-  const publication = src.indexOf('renderPublicationDashboard(book)');
-  const opening = src.indexOf('renderOpeningDecisionCard(book)');
+  const src = workshopSource();
+  // V0.109.5：拆分后**顺序断言必须读 index.js**——编排顺序（谁先 append）只在那里，
+  // 用拼接全文比较位置会因文件排序（chapter 在 index 前）得出错误结论。
+  const idx = workshopModule('index.js');
+  const auto = idx.indexOf('renderAutoCreationCard(book, mainRoot)');
+  const chapter = idx.indexOf('renderChapter(book, chapter)');
+  const publication = idx.indexOf('renderPublicationDashboard(book)');
+  const opening = idx.indexOf('renderOpeningDecisionCard(book)');
   assert.ok(auto >= 0 && chapter > auto, '当前章正文必须紧跟自动创作卡');
   assert.ok(publication > chapter, '推流驾驶舱不得挡在正文前');
   assert.ok(opening > chapter, '开篇决策台不得挡在正文前');
@@ -149,7 +153,7 @@ test('V0.104.0 写作台 DOM：自动创作卡之后即可到达章节正文，�
 
 test('V0.104.0 导航与状态映射零依赖书名；清场合同本轮不碰', () => {
   const app = read('web/js/app.js');
-  const workshop = read('web/js/views/workshop.js');
+  const workshop = workshopSource();
   const library = read('web/js/views/library.js');
   assert.match(app, /navItem\('#\/library'/, '书内导航必须有作品库入口');
  assert.doesNotMatch(app, /示例历史长篇/);

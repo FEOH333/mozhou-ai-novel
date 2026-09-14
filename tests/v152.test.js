@@ -8,6 +8,7 @@ import './helper.js';
 import * as store from '../server/db/store.js';
 import { syncCastCharacters } from '../server/engine/narrative/roster.js';
 import { characterRollCallText, characterCardsText } from '../server/engine/narrative/characters.js';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -55,7 +56,7 @@ test('V0.96 router 终帧补推：非流式/无 usage 帧端点流结束补推�
 });
 
 test('V0.96 tokens 口径：promptTokens 已含 hit+miss，前端不得四项相加', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   assert.ok(!ws.includes('runTokens += (u.promptTokens || 0) + (u.completionTokens || 0) + (u.promptCacheHitTokens || 0)'),
     '不得再把缓存 hit/miss 加进 tokens（重复计一次，显示约为实际两倍）');
 });
@@ -76,7 +77,7 @@ test('V0.96 审校用量进本次运行统计：auditChapter 接受 streamCb 且
 // ---------- ④ 前端统计条全路径 ----------
 
 test('V0.96 统计条工厂：自动创作与一键写本章共用（单章写作不再零统计）', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   // V0.109.5：runStatsBar 工厂移入 workshop/shared.js（自动创作与单章共用，属共用件）。
   const shared = read('web/js/views/workshop/shared.js');
   assert.ok(/function runStatsBar\(\)/.test(shared), '应存在 runStatsBar 模块级工厂');
@@ -94,7 +95,7 @@ test('V0.96 统计条工厂：自动创作与一键写本章共用（单章写�
 // ---------- ⑤ 前端可视化补齐 ----------
 
 test('V0.96 前端可视化：健康体检/语义搜索/引擎概览进书务台', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   assert.ok(ws.includes('`/api/books/${book.id}/health`'), '健康体检应调 /health 端点（此前零入口）');
   assert.ok(ws.includes('`/api/books/${book.id}/search?q='), '语义搜索应调 /search 端点（此前零入口）');
   assert.ok(ws.includes('`/api/books/${book.id}/recover`'), '一键恢复应调 /recover 端点');
@@ -124,7 +125,7 @@ test('V0.96.1 签约评估渲染适配真实 schema：scores 是对象（novelty
 
 test('V0.96.1 原生 append 不跳过 null：本轮四处条件子节点全部 filter(Boolean)', () => {
   const outline = read('web/js/views/outline.js');
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   const pleasure = read('web/js/views/pleasure.js');
   for (const [name, src, min] of [['outline', outline, 1], ['workshop', ws, 2], ['pleasure', pleasure, 1]]) {
     const n = (src.match(/\.filter\(Boolean\)\)/g) || []).length;

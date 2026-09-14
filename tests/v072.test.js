@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { workshopSource } from './helpers/workshop-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v072-'));
@@ -15,7 +16,7 @@ const store = await import(pathToFileURL(path.join(ROOT, 'server/db/store.js')))
 
 describe('V0.72 事件流与缓存深度修复', () => {
   test('①前端 done 字段保护：written undefined 时显示"本章流程完成"', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const src = workshopSource();
     assert.ok(src.includes("data.written === undefined"), 'done case 应有字段保护');
     assert.ok(src.includes('本章流程完成'), '应显示流程完成文案');
     assert.ok(src.includes("case 'usage_cost'"), '应有 usage_cost 实时费用事件');

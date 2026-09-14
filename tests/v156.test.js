@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import './helper.js';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -81,7 +82,7 @@ test('V0.96.5 chapter_done/done 事件带耗时与字数（效率观察面）', 
 });
 
 test('V0.96.5 runPilot 观察面补角：audit_done/content_recovered/replan_rollback/quality_blocked', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   const runPilotSrc = ws.slice(ws.indexOf('async function runPilot'));
   assert.ok(/case 'audit_done':/.test(runPilotSrc), 'runPilot 应处理 audit_done（每章审校结论——runFlow 有、runPilot 缺）');
   assert.ok(/case 'content_recovered':/.test(runPilotSrc), 'runPilot 应处理 content_recovered（快照只增恢复是重大数据事件）');

@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'novel-v0991-'));
 process.env.NOVEL_DATA_DIR = tmp;
@@ -50,7 +51,7 @@ function sseOkBody(res) {
 }
 
 test('V0.99.1 推流驾驶舱不把 recovery_started 内部事件名直接显示给用户', () => {
-  const workshop = fs.readFileSync(path.join(process.cwd(), 'web/js/views/workshop.js'), 'utf8');
+  const workshop = workshopSource();
   assert.match(workshop, /event === 'recovery_started'.*返工诊断已启动/s);
 });
 

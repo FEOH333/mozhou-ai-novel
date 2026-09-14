@@ -3,9 +3,10 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
-const workshop = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+const workshop = workshopSource();
 const library = fs.readFileSync(path.join(ROOT, 'web/js/views/library.js'), 'utf8');
 
 describe('V0.93 自动创作状态可见且不误导', () => {

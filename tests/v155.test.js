@@ -11,6 +11,7 @@ import './helper.js';
 import * as store from '../server/db/store.js';
 import { diffParagraphs } from '../server/util/diff.js';
 import { snapshotDiffOverview, snapshotChapterDiff } from '../server/engine/pipeline/data_safety.js';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -138,7 +139,7 @@ test('V0.96.4 端点：GET /api/books/:id/snapshots/:sid/diff 注册且走 OWNED
 // ---------- ④ 前端可视化（源码断言） ----------
 
 test('V0.96.4 前端：书务台快照卡片加「对比」入口，红删绿增块渲染 + 未变段折叠', () => {
-  const ws = read('web/js/views/workshop.js');
+  const ws = workshopSource();
   assert.ok(ws.includes('`/api/books/${book.id}/snapshots/${snapId}/diff`'), '快照行应请求 diff 端点');
   assert.ok(ws.includes('对比'), '应有「对比」按钮文案');
   assert.ok(ws.includes('diff-block-add') && ws.includes('diff-block-del'), '应渲染红删绿增块类名');

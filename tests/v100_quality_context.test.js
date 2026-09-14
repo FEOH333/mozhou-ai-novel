@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { workshopSource as workshopAllSource } from './helpers/workshop-source.js';
 
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v100-quality-context-'));
 process.env.NOVEL_MOCK_LLM = '1';
@@ -143,7 +144,7 @@ test('V0.100 stale narrative state has a visible rebuild route and cockpit actio
   const root = process.cwd();
   const serverSource = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
   const apiSource = fs.readFileSync(path.join(root, 'web/js/api.js'), 'utf8');
-  const workshopSource = fs.readFileSync(path.join(root, 'web/js/views/workshop.js'), 'utf8');
+  const workshopSource = workshopAllSource();
   assert.match(serverSource, /GET', '\/api\/books\/:id\/narrative-state'/);
   assert.match(serverSource, /POST', '\/api\/books\/:id\/narrative-state\/rebuild'/);
   assert.match(apiSource, /narrative-state\/rebuild/);

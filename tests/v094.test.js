@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { workshopSource } from './helpers/workshop-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v094-'));
@@ -117,7 +118,7 @@ describe('V0.86 创作质量与重写机制', () => {
     const idx = fs.readFileSync(path.join(ROOT, 'server/index.js'), 'utf8');
     assert.ok(idx.includes("route('POST', '/api/books/:id/chapters/:cid/rewrite'"), '重写端点存在');
     assert.ok(idx.includes('rewriteChapterRange'), '端点用 rewriteChapterRange');
-    const ws = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const ws = workshopSource();
     assert.ok(ws.includes('重写本章'), '前端重写按钮');
     assert.ok(ws.includes('/rewrite'), '前端调用重写端点');
   });

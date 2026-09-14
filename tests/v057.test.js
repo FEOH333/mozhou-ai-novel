@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 process.env.NOVEL_MOCK_LLM = '1';
@@ -11,7 +12,7 @@ process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v057-'));
 
 describe('V0.57 诊断修复进度可视化', () => {
   test('前端处理 recovery_stage（重规划逐章进度——修无反馈像卡死问题）', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const src = workshopSource();
     assert.ok(src.includes("case 'recovery_stage'"), '应处理 recovery_stage');
     assert.ok(src.includes('正在重规划'), '应显示重规划进度');
     assert.ok(src.includes("case 'recovery_executed'"), '应处理 recovery_executed');

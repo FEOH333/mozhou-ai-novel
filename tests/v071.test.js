@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { workshopSource } from './helpers/workshop-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v071-'));
@@ -137,7 +138,7 @@ describe('V0.71 过程打磨与伏笔收束', () => {
     assert.ok(pilot.includes('foreshadowClosurePlan'), 'pilot 应卷写完生成收束计划');
     const cont = fs.readFileSync(path.join(ROOT, 'server/engine/pipeline/continuation.js'), 'utf8');
     assert.ok(cont.includes('midReviewText') && cont.includes('closurePlanText'), '续卷应注入两段反馈');
-    const ws = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const ws = workshopSource();
     assert.ok(ws.includes("case 'mid_review':") && ws.includes("case 'foreshadow_plan':"), '前端应处理新事件');
   });
 });

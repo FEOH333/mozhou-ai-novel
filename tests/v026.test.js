@@ -2,6 +2,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { workshopModule } from './helpers/workshop-source.js';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -63,7 +64,10 @@ test('V0.26: 前端导航上下文——route() 先定 book 再 renderNav（静�
   assert.ok(renderNavIdx > bookGetIdx, 'renderNav 应在 state.book=get 之后');
   // 7 个书内页头部带书名
   for (const f of ['workshop', 'outline', 'world', 'foreshadows', 'pleasure', 'facts', 'costs']) {
-    const src = fs.readFileSync(`web/js/views/${f}.js`, 'utf8');
+    // V0.109.5：workshop.js 已拆为 workshop/ 目录，薄桶不含实现；书名头部在 index.js（骨架）。
+    const src = f === 'workshop'
+      ? workshopModule('index.js')
+      : fs.readFileSync(`web/js/views/${f}.js`, 'utf8');
     assert.ok(src.includes('book.title'), `${f} 头部应显示书名`);
   }
 });

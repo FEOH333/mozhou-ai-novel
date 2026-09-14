@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import './helper.js';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 const load = async f => import(pathToFileURL(path.join(ROOT, f)));
@@ -27,7 +28,7 @@ test('V0.105.3 resolvePilotTarget：再写 N 章 → 绝对目标（已完成 + 
 });
 
 test('V0.105.3 runPilot 使用边界翻译且 UI 文案改为「再写几章」', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+  const src = workshopSource();
   assert.ok(src.includes('const targetChapters = resolvePilotTarget(targetInput?.value'), 'runPilot 应走边界翻译');
   assert.ok(src.includes("placeholder: '再写几章'"), '输入框占位文案应为「再写几章」');
   assert.ok(src.includes('再写 N 章'), 'title 应说明相对语义');

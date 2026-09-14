@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { workshopSource as workshopAllSource, workshopModule } from './helpers/workshop-source.js';
 
 const apiSource = fs.readFileSync(new URL('../web/js/api.js', import.meta.url), 'utf8');
-const workshopSource = fs.readFileSync(new URL('../web/js/views/workshop.js', import.meta.url), 'utf8');
+const workshopSource = workshopAllSource();
 const cssSource = fs.readFileSync(new URL('../web/css/app.css', import.meta.url), 'utf8');
 
 test('V0.99 UI：发布反馈 API 覆盖保存、同步、审核、数据、诊断、执行和同步确认', () => {
@@ -16,10 +17,13 @@ test('V0.99 UI：发布反馈 API 覆盖保存、同步、审核、数据、诊�
 });
 
 test('V0.99 UI：推流质量驾驶舱仍存在且默认可折叠，不挡在正文前', () => {
-  const auto = workshopSource.indexOf('renderAutoCreationCard(book, mainRoot)');
-  const chapter = workshopSource.indexOf('renderChapter(book, chapter)');
-  const publication = workshopSource.indexOf('renderPublicationDashboard(book)');
-  const opening = workshopSource.indexOf('renderOpeningDecisionCard(book)');
+  // V0.109.5：拆分后**顺序断言必须读 index.js**（编排顺序只在那里）。
+  // 用拼接全文比较位置会因文件排序（chapter 在 index 前）得出错误结论。
+  const idx = workshopModule('index.js');
+  const auto = idx.indexOf('renderAutoCreationCard(book, mainRoot)');
+  const chapter = idx.indexOf('renderChapter(book, chapter)');
+  const publication = idx.indexOf('renderPublicationDashboard(book)');
+  const opening = idx.indexOf('renderOpeningDecisionCard(book)');
   assert.ok(auto >= 0 && chapter > auto, '当前章正文必须紧跟自动创作卡');
   assert.ok(publication > chapter && opening > chapter, '驾驶舱/开篇不得挡在正文前');
   assert.match(workshopSource, /el\('details', \{ class: 'fold' \}/);

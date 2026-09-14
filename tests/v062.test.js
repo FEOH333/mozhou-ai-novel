@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { workshopSource } from './helpers/workshop-source.js';
 
 process.env.NOVEL_MOCK_LLM = '1';
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v062-'));
@@ -55,7 +56,7 @@ describe('V0.62 自动化升级', () => {
   });
 
   test('⑤性能：前端 usage 节流 + 续卷网格扩展 + 后端 costs 缓存', () => {
-    const ws = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const ws = workshopSource();
     assert.ok(ws.includes('usageRefreshAt'), 'usage 刷新节流');
     assert.ok(ws.includes('Date.now() - usageRefreshAt > 3000'), '3 秒节流窗口');
     assert.ok(ws.includes('ensureGridCells'), '续卷新章动态扩展网格');
@@ -66,7 +67,7 @@ describe('V0.62 自动化升级', () => {
 
   test('⑤b 前端 workshop 语法完整（runPilot 可用）', async () => {
     // 静态检查：total 声明不重复（let 替换 const 后）
-    const ws = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const ws = workshopSource();
     const runStart = ws.indexOf('async function runPilot');
     const runEnd = ws.indexOf('async function runPolishNow');
     const runBody = ws.slice(runStart, runEnd);

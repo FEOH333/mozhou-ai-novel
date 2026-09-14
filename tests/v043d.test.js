@@ -3,12 +3,13 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { workshopSource } from './helpers/workshop-source.js';
 
 const ROOT = process.cwd();
 
 describe('V0.43 自动创作可视化', () => {
   test('pilot 面板含章节网格/当前章/停止按钮', () => {
-    const w = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const w = workshopSource();
     assert.ok(w.includes('ch-grid'), '章节进度网格');
     assert.ok(w.includes('ch-cell active'), '当前章高亮');
     assert.ok(w.includes('pilot-cur'), '当前章指示');
@@ -26,7 +27,7 @@ describe('V0.43 自动创作可视化', () => {
   });
 
   test('已完成章节卡片与事件流', () => {
-    const w = fs.readFileSync(path.join(ROOT, 'web/js/views/workshop.js'), 'utf8');
+    const w = workshopSource();
     assert.ok(w.includes('ch-done-cards'), '完成卡片容器');
     assert.ok(w.includes('ch-done-item'), '完成卡片');
     assert.ok(w.includes('ev-feed'), '事件流');

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { workshopSource } from './helpers/workshop-source.js';
 
 process.env.NOVEL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'v099-release-feedback-'));
 process.env.NOVEL_NO_OPEN = '1';
@@ -2424,8 +2425,9 @@ test('V0.99 所有常用正文写入路径都会登记已发布章节的线上�
   const auditSource = fs.readFileSync(new URL('../server/engine/pipeline/audit.js', import.meta.url), 'utf8');
   assert.match(auditSource, /applyValidatedSceneRewrite/,
     'audit.js 必须复用 polish 的场景写入门禁，由单一入口登记线上同步债务与叙事状态失效');
-  const workshopSource = fs.readFileSync(new URL('../web/js/views/workshop.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(workshopSource, /仅正文，不影响历史堆/,
+  // V0.109.5：局部变量改名，避免与 './helpers/workshop-source.js' 的导入同名（会造成 TDZ 报错）。
+  const workshopSrc = workshopSource();
+  assert.doesNotMatch(workshopSrc, /仅正文，不影响历史堆/,
     '手工编辑提示不能继续声称历史堆不会更新');
 
   const book = store.books.create({ title: '整章写入债务测试', genre: '历史', platform: '番茄' });
