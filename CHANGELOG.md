@@ -19,6 +19,37 @@
 
 ---
 
+## [0.109.5] - 2026-09-14
+
+### 变更
+
+**超大文件拆分，降低 AI 辅助开发的读取代价**（纯重构，功能与行为完全不变）：
+
+- `server/engine/recovery/recommendation_recovery.js` 3217 行 → 1346 行编排层，
+  实现分入 `recovery_shared/validation/checkpoint/rewrite/global_review.js` 五个模块，
+  19 个导出名不变
+- `server/engine/prompts.js` 2672 行 → 12 行薄桶，按用途分入 `prompts/` 下 7 个模块，
+  63 个导出名不变。**缓存前缀单独锁进 `prompts/prefix.js`**（L1 system + L2 公共材料），
+  逐字节校验未变——改它会让所有用户的 prompt cache 失效、费用翻倍，故单独隔离并加警示
+- `web/js/views/workshop.js` 2408 行 → 5 行薄桶，分入 `workshop/` 下 6 个模块
+  （`pilot` 675 / `chapter` 540 / `publication` 524 / `index` 454 / `opening` 256 / `shared` 70）
+
+拆分前，`recommendation_recovery.js` 与 `prompts.js` 是后端最大的两个文件，
+`workshop.js` 是前端最大单文件（136KB）——AI 改其中任何一处都必须整篇读入。
+
+### 修复
+
+- **测试脚本改为跨目录匹配**（`node --test "tests/**/*.test.js"`）。此前 `tests/*.test.js` 的
+  `*` 不跨目录，一旦测试拆入子目录就会被**静默跳过**而 CI 全绿。
+
+### 安全
+
+- 17 个「源码接线断言」测试的读取路径随拆分同步。**其中两条是负向断言**
+  （`v123` 已移除函数不得复活、`v098_story_promise` 禁用平台指标词不得出现）——
+  若只读薄桶会**恒真、防线静默失效**。已专程实测：插入被禁内容即变红，还原即全绿。
+
+---
+
 ## [0.109.4] - 2026-09-13
 
 ### 新增

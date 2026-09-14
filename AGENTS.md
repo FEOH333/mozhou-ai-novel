@@ -33,6 +33,7 @@ server/
   util/             diff/json/oplog/text
   index.js          HTTP 路由（单文件）
 web/                js/(app,ui,api,views/) + css/，原生 JS 无构建
+  js/views/workshop/  写作台子模块：index(骨架) pilot(自动创作) chapter(章节/场景) publication(发稿) opening(开篇) shared(共用件)
 tests/              node:test，文件数即历史版本号
 docs/               设计调研与开发计划（人读，AI 按需取）
 ```
@@ -47,7 +48,22 @@ docs/               设计调研与开发计划（人读，AI 按需取）
 | `narrative/` | 叙事资料与投影：事实/人物/伏笔/世界/时间线 | `narrative_state` `factbook` `foreshadow` `characters` `history` |
 | `longform/` | 长程阶段与历史题材 | `longform_lifecycle` `historical_*` `alignment` |
 | `recovery/` | 返工与恢复 | `recommendation_recovery` `recovery` `recovery_contract` |
-| （根） | 跨域共享 | `prompts.js`（全部提示词） |
+| （根） | 跨域共享 | `prompts.js`（12 行薄桶，re-export 全部提示词） |
+
+`server/engine/prompts/` 同样按用途分 7 个模块（2672 行 → 7 文件）：
+
+| 文件 | 内容 |
+| --- | --- |
+| `prefix.js` | ★ **缓存前缀（L1+L2），锁定** —— 动它会让全部用户的 prompt cache 失效，新增纪律请进最后一条 user 指令 |
+| `planning.js` | 书纲/卷纲/细纲/契约/五问/续卷/命名/卷审 |
+| `audit.js` | 审校/覆盖/修订/结算/吸引力门/发稿反馈 |
+| `recovery.js` | 推荐返工全链 + 打磨三指令 |
+| `opening.js` | 开篇蓝图/承诺/诊断/策略/候选 |
+| `write.js` | 场景写作 + 私有 CREATIVE_* 简报 |
+| `common.js` | 跨模块共用件（视角/篇幅/结局倒推/张力升级） |
+
+`server/engine/recovery/` 下 `recommendation_recovery.js` 已瘦身为 1346 行编排层，
+实现分散在 `recovery_shared/validation/checkpoint/rewrite/global_review.js`（合计约 2280 行）。
 
 ## 常见任务：改哪里
 
